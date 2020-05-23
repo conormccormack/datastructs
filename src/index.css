@@ -11,3 +11,19 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+@font-face {
+  font-family: 'PoiretOne';
+  src: local('PoiretOne'), url(resources/fonts/PoiretOne-Regular.ttf) format('ttf');
+}
+
+@font-face {
+  font-family: 'Ubuntu';
+  src: local('Ubuntu'), url(resources/fonts/Ubuntu-Italic.ttf) format('ttf');
+}
+
+@font-face {
+  font-family: 'Ramaraja';
+  src: local('Ramaraja'), url(resources/fonts/Ramaraja-Regular.ttf) format('ttf');
+
+}
