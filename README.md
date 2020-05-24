@@ -1,4 +1,7 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<a href="url"><img src="https://github.com/conormccormack/datastructs/blob/master/assets/darklogotag.png" align="right" height="280" ></a> 
+
+# DataStructures
+DataStructs is a beautiful, intuitive platform for vizualizing data structures and algorithms.
 
 ## Available Scripts
 
