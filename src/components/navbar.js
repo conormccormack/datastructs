@@ -3,7 +3,7 @@ import '../css/navbar.css'
 import styled from 'styled-components'
 import HomeButton from "./homebutton";
 import NavigationButton from './navigationbutton';
-import SearchBar from "./searchbar";
+import Searchbar from "./searchbar";
 
 const NavLayout = styled.div`
     padding-top: 10px;
@@ -15,6 +15,9 @@ const NavLayout = styled.div`
     grid-template-columns: repeat(5,200px);
     height: 50px;
 `
+const SearchbarContainer = styled.div`
+    margin-left: auto;
+`
 
 function Navbar(){
     return (
@@ -25,7 +28,9 @@ function Navbar(){
                 <NavigationButton nextPage="explore"/>
                 <NavigationButton nextPage="everything else"/>
                 <NavigationButton nextPage="premium"/>
-                <SearchBar/>
+                <SearchbarContainer>
+                    <Searchbar/>
+                </SearchbarContainer>
             </NavLayout>
         </nav>
     );

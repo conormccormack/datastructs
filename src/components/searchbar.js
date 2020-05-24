@@ -1,44 +1,102 @@
-import React, {useState} from 'react';
-import styled from 'styled-components';
+import React, {PureComponent} from 'react';
 import Autosuggest from 'react-autosuggest';
+import '../css/autocomplete.css';
 
-function SearchBar(){
-    const [suggestions, setSuggestions] = useState([]);
-    const datastructures = [
-        {
-            name: "AVL Tree",
-            category: "Tree",
-        },
-        {
-            name: "Stack",
-            category: "Stack & Queues",
-        },
-        {
-            name: "Queue",
-            category: "Stack & Queues",
-        },
-        {
-            name: "Splay Tree",
-            category: "Tree",
-        },
-        {
-          name: "Linked List",
-          category: "Basics",
-        },
-        {
-            name: "Binary Search Tree",
-            category: "Tree",
-        }
-    ];
+const datastructures = [
+    {
+        name: "AVL Tree",
+        category: "Tree",
+    },
+    {
+        name: "Stack",
+        category: "Stack & Queues",
+    },
+    {
+        name: "Queue",
+        category: "Stack & Queues",
+    },
+    {
+        name: "Splay Tree",
+        category: "Tree",
+    },
+    {
+        name: "Linked List",
+        category: "Basics",
+    },
+    {
+        name: "Binary Search Tree",
+        category: "Tree",
+    },
+];
 
+// Generate suggestions list based on user input matching to suggestion names.
+const getSuggestions = value => {
+    const inputValue = value.trim().toLowerCase();
+    const inputLength = inputValue.length;
 
+    return inputLength === 0 ? [] : datastructures.filter(datastruct =>
+        datastruct.name.toLowerCase().slice(0,inputLength) === inputValue
+    );
+};
 
+// Retrieve value from suggestion that user has chosen
+const getSuggestionValue = suggestion => suggestion.name;
 
+const renderSuggestion = suggestion => (
+    <div>
+        {suggestion.name}
+    </div>
+);
 
-    return (
-        <div></div>
-    )
+class Searchbar extends PureComponent {
+    constructor(props) {
+        super(props);
+        this.state = {
+            value: '',
+            suggestions: []
+        };
+    }
+
+    // Update value onChange.
+    onChange = (event, { newValue }) => {
+       this.setState({
+           value: newValue
+       });
+    };
+
+    onSuggestionsFetchRequested = ({ value }) => {
+        this.setState({
+           suggestions: getSuggestions(value)
+        });
+    };
+
+    onSuggestionsClearRequested = () => {
+        this.setState({
+            suggestions: []
+        });
+    };
+
+    render(){
+        const { value, suggestions } = this.state;
+
+        const inputProps = {
+            placeholder: '"AVL Trees"',
+            value,
+            onChange: this.onChange
+        };
+
+        return(
+            <Autosuggest
+                suggestions={suggestions}
+                onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                getSuggestionValue={getSuggestionValue}
+                renderSuggestion={renderSuggestion}
+                inputProps={inputProps}
+            />
+        );
+    }
 
 }
 
-export default SearchBar;
+export default Searchbar;
