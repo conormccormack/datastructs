@@ -6,6 +6,9 @@ const Button = styled.div`
     font-size: 18px;
     vertical-align: text-bottom;
     font-family: Raleway, sans-serif;
+    padding-top: 4px;
+    padding-left: 15px;
+    padding-right: 15px;
 `
 
 function NavigationButton(props){

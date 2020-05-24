@@ -7,7 +7,7 @@ const MainPanel = styled.div`
 `
 
 
-function MainLanding(){
+function Mainlanding(){
     return (
         <MainPanel>
             Landing page
@@ -15,4 +15,4 @@ function MainLanding(){
     )
 }
 
-export default MainLanding;
+export default Mainlanding;
