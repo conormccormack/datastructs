@@ -1,9 +1,18 @@
 import React from 'react';
 import Navbar from "./navbar";
+import styled from 'styled-components';
+import MainLanding from "./MainLanding";
+
+const gridContainer = styled.div`
+    display: grid;
+`
 
 function Home() {
     return (
-      <Navbar/>
+        <gridContainer>
+            <Navbar/>
+            <MainLanding/>
+        </gridContainer>
     );
 }
 

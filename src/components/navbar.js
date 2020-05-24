@@ -2,33 +2,27 @@ import React from "react";
 import '../css/navbar.css'
 import styled from 'styled-components'
 import HomeButton from "./homebutton";
-
+import NavigationButton from './navigationbutton';
 
 const NavLayout = styled.div`
     padding: 20px;
     display: grid;
-    background-color: #EEF0F2;
-    grid-template-columns: 1fr  1fr 1fr;
-    font-family: PoiretOne;
+    background-color: #EFE7E2;
+    grid-template-columns: repeat(5,200px);
     height: 50px;
-`
-
-const ControlButton = styled.div`
-    font-size: 1.5em;
-    vertical-align: text-bottom;
 `
 
 function Navbar(){
     return (
-        <NavLayout>
-            <HomeButton className="homeLink"/>
-            <ControlButton>
-                Categories
-            </ControlButton>
-            <ControlButton>
-                Premium
-            </ControlButton>
-        </NavLayout>
+        <nav>
+            <NavLayout>
+                <HomeButton className="homeLink"/>
+                <NavigationButton nextPage="about"/>
+                <NavigationButton nextPage="explore"/>
+                <NavigationButton nextPage="everything else"/>
+                <NavigationButton nextPage="premium"/>
+            </NavLayout>
+        </nav>
     );
 }
 

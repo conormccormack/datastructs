@@ -4,8 +4,6 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import './resources/fonts/Ramaraja-Regular.ttf';
-import './resources/fonts/Ubuntu-Italic.ttf';
-import './resources/fonts/PoiretOne-Regular.ttf';
 
 ReactDOM.render(
   <React.StrictMode>
