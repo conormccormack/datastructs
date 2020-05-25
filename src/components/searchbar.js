@@ -1,6 +1,8 @@
 import React, {PureComponent} from 'react';
 import Autosuggest from 'react-autosuggest';
+import {Redirect} from 'react-router-dom';
 import '../css/autocomplete.css';
+import Home from "./home";
 
 const dataStructures = [
     {
@@ -131,15 +133,24 @@ class Searchbar extends PureComponent {
         super(props);
         this.state = {
             value: '',
-            suggestions: []
+            suggestions: [],
+            enterDown: false,
         };
     }
 
     // Update value on change to input box.
-    onChange = (event, { newValue, method }) => {
+    onChange = (event, { newValue }) => {
        this.setState({
            value: newValue
        });
+    };
+
+    onKeyDown = (event) => {
+        if (event.key === 'Enter'){
+            this.setState({
+                enterDown: true,
+            });
+        }
     };
 
     // Repopulate suggestions whenever requested.
@@ -162,21 +173,27 @@ class Searchbar extends PureComponent {
         const inputProps = {
             placeholder: 'Search (e.g. "AVL Tree")',
             value,
-            onChange: this.onChange
+            onChange: this.onChange,
+            onKeyDown: this.onKeyDown,
         };
 
+        const enterDown = this.state.enterDown;
+
         return(
-            <Autosuggest
-                multiSection={true}
-                suggestions={suggestions}
-                onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                getSuggestionValue={getSuggestionValue}
-                getSectionSuggestions={getSectionSuggestions}
-                renderSuggestion={renderSuggestion}
-                renderSectionTitle={renderSectionTitle}
-                inputProps={inputProps}
-            />
+            <div>
+                <Autosuggest
+                    multiSection={true}
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                    getSuggestionValue={getSuggestionValue}
+                    getSectionSuggestions={getSectionSuggestions}
+                    renderSuggestion={renderSuggestion}
+                    renderSectionTitle={renderSectionTitle}
+                    inputProps={inputProps}
+                />
+                {enterDown ? <Redirect to={`/catalog/?view=all&term=${this.state.value}`}/> : ''}
+            </div>
         );
     }
 
