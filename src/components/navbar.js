@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import HomeButton from "./homebutton";
 import NavigationButton from './navigationbutton';
 import Searchbar from "./searchbar";
+import LoginRegister from "./login_register_button";
 
 const NavLayout = styled.div`
     padding-top: 10px;
@@ -17,6 +18,7 @@ const NavLayout = styled.div`
 `
 const SearchbarContainer = styled.div`
     margin-left: auto;
+    margin-right: 10px;
 `
 
 function Navbar(){
@@ -31,6 +33,7 @@ function Navbar(){
                 <SearchbarContainer>
                     <Searchbar/>
                 </SearchbarContainer>
+                <LoginRegister/>
             </NavLayout>
         </nav>
     );

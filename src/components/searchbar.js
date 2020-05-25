@@ -8,15 +8,7 @@ const datastructures = [
         category: "Tree",
     },
     {
-        name: "Stack",
-        category: "Stack & Queues",
-    },
-    {
-        name: "Queue",
-        category: "Stack & Queues",
-    },
-    {
-        name: "Splay Tree",
+        name: "Binary Search Tree",
         category: "Tree",
     },
     {
@@ -24,8 +16,20 @@ const datastructures = [
         category: "Basics",
     },
     {
-        name: "Binary Search Tree",
+        name: 'Red-Black Tree',
+        category: 'Tree',
+    },
+    {
+        name: "Splay Tree",
         category: "Tree",
+    },
+    {
+        name: "Queue",
+        category: "Stack & Queues",
+    },
+    {
+        name: "Stack",
+        category: "Stack & Queues",
     },
 ];
 
@@ -35,7 +39,7 @@ const getSuggestions = value => {
     const inputLength = inputValue.length;
 
     return inputLength === 0 ? [] : datastructures.filter(datastruct =>
-        datastruct.name.toLowerCase().slice(0,inputLength) === inputValue
+        datastruct.name.toLowerCase().includes(inputValue)
     );
 };
 
