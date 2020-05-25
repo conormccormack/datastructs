@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import Autosuggest from 'react-autosuggest';
 import '../css/autocomplete.css';
 
-const datastructures = [
+const dataStructures = [
     {
         category: "Trees",
         queries: [
@@ -93,7 +93,7 @@ function getSuggestions(value) {
         return []
     };
 
-    return datastructures
+    return dataStructures
         .map(section => {
             return {
                 category: section.category,
@@ -104,22 +104,22 @@ function getSuggestions(value) {
 
 }
 
-// Retrieve value from suggestion that user has chosen
+// Given a suggestion, return the name
 const getSuggestionValue = suggestion => suggestion.name;
 
+// Given a section, return an array of corresponding queries
 const getSectionSuggestions = section => {
     return section.queries;
 };
 
-const renderSectionTitle = section => {
-    console.log(section)
-    return (
+// Given a section, render its category name as bold text
+const renderSectionTitle = section => (
     <strong>
         {section.category}
     </strong>
-)};
+);
 
-
+// Given a suggestion (query), render its name
 const renderSuggestion = suggestion => (
     <div>
         {suggestion.name}
@@ -135,19 +135,21 @@ class Searchbar extends PureComponent {
         };
     }
 
-    // Update value onChange.
+    // Update value on change to input box.
     onChange = (event, { newValue, method }) => {
        this.setState({
            value: newValue
        });
     };
 
+    // Repopulate suggestions whenever requested.
     onSuggestionsFetchRequested = ({ value }) => {
         this.setState({
            suggestions: getSuggestions(value)
         });
     };
 
+    // Clean up function
     onSuggestionsClearRequested = () => {
         this.setState({
             suggestions: []
@@ -158,7 +160,7 @@ class Searchbar extends PureComponent {
         const { value, suggestions } = this.state;
 
         const inputProps = {
-            placeholder: '"AVL Trees"',
+            placeholder: 'Search (e.g. "AVL Tree")',
             value,
             onChange: this.onChange
         };
