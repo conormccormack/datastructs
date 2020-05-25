@@ -4,47 +4,121 @@ import '../css/autocomplete.css';
 
 const datastructures = [
     {
-        name: "AVL Tree",
-        category: "Tree",
+        category: "Trees",
+        queries: [
+            {
+                name: 'AVL Tree'
+            },
+            {
+                name: 'Binary Search Tree'
+            },
+            {
+                name: 'Red-Black Tree'
+            },
+            {
+                name: 'Splay Tree'
+            },
+        ]
     },
     {
-        name: "Binary Search Tree",
-        category: "Tree",
-    },
-    {
-        name: "Linked List",
         category: "Basics",
+        queries: [
+            {
+                name: 'Linked List'
+            },
+            {
+                name: 'Stack'
+            },
+            {
+                name: 'Queue'
+            },
+        ],
     },
     {
-        name: 'Red-Black Tree',
-        category: 'Tree',
+        category: "Sorting Algorithms",
+        queries: [
+            {
+                name: 'Bubble Sort'
+            },
+            {
+                name: 'Selection Sort'
+            },
+            {
+                name: 'Insert Sort'
+            },
+            {
+                name: 'Merge Sort'
+            },
+            {
+                name: 'Quick Sort'
+            },
+            {
+                name: 'Radix Sort'
+            },
+            {
+                name: 'Heap Sort'
+            },
+        ],
     },
     {
-        name: "Splay Tree",
-        category: "Tree",
+        category: "Graph Algorithms",
+        queries: [
+            {
+                name: 'Breadth-First Search'
+            },
+            {
+                name: 'Depth-First Search'
+            },
+            {
+                name: 'Dijkstra\'s Algorithm'
+            },
+            {
+                name: 'Prim\'s Algorithm'
+            },
+            {
+                name: 'Topological Sort'
+            },
+            {
+                name: 'Kruskal\'s Sort'
+            },
+        ]
     },
-    {
-        name: "Queue",
-        category: "Stack & Queues",
-    },
-    {
-        name: "Stack",
-        category: "Stack & Queues",
-    },
+
 ];
 
 // Generate suggestions list based on user input matching to suggestion names.
-const getSuggestions = value => {
+function getSuggestions(value) {
     const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
+    if (inputValue.length === 0) {
+        return []
+    };
 
-    return inputLength === 0 ? [] : datastructures.filter(datastruct =>
-        datastruct.name.toLowerCase().includes(inputValue)
-    );
-};
+    return datastructures
+        .map(section => {
+            return {
+                category: section.category,
+                queries: section.queries.filter(query => query.name.toLowerCase().includes(inputValue))
+            };
+        })
+        .filter(section => section.queries.length > 0)
+
+}
 
 // Retrieve value from suggestion that user has chosen
 const getSuggestionValue = suggestion => suggestion.name;
+
+const getSectionSuggestions = section => {
+    return section.queries;
+};
+
+const renderSectionTitle = section => {
+    console.log(section)
+    return (
+    <strong>
+        {section.category}
+    </strong>
+)};
+
 
 const renderSuggestion = suggestion => (
     <div>
@@ -62,7 +136,7 @@ class Searchbar extends PureComponent {
     }
 
     // Update value onChange.
-    onChange = (event, { newValue }) => {
+    onChange = (event, { newValue, method }) => {
        this.setState({
            value: newValue
        });
@@ -91,11 +165,14 @@ class Searchbar extends PureComponent {
 
         return(
             <Autosuggest
+                multiSection={true}
                 suggestions={suggestions}
                 onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
                 onSuggestionsClearRequested={this.onSuggestionsClearRequested}
                 getSuggestionValue={getSuggestionValue}
+                getSectionSuggestions={getSectionSuggestions}
                 renderSuggestion={renderSuggestion}
+                renderSectionTitle={renderSectionTitle}
                 inputProps={inputProps}
             />
         );

@@ -3,16 +3,16 @@ import Navbar from "./navbar";
 import styled from 'styled-components';
 import Mainlanding from "./mainlanding";
 
-const gridContainer = styled.div`
+const GridContainer = styled.div`
     display: grid;
 `
 
 function Home() {
     return (
-        <gridContainer>
+        <GridContainer>
             <Navbar/>
             <Mainlanding/>
-        </gridContainer>
+        </GridContainer>
     );
 }
 
