@@ -41,7 +41,7 @@ function Mainlanding(){
                     <img src={require("../resources/images/logo_waves.svg")} alt="logo waves"></img>
                 </MainGraphic>
                 <WelcomeMessage>
-                    <WelcomeHeadline>Deadly Waves</WelcomeHeadline>
+                    <WelcomeHeadline>Welcome to DataStructs</WelcomeHeadline>
                     <WelcomeBody>
                         DataStructs is a beautiful, intuitive platform for vizualizing essential data structures and algorithms.
                         <br/><br/>
