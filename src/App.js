@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import Home from './components/home'
+import Home from './components/home/home'
 import About from './components/about'
 import Catalog from './components/catalog'
 import Premium from './components/premium'

@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components'
+import HomeMainGraphic from "./home/homemaingraphic";
 
 const MainPanel = styled.div`
     grid-template-columns: 1fr 1fr;
@@ -26,20 +27,11 @@ const WelcomeMessage =styled.div`
     padding-right: 100px;
 `
 
-const MainGraphic = styled.div`
-    width: 600px;
-    grid-column: 1 / 2;
-    padding-right: 30px;
-    padding-left: 120px;
-`
-
 function Mainlanding(){
     return (
         <MainPanel>
             <MainWrapper>
-                <MainGraphic>
-                    <img src={require("../resources/images/logo_waves.svg")} alt="logo waves"></img>
-                </MainGraphic>
+                <HomeMainGraphic/>
                 <WelcomeMessage>
                     <WelcomeHeadline>Welcome to DataStructs</WelcomeHeadline>
                     <WelcomeBody>

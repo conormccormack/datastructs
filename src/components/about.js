@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from './navbar';
 import styled from 'styled-components';
 import '../css/about.css';
+import AboutMainGraphic from "./aboutmaingraphic";
 
 const AboutContainer = styled.div`
     height: 100vh;
@@ -29,14 +30,6 @@ const AboutBody = styled.div`
     font-size: 16px;
     font-weight: 500;
 `
-const MainGraphic = styled.div`
-    width: 300px;
-    padding-right: 100px;
-    margin-left: auto;
-    grid-row: 1 / 2;
-    grid-column: 3 / 4;
-    
-`
 
 const GitHubLink = styled.a`
     text-decoration: none;
@@ -63,9 +56,7 @@ function About (){
                         </GitHubLink> @conormccormack/datastructs
                     </AboutBody>
                 </AboutMessage>
-                <MainGraphic>
-                    <img src={require('../resources/images/darklogotag.svg')} alt='darklogo'/>
-                </MainGraphic>
+                <AboutMainGraphic/>
             </MainWrapper>
         </AboutContainer>
     )
