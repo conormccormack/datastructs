@@ -2,7 +2,6 @@ import React, {PureComponent} from 'react';
 import Autosuggest from 'react-autosuggest';
 import {Redirect} from 'react-router-dom';
 import '../css/autocomplete.css';
-import Home from "./home";
 
 const dataStructures = [
     {
