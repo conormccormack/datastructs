@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components'
-import HomeMainGraphic from "./home/homemaingraphic";
+import HomeMainGraphic from "./homemaingraphic";
 
 const MainPanel = styled.div`
     grid-template-columns: 1fr 1fr;
@@ -33,7 +33,7 @@ function Mainlanding(){
             <MainWrapper>
                 <HomeMainGraphic/>
                 <WelcomeMessage>
-                    <WelcomeHeadline>Welcome to DataStructs</WelcomeHeadline>
+                    <WelcomeHeadline>Welcome to DataStructs.</WelcomeHeadline>
                     <WelcomeBody>
                         DataStructs is a beautiful, intuitive platform for vizualizing essential data structures and algorithms.
                         <br/><br/>

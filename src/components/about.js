@@ -49,7 +49,9 @@ function About (){
                     <AboutBody>
                         DataStructs is a beautiful, intuitive platform for vizualizing data structures and algorithms.<br/>
                         <br/>
-                        As of May 2020, DataStructs is built around React, animated with Anime.js, and hosted on AWS Amplify.
+                        DataStructs was engineering around the philosophy of <em>treating every day like it's Karen's last ziti.</em>
+                        <br/><br/>
+                        As of May 2020, DataStructs is built around React, animated with Framer Motion, and hosted on AWS Amplify.
                         <br/><br/>
                         <GitHubLink className="hoverHighlit" href='https://github.com/conormccormack/datastructs'>
                             <i className="fab fa-github"></i> View this project on <strong>Github</strong>

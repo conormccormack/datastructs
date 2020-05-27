@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from "../navbar";
 import styled from 'styled-components';
-import Mainlanding from "../mainlanding";
+import Mainlanding from "./mainlanding";
 
 const HomeContainer = styled.div`
     height: 100vh;

@@ -1,7 +1,7 @@
 import React from "react";
 import '../css/navbar.css'
 import styled from 'styled-components'
-import HomeButton from "./home/homebutton";
+import HomeButton from "./homebutton";
 import NavigationButton from './navigationbutton';
 import Searchbar from "./searchbar";
 import LoginRegister from "./login_register_button";
