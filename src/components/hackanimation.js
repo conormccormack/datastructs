@@ -2,10 +2,10 @@ import React, {useEffect, useState} from "react";
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import Navbar from "./navbar";
-import {stringify} from "query-string";
+import {parse, stringify} from "query-string";
 
 const TestSandbox = styled.div`
-    height: 100vh;
+    height: 3900vh;
     background-color: #EFE7E2;
     grid-template-columns: 1fr 1fr;
     display: grid;
@@ -104,13 +104,25 @@ function HackAnimation(){
         removeNode();
     };
 
-    const shiftLeftRecurse = (root) => {
-
+    // For every element in subtree, shift up one level
+    const shiftRecurse = (root, basis) => {
+        // Base case: do not shift subtree if it does not exist.
+        if (tree[root].data === null) return;
+        const level = tree[root].level;
+        // If not 0th level, shift.
+        if (level !== 0) {
+            // const newData = tree[root].data;
+            // const reWrite = root - basis;
+            // setTree(tree.map(node => node.id == reWrite && {...node, data: newData}));
+            // setTree(tree.map(node => node.id == root ? {...node, data: null} : node ));
+            tree[root - basis].data = tree[root].data;
+            tree[root].data = null;
+        }
+        // shift children by basis * 2.
+        shiftRecurse(tree[root].left, basis * 2);
+        shiftRecurse(tree[root].right, basis * 2);
     };
 
-    const shiftRightRecurse = (root) => {
-
-    };
 
     const updateTreeIndexRemove = (root) => {
         setErrorMessage('Removing...');
@@ -119,36 +131,43 @@ function HackAnimation(){
         if (tree[left].data === null && tree[right].data === null){
             setTree(tree.map(node => node.id === root ? {...node, data: null} : node));
         } else if (tree[left].data === null){
-
+            shiftRecurse(right, tree[right].id - tree[root].id);
         } else if (tree[right].data === null) {
-
+            shiftRecurse(left, tree[left].id - tree[root].id);
         } else {
-
+            const successor = findMin(right);
+            tree[root].data = tree[successor].data;
+            if (tree[tree[successor].right].data !== null){
+                shiftRecurse(tree[successor].right, tree[tree[successor].right].id - successor);
+            } else tree[successor].data = null;
         }
         setNumberNodes(numberNodes => numberNodes - 1);
     };
 
+    const findMin = (root) => {
+        if (tree[tree[root].left].data !== null) return findMin(tree[root].left);
+        else return root;
+    };
+
     const removeRecurse = (root, value) => {
+        console.log(`removeRecurse: root ${root}`);
         if (tree[root].data === null) {
             setErrorMessage('Element does not exist in the tree.');
-        } else if (value < tree[root].data) {
+        } else if (parseInt(value) < parseInt(tree[root].data)) {
             removeRecurse(tree[root].left, value);
-        } else if (value > tree[root].data){
+        } else if (parseInt(value) > parseInt(tree[root].data)){
             removeRecurse(tree[root].right, value);
         }
         else {
             // Even if current element matches value to remove, we have to check if that value exists
             // as right child element since we allow for duplicates.
-            if (tree[tree[root].right].data != value) updateTreeIndexRemove(root);
+            if (tree[tree[root].right].data !== value) updateTreeIndexRemove(root);
             else removeRecurse(tree[root].right, value);
         }
     };
 
     const removeNode = () => {
-        if (tree[0].data === null) {
-            setErrorMessage('The tree is empty!');
-            return;
-        }
+        if (tree[0].data === null) setErrorMessage('The tree is empty!');
         else removeRecurse(0, removeValue);
     };
 
