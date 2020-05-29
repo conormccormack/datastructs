@@ -54,6 +54,8 @@ function HackAnimation(){
     const [inputValue, setInputValue] = useState('');
     const [removeValue, setRemoveValue] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [height, setHeight] = useState(-1);
+    const [displayNodes, setDisplayNodes] = useState([]);
     const [tree, setTree] = useState([...Array(2049)].map((x, index) => {
         const parentId = index > 0 ? Math.floor((index-1)/2) : null;
         const level = Math.floor(Math.log2(index));
@@ -64,23 +66,31 @@ function HackAnimation(){
         setTree(tree.map(node => node.id === index ? {...node, data: value} : node));
     };
 
+    const recursiveMaxDepth = (max, root) => {
+        if (tree[root].data === null) return max;
+        max = tree[root].level > max ? tree[root].level : max;
+        return Math.max(max, recursiveMaxDepth(max, tree[root].left), recursiveMaxDepth(max, tree[root].right));
+    };
+
+    useEffect(() => {
+        const depth = recursiveMaxDepth(0, 0);
+        setHeight(depth + 1);
+    },[tree]);
+
     const insertRecurse = (root, value) => {
-        try {
-            if (parseInt(value) < parseInt(tree[root].data)) {
-                // Base case: insert new value as leaf node
-                if (tree[tree[root].left].data === null) updateTreeIndexInsert(tree[root].left, value);
-                else insertRecurse(tree[root].left, value);
-            } else {
-                // Base case: insert new value as leaf node
-                if (tree[tree[root].right].data === null) updateTreeIndexInsert(tree[root].right, value);
-                else insertRecurse(tree[root].right, value);
-            }
-        } finally {
-            console.log(tree);
+        if (parseInt(value) < parseInt(tree[root].data)) {
+            // Base case: insert new value as leaf node
+            if (tree[tree[root].left].data === null) updateTreeIndexInsert(tree[root].left, value);
+            else insertRecurse(tree[root].left, value);
+        } else {
+            // Base case: insert new value as leaf node
+            if (tree[tree[root].right].data === null) updateTreeIndexInsert(tree[root].right, value);
+            else insertRecurse(tree[root].right, value);
         }
     };
 
     const insertNode = () => {
+        setErrorMessage(`Inserting ${inputValue}`);
         if (tree[0].data === null) {
             updateTreeIndexInsert(0, inputValue);
         } else insertRecurse(0, inputValue);
@@ -90,7 +100,11 @@ function HackAnimation(){
 
     const onInsertDown = event => {
         event.preventDefault();
-        if (inputValue === '') return;
+        if (inputValue.trim() === '') return;
+        if (isNaN(inputValue)) {
+            setErrorMessage(`Please enter a number (e.g. 27, 3.2)`);
+            return;
+        }
         insertNode();
         setInputValue('');
         setNumberNodes(numberNodes => numberNodes + 1);
@@ -100,8 +114,13 @@ function HackAnimation(){
 
     const onRemoveDown = event => {
         event.preventDefault();
-        setRemoveValue('');
+        if (removeValue.trim() === '') return;
+        if (isNaN(removeValue)) {
+                setErrorMessage(`Please enter a number (e.g. 27, 3.2)`);
+                return;
+        }
         removeNode();
+        setRemoveValue('');
     };
 
     // For every element in subtree, shift up one level
@@ -123,9 +142,8 @@ function HackAnimation(){
         shiftRecurse(tree[root].right, basis * 2);
     };
 
-
     const updateTreeIndexRemove = (root) => {
-        setErrorMessage('Removing...');
+        setErrorMessage(`Removing ${removeValue}`);
         const left = tree[root].left;
         const right = tree[root].right;
         if (tree[left].data === null && tree[right].data === null){
@@ -150,7 +168,6 @@ function HackAnimation(){
     };
 
     const removeRecurse = (root, value) => {
-        console.log(`removeRecurse: root ${root}`);
         if (tree[root].data === null) {
             setErrorMessage('Element does not exist in the tree.');
         } else if (parseInt(value) < parseInt(tree[root].data)) {
@@ -193,6 +210,7 @@ function HackAnimation(){
                         </label>
                     </form>
                     <p>Number of Nodes: {numberNodes}</p>
+                    { numberNodes > 0 && <p>Tree Height: {height}</p>}
                     <p>{errorMessage}</p>
                 </PadLeft100>
             </TestSandbox>
