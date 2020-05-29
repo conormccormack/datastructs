@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from "react";
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import Navbar from "./navbar";
+import Navbar from './navbar';
+import PageHeadline from './PageHeadline';
 import {parse, stringify} from "query-string";
 
 const TestSandbox = styled.div`
@@ -54,11 +55,12 @@ function HackAnimation(){
     const [inputValue, setInputValue] = useState('');
     const [removeValue, setRemoveValue] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [treeUpdated, setTreeUpdated] = useState(true);
     const [height, setHeight] = useState(-1);
     const [displayNodes, setDisplayNodes] = useState([]);
     const [tree, setTree] = useState([...Array(2049)].map((x, index) => {
         const parentId = index > 0 ? Math.floor((index-1)/2) : null;
-        const level = Math.floor(Math.log2(index));
+        const level = Math.floor(Math.log2(index + 1));
         return {data: null, id: index, level: level, parent: parentId, left: index * 2 + 1, right: index * 2 + 2 }
     }));
 
@@ -94,12 +96,14 @@ function HackAnimation(){
         if (tree[0].data === null) {
             updateTreeIndexInsert(0, inputValue);
         } else insertRecurse(0, inputValue);
+        setHeight(recursiveMaxDepth(0,0) + 1);
     };
 
     const handleInputChange = event => setInputValue(event.target.value);
 
     const onInsertDown = event => {
         event.preventDefault();
+        setTreeUpdated(false);
         if (inputValue.trim() === '') return;
         if (isNaN(inputValue)) {
             setErrorMessage(`Please enter a number (e.g. 27, 3.2)`);
@@ -186,17 +190,17 @@ function HackAnimation(){
     const removeNode = () => {
         if (tree[0].data === null) setErrorMessage('The tree is empty!');
         else removeRecurse(0, removeValue);
+        setHeight(recursiveMaxDepth(0,0) + 1);
     };
 
 
     return (
         <div>
             <Navbar/>
+            <PageHeadline text={'Binary Search Trees'} />
             <TestSandbox>
                 <ListWrapper>
-                    <Margin20>
-                        {JSON.stringify(tree)}
-                    </Margin20>
+                    {JSON.stringify(tree)}
                 </ListWrapper>
                 <PadLeft100>
                     <form onSubmit={onInsertDown}>
