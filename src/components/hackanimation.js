@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 import Navbar from './navbar';
 import PageHeadline from './PageHeadline';
 import {parse, stringify} from "query-string";
+import RelatedPagesCard from "./relatedpagescard";
 
 const TestSandbox = styled.div`
-    height: 3900vh;
+    height: 100vh;
     background-color: #EFE7E2;
     grid-template-columns: 1fr 1fr;
     display: grid;
