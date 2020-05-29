@@ -55,7 +55,6 @@ function HackAnimation(){
     const [inputValue, setInputValue] = useState('');
     const [removeValue, setRemoveValue] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [treeUpdated, setTreeUpdated] = useState(true);
     const [height, setHeight] = useState(-1);
     const [displayNodes, setDisplayNodes] = useState([]);
     const [tree, setTree] = useState([...Array(2049)].map((x, index) => {
@@ -77,6 +76,7 @@ function HackAnimation(){
     useEffect(() => {
         const depth = recursiveMaxDepth(0, 0);
         setHeight(depth + 1);
+        updateDisplay();
     },[tree]);
 
     const insertRecurse = (root, value) => {
@@ -97,13 +97,13 @@ function HackAnimation(){
             updateTreeIndexInsert(0, inputValue);
         } else insertRecurse(0, inputValue);
         setHeight(recursiveMaxDepth(0,0) + 1);
+        updateDisplay();
     };
 
     const handleInputChange = event => setInputValue(event.target.value);
 
     const onInsertDown = event => {
         event.preventDefault();
-        setTreeUpdated(false);
         if (inputValue.trim() === '') return;
         if (isNaN(inputValue)) {
             setErrorMessage(`Please enter a number (e.g. 27, 3.2)`);
@@ -125,6 +125,7 @@ function HackAnimation(){
         }
         removeNode();
         setRemoveValue('');
+        updateDisplay();
     };
 
     // For every element in subtree, shift up one level
@@ -187,12 +188,15 @@ function HackAnimation(){
         }
     };
 
+    const updateDisplay = () => {
+        setDisplayNodes(tree.filter(node => node.data !== null));
+    };
+
     const removeNode = () => {
         if (tree[0].data === null) setErrorMessage('The tree is empty!');
         else removeRecurse(0, removeValue);
         setHeight(recursiveMaxDepth(0,0) + 1);
     };
-
 
     return (
         <div>
@@ -200,7 +204,7 @@ function HackAnimation(){
             <PageHeadline text={'Binary Search Trees'} />
             <TestSandbox>
                 <ListWrapper>
-                    {JSON.stringify(tree)}
+                    {JSON.stringify(displayNodes)}
                 </ListWrapper>
                 <PadLeft100>
                     <form onSubmit={onInsertDown}>
