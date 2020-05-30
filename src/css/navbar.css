@@ -8,7 +8,18 @@
     height: 40px;
 }
 
+.dropdown {
+    font-size: 16px;
+    vertical-align: text-bottom;
+    font-family: Raleway, sans-serif;
+    font-weight: 500;
+    padding-top: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
 .caret {
     font-size: 18px;
     color: #3C5B6F;
 }
+

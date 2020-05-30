@@ -1,19 +1,17 @@
 import React from 'react';
 import styled from "styled-components";
 
-const MainGraphic = styled.div`
-    width: 600px;
-    grid-column: 1 / 2;
-    padding-right: 30px;
-    padding-left: 120px;
+const ResponsiveGraphic = styled.div`
+    width: 100%;
+    box-sizing: border-box;
 `
 
 function HomeMainGraphic() {
 
     return(
-        <MainGraphic>
-            <img src={require("../../resources/images/logo_waves.svg")} alt="logo on waves"></img>
-        </MainGraphic>
+        <ResponsiveGraphic>
+            <img style={{width: '100%'}} src={require("../../resources/images/logo_waves.svg")} alt="logo on waves"/>
+        </ResponsiveGraphic>
     )
 }
 

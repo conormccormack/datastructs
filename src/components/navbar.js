@@ -5,6 +5,7 @@ import HomeButton from "./homebutton";
 import NavigationButton from './navigationbutton';
 import Searchbar from "./searchbar";
 import LoginRegister from "./login_register_button";
+import ExlporeDropdown from "./exploredropdown";
 
 const NavLayout = styled.div`
     padding-top: 10px;
@@ -20,6 +21,8 @@ const SearchbarContainer = styled.div`
     margin-left: auto;
     margin-right: 10px;
 `
+
+
 
 function Navbar(){
     return (
