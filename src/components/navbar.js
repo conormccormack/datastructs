@@ -23,7 +23,6 @@ const SearchbarContainer = styled.div`
 `
 
 
-
 function Navbar(){
     return (
         <nav>

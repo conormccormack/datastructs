@@ -11,21 +11,21 @@ const AboutContainer = styled.div`
 const AboutHeadline = styled.div`
     font-family: Ramaraja;
     font-size: 80px;
-    padding-left: 100px;
 `
 
 const MainWrapper = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    padding-left: 6rem;
+    padding-right: 6rem;
 `
 
 const AboutMessage = styled.div`
-    padding-right: 30px;
-    grid-column: 1 / 3;
+    grid-column: auto / span 2;
 `
 
 const AboutBody = styled.div`
-    padding-left: 100px;
     font-family: Raleway;
     font-size: 16px;
     font-weight: 500;

@@ -4,7 +4,7 @@ import HomeMainGraphic from "./homemaingraphic";
 
 const WelcomeHeadline = styled.div`
     font-family: Ramaraja;
-    font-size: 50px;
+    font-size: calc(40px + 10 * ((100vw - 1130px) / (550)));
 `
 
 const WelcomeBody = styled.div`
