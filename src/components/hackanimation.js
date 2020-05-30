@@ -5,6 +5,7 @@ import Navbar from './navbar';
 import PageHeadline from './PageHeadline';
 import {parse, stringify} from "query-string";
 import RelatedPagesCard from "./relatedpagescard";
+import BinaryTree from "./binarytree";
 
 const TestSandbox = styled.div`
     height: 100vh;
@@ -14,21 +15,18 @@ const TestSandbox = styled.div`
 `
 
 const ListWrapper = styled.div`
-    height: 200px; 
-    width: 100px;
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
 `
 
 const DisplayNode = styled.div`
-    background-color: #D8BBFF; 
+    background: rgb(222,170,255);
+    background: linear-gradient(225deg, rgba(222,170,255,1) 34%, rgba(208,209,255,1) 80%);
     border-radius: 50%;
     margin: 20px;
-    height: 100px; 
-    width: 100px;
+    height: 70px; 
+    width: 70px;
     margin: auto;
     display: flex;
     justify-content: center;
@@ -42,11 +40,10 @@ const PadLeft100 = styled.div`
 const NodeContent = styled.div`
     text-align: center;
     vertical-align: middle;
-    font-size: 30px;
+    font-size: 20px;
     font-family: Helvetica;
     color: #FFF;
 `
-
 const Margin20 = styled.div`
     margin: 20px;
 `
@@ -56,7 +53,7 @@ function HackAnimation(){
     const [inputValue, setInputValue] = useState('');
     const [removeValue, setRemoveValue] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [height, setHeight] = useState(-1);
+    const [height, setHeight] = useState(0);
     const [displayNodes, setDisplayNodes] = useState([]);
     const [tree, setTree] = useState([...Array(2049)].map((x, index) => {
         const parentId = index > 0 ? Math.floor((index-1)/2) : null;
@@ -76,12 +73,12 @@ function HackAnimation(){
 
     useEffect(() => {
         const depth = recursiveMaxDepth(0, 0);
-        setHeight(depth + 1);
+        setHeight(depth);
         updateDisplay();
     },[tree]);
 
     const insertRecurse = (root, value) => {
-        if (parseInt(value) < parseInt(tree[root].data)) {
+        if (parseInt(value, 10) < parseInt(tree[root].data, 10)) {
             // Base case: insert new value as leaf node
             if (tree[tree[root].left].data === null) updateTreeIndexInsert(tree[root].left, value);
             else insertRecurse(tree[root].left, value);
@@ -97,7 +94,7 @@ function HackAnimation(){
         if (tree[0].data === null) {
             updateTreeIndexInsert(0, inputValue);
         } else insertRecurse(0, inputValue);
-        setHeight(recursiveMaxDepth(0,0) + 1);
+        setHeight(recursiveMaxDepth(0,0));
         updateDisplay();
     };
 
@@ -136,10 +133,6 @@ function HackAnimation(){
         const level = tree[root].level;
         // If not 0th level, shift.
         if (level !== 0) {
-            // const newData = tree[root].data;
-            // const reWrite = root - basis;
-            // setTree(tree.map(node => node.id == reWrite && {...node, data: newData}));
-            // setTree(tree.map(node => node.id == root ? {...node, data: null} : node ));
             tree[root - basis].data = tree[root].data;
             tree[root].data = null;
         }
@@ -176,9 +169,9 @@ function HackAnimation(){
     const removeRecurse = (root, value) => {
         if (tree[root].data === null) {
             setErrorMessage('Element does not exist in the tree.');
-        } else if (parseInt(value) < parseInt(tree[root].data)) {
+        } else if (parseInt(value, 10) < parseInt(tree[root].data, 10)) {
             removeRecurse(tree[root].left, value);
-        } else if (parseInt(value) > parseInt(tree[root].data)){
+        } else if (parseInt(value, 10) > parseInt(tree[root].data, 10)){
             removeRecurse(tree[root].right, value);
         }
         else {
@@ -189,14 +182,28 @@ function HackAnimation(){
         }
     };
 
+    // Compute left-right zero based index of id on its level in the tree.
+    const computeIndexOnLevel = (id, level) => (id + 1 - Math.pow(2,level));
+
     const updateDisplay = () => {
-        setDisplayNodes(tree.filter(node => node.data !== null));
+        setDisplayNodes(tree.filter(node => node.data !== null).map((node) => {
+            const indexOnLevel = computeIndexOnLevel(node.id, node.level);
+            const shift = indexOnLevel % 2 === 0 ? indexOnLevel*(-20) : indexOnLevel * 20;
+            return (
+                <motion.div initial={{scale: 0}} animate={{ scale: 1, x: shift}} whileHover={{scale: 1.2}}>
+                    <DisplayNode>
+                        <NodeContent>{node.data}</NodeContent>
+                    </DisplayNode>
+                </motion.div>
+            )
+        }
+        ));
     };
 
     const removeNode = () => {
         if (tree[0].data === null) setErrorMessage('The tree is empty!');
         else removeRecurse(0, removeValue);
-        setHeight(recursiveMaxDepth(0,0) + 1);
+        setHeight(recursiveMaxDepth(0,0));
     };
 
     return (
@@ -204,9 +211,9 @@ function HackAnimation(){
             <Navbar/>
             <PageHeadline text={'Binary Search Trees'} />
             <TestSandbox>
-                <ListWrapper>
-                    {JSON.stringify(displayNodes)}
-                </ListWrapper>
+                <div>
+                    <BinaryTree displayNodes={displayNodes} height={height}/>
+                </div>
                 <PadLeft100>
                     <form onSubmit={onInsertDown}>
                         <label>
@@ -219,7 +226,7 @@ function HackAnimation(){
                         </label>
                     </form>
                     <p>Number of Nodes: {numberNodes}</p>
-                    { numberNodes > 0 && <p>Tree Height: {height}</p>}
+                    { numberNodes > 0 && <p>Tree Height: {height + 1}</p>}
                     <p>{errorMessage}</p>
                 </PadLeft100>
             </TestSandbox>
