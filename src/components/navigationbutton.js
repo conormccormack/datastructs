@@ -20,7 +20,7 @@ function NavigationButton(props){
         } else if (props.nextPage.includes('explore')){
             return `/catalog?view=${props.exploreCategory}`
         } else {
-            return props.nextPage.replace(/\W/g, '')
+            return `/${props.nextPage.replace(/\W/g, '')}`
         }
     };
 
