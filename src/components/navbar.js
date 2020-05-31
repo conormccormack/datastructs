@@ -25,7 +25,7 @@ const SearchbarContainer = styled.div`
 
 function Navbar(){
     return (
-        <nav>
+        <nav role='navigation'>
             <NavLayout>
                 <HomeButton className="homeLink"/>
                 <NavigationButton nextPage="about"/>

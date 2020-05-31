@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from './navbar';
 import queryString from 'query-string';
 import styled from 'styled-components';
+import {motion} from "framer-motion";
 
 const CatalogContainer = styled.div`
     background-color: #EFE7E2;
@@ -166,12 +167,14 @@ function Catalog(props){
     return(
         <CatalogContainer>
             <Navbar/>
-            {query.term ? <CatalogHeadline>Search results for {query.term}:</CatalogHeadline> :
-                <CatalogHeadline>This is the catalog filtered by {query.view}.</CatalogHeadline>
-            }
-            <Results>
-                {SearchResults}
-            </Results>
+                <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
+                {query.term ? <CatalogHeadline>Search results for {query.term}:</CatalogHeadline> :
+                    <CatalogHeadline>This is the catalog filtered by {query.view}.</CatalogHeadline>
+                }
+                <Results>
+                    {SearchResults}
+                </Results>
+            </motion.div>
         </CatalogContainer>
     )
 }

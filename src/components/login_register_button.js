@@ -25,7 +25,7 @@ function LoginRegister() {
     return(
         <Link to='/' style={{textDecoration:'None' , color:'black'}}>
             <LoginButton>
-                <Buttontext>Login</Buttontext>
+                <Buttontext>Sign In</Buttontext>
             </LoginButton>
         </Link>
     );

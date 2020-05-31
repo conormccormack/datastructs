@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from "react";
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import {AnimatePresence, motion} from 'framer-motion';
 import Navbar from './navbar';
 import PageHeadline from './PageHeadline';
-import {parse, stringify} from "query-string";
 import RelatedPagesCard from "./relatedpagescard";
 import BinaryTree from "./binarytree";
+import BSTNode from './bstnode';
 
 const TestSandbox = styled.div`
     height: 100vh;
@@ -14,38 +14,13 @@ const TestSandbox = styled.div`
     display: grid;
 `
 
-const ListWrapper = styled.div`
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 20px;
+const PadLeft6rem = styled.div`
+    padding-left: 6rem;
 `
 
-const DisplayNode = styled.div`
-    background: rgb(222,170,255);
-    background: linear-gradient(225deg, rgba(222,170,255,1) 34%, rgba(208,209,255,1) 80%);
-    border-radius: 50%;
-    margin: 20px;
-    height: 70px; 
-    width: 70px;
-    margin: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
 
 const PadLeft100 = styled.div`
     padding-left: 100px;
-`
-
-const NodeContent = styled.div`
-    text-align: center;
-    vertical-align: middle;
-    font-size: 20px;
-    font-family: Helvetica;
-    color: #FFF;
-`
-const Margin20 = styled.div`
-    margin: 20px;
 `
 
 function HackAnimation(){
@@ -185,16 +160,12 @@ function HackAnimation(){
     // Compute left-right zero based index of id on its level in the tree.
     const computeIndexOnLevel = (id, level) => (id + 1 - Math.pow(2,level));
 
-    const updateDisplay = () => {
+    const updateDisplay = (BST) => {
         setDisplayNodes(tree.filter(node => node.data !== null).map((node) => {
             const indexOnLevel = computeIndexOnLevel(node.id, node.level);
             const shift = indexOnLevel % 2 === 0 ? indexOnLevel*(-20) : indexOnLevel * 20;
             return (
-                <motion.div initial={{scale: 0}} animate={{ scale: 1, x: shift}} whileHover={{scale: 1.2}}>
-                    <DisplayNode>
-                        <NodeContent>{node.data}</NodeContent>
-                    </DisplayNode>
-                </motion.div>
+                <BSTNode data={node.data} id={node.id} shift={shift}/>
             )
         }
         ));
@@ -207,13 +178,13 @@ function HackAnimation(){
     };
 
     return (
-        <div>
+        <motion.div exit={{}}>
             <Navbar/>
             <PageHeadline text={'Binary Search Trees'} />
             <TestSandbox>
-                <div>
-                    <BinaryTree displayNodes={displayNodes} height={height}/>
-                </div>
+                <PadLeft6rem>
+                <BinaryTree BST={tree} displayNodes={displayNodes} height={height}/>
+                </PadLeft6rem>
                 <PadLeft100>
                     <form onSubmit={onInsertDown}>
                         <label>
@@ -230,7 +201,7 @@ function HackAnimation(){
                     <p>{errorMessage}</p>
                 </PadLeft100>
             </TestSandbox>
-        </div>
+        </motion.div>
     );
 }
 

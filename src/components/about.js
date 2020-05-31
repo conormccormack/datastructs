@@ -3,6 +3,7 @@ import Navbar from './navbar';
 import styled from 'styled-components';
 import '../css/about.css';
 import AboutMainGraphic from "./aboutmaingraphic";
+import {motion} from "framer-motion";
 
 const AboutContainer = styled.div`
     height: 100vh;
@@ -37,10 +38,11 @@ const GitHubLink = styled.a`
     hover: 
 `
 
-function About (){
+function About (props){
     return(
         <AboutContainer>
             <Navbar/>
+            <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
             <MainWrapper>
                 <AboutMessage>
                     <AboutHeadline>
@@ -60,6 +62,7 @@ function About (){
                 </AboutMessage>
                 <AboutMainGraphic/>
             </MainWrapper>
+            </motion.div>
         </AboutContainer>
     )
 }

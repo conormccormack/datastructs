@@ -1,24 +1,50 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import './App.css';
 import Home from './components/home/home'
 import About from './components/about'
 import Catalog from './components/catalog'
 import Premium from './components/premium'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom';
 import TestAnimation from "./components/testanimation";
 import HackAnimation from "./components/hackanimation";
+import {AnimatePresence} from "framer-motion";
+
+
+const PageVariants = {
+    pageIn : {
+        opacity: 1,
+        y: 0,
+        x: 0,
+    },
+    pageInit : {
+        opacity: 0,
+        y: 50,
+        scale: 1,
+    },
+    pageOut : {
+        opacity: 0,
+        y: -50,
+    }
+};
+
+const PageTransition = {
+    type: "tween",
+    ease: "anticipate",
+};
 
 function App() {
-  return (
-      <Router>
-          <Switch>
-              <Route path='/' exact component={Home}/>
-              <Route path='/test' exact component={HackAnimation}/>
-              <Route path='/about' component={About}/>
-              <Route path='/catalog' exact component={Catalog}/>
-              <Route path='/premium' exact component={Premium}/>
-          </Switch>
-      </Router>
+    let location = useLocation();
+    return (
+          <AnimatePresence exitBeforeEnter>
+              <Switch location={location} key={location.pathname}>
+                  <Route path='/' exact render={(props) => <Home {...props} transition={PageTransition} variants={PageVariants}/>} />
+                  <Route path='/test' exact render={(props) => <HackAnimation {...props} transition={PageTransition} variants={PageVariants}/>} />
+                  <Route path='/about' render={(props) => <About {...props} transition={PageTransition} variants={PageVariants}/>}/>
+                  <Route path='/catalog' exact render={(props) => <Catalog {...props} transition={PageTransition} variants={PageVariants}/>}/>
+                  <Route path='/premium' exact render={(props) => <Premium {...props} transition={PageTransition} variants={PageVariants}/>}/>
+              </Switch>
+          </AnimatePresence>
   );
 }
 

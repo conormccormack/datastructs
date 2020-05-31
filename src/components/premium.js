@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import Navbar from "./navbar";
+import {motion} from "framer-motion";
 
 const PremiumContainer = styled.div`
     background-color: #EFE7E2;
@@ -12,11 +13,13 @@ const PremiumHeadline = styled.div`
     padding-left: 100px;
 `
 
-function Premium(){
+function Premium(props){
     return(
         <PremiumContainer>
             <Navbar/>
-            <PremiumHeadline>Premium</PremiumHeadline>
+            <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
+             <PremiumHeadline>Premium</PremiumHeadline>
+            </motion.div>
         </PremiumContainer>
     )
 }
