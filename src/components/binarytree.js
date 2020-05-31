@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {AnimatePresence, motion} from 'framer-motion';
+import '../css/bst.css'
 import styled from 'styled-components';
 
 // Build and maintain state as array.
@@ -12,11 +13,9 @@ function BinaryTree (props){
     const computeIndexOnLevel = (id, level) => (id + 1 - Math.pow(2,level));
 
     return(
-        <motion.div>
             <AnimatePresence>
-            {props.displayNodes}
+                {props.displayNodes}
             </AnimatePresence>
-        </motion.div>
     )
 
 }

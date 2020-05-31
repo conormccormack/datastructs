@@ -165,7 +165,7 @@ function HackAnimation(){
             const indexOnLevel = computeIndexOnLevel(node.id, node.level);
             const shift = indexOnLevel % 2 === 0 ? indexOnLevel*(-20) : indexOnLevel * 20;
             return (
-                <BSTNode data={node.data} id={node.id} shift={shift}/>
+                <BSTNode key={node.id} data={node.data} id={node.id} shift={shift}/>
             )
         }
         ));
