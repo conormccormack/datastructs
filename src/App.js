@@ -9,7 +9,8 @@ import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-route
 import TestAnimation from "./components/testanimation";
 import HackAnimation from "./components/hackanimation";
 import {AnimatePresence} from "framer-motion";
-
+import AnimeTest from './components/animetest';
+import BST from './components/bst';
 
 const PageVariants = {
     pageIn : {
@@ -39,7 +40,9 @@ function App() {
           <AnimatePresence exitBeforeEnter>
               <Switch location={location} key={location.pathname}>
                   <Route path='/' exact render={(props) => <Home {...props} transition={PageTransition} variants={PageVariants}/>} />
-                  <Route path='/test' exact render={(props) => <HackAnimation {...props} transition={PageTransition} variants={PageVariants}/>} />
+                  <Route path='/test' exact render={(props) => <BST {...props} transition={PageTransition} variants={PageVariants}/> } />
+                  {/* <Route path='/test' exact render={(props) => <HackAnimation {...props} transition={PageTransition} variants={PageVariants}/>} /> */}
+                  <Route path='/Binary Search Tree' exact render={(props) => <HackAnimation {...props} transition={PageTransition} variants={PageVariants}/>} />
                   <Route path='/about' render={(props) => <About {...props} transition={PageTransition} variants={PageVariants}/>}/>
                   <Route path='/catalog' exact render={(props) => <Catalog {...props} transition={PageTransition} variants={PageVariants}/>}/>
                   <Route path='/premium' exact render={(props) => <Premium {...props} transition={PageTransition} variants={PageVariants}/>}/>

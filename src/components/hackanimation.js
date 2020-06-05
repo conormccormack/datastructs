@@ -6,6 +6,7 @@ import PageHeadline from './PageHeadline';
 import RelatedPagesCard from "./relatedpagescard";
 import BinaryTree from "./binarytree";
 import BSTNode from './bstnode';
+import animejs from "animejs";
 
 const TestSandbox = styled.div`
     height: 100vh;
@@ -30,6 +31,7 @@ function HackAnimation(){
     const [errorMessage, setErrorMessage] = useState('');
     const [height, setHeight] = useState(0);
     const [displayNodes, setDisplayNodes] = useState([]);
+    const [count, setCount] = useState(0);
     const [tree, setTree] = useState([...Array(2049)].map((x, index) => {
         const parentId = index > 0 ? Math.floor((index-1)/2) : null;
         const level = Math.floor(Math.log2(index + 1));
@@ -65,6 +67,7 @@ function HackAnimation(){
     };
 
     const insertNode = () => {
+        setCount(count => count + 1);
         setErrorMessage(`Inserting ${inputValue}`);
         if (tree[0].data === null) {
             updateTreeIndexInsert(0, inputValue);
@@ -161,11 +164,15 @@ function HackAnimation(){
     const computeIndexOnLevel = (id, level) => (id + 1 - Math.pow(2,level));
 
     const updateDisplay = (BST) => {
-        setDisplayNodes(tree.filter(node => node.data !== null).map((node) => {
+        setDisplayNodes(tree.filter(node => node.data !== null).map((node, index) => {
             const indexOnLevel = computeIndexOnLevel(node.id, node.level);
             const shift = indexOnLevel % 2 === 0 ? indexOnLevel*(-20) : indexOnLevel * 20;
             return (
-                <BSTNode data={node.data} id={node.id} shift={shift}/>
+                <motion.div key={index} className="bstnode" style={{float: 'left'}} exit={{ scale: 0}} initial={{ scale: 0}}
+                animate={{ scale: 1}} whileHover={{scale: 1.25}}>
+                    {node.data}
+                </motion.div>
+                //<BSTNode key={count} data={node.data} shift={shift}/>
             )
         }
         ));

@@ -3,6 +3,9 @@ import Navbar from './navbar';
 import queryString from 'query-string';
 import styled from 'styled-components';
 import {motion} from "framer-motion";
+import Home from "./home/home";
+import {Link, Route} from "react-router-dom";
+import HackAnimation from "./hackanimation";
 
 const CatalogContainer = styled.div`
     background-color: #EFE7E2;
@@ -152,10 +155,12 @@ const resultsByCategory = (query, filt, db) => {
 const resultsToHTML = (results) => {
     if (results.length === 0) return ('There are no items matching your search.');
     else {
-        return results.map(cat => <div>
-            <ResultCategory>{cat.category}</ResultCategory>
-                {cat.results.map(result => <ResultPage> {result.name}</ResultPage>)}
-        </div>
+        return results.map(cat =>
+                <div>
+                    <ResultCategory>{cat.category}</ResultCategory>
+                    {cat.results.map(result =>
+                        <ResultPage><Link style={{ color:'black'}} to={result.name}>{result.name}</Link></ResultPage>)}
+                </div>
         )
     };
 };
