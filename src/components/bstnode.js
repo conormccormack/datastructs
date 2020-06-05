@@ -16,6 +16,7 @@ const variants = {
 //                      animate={{ scale: 1, x: props.shift, y: props.shift}} whileHover={{scale: 1.25}}
 
 function BSTNode (props) {
+    const id = props.id;
     return(
         <motion.div className="bstnode" style={{float: 'left'}} exit={{ scale: 0}} initial={{ scale: 0}}
                                   animate={{ scale: 1, x: props.shift, y: props.shift}} whileHover={{scale: 1.25}}>
