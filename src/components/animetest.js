@@ -8,8 +8,9 @@ const PageWrapper = styled.div`
     padding-left: 6rem;
     padding-right: 6rem;
     padding-top: 2rem;
+    height: 80vh;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
 `
 
 const Controls = styled.div`
@@ -17,9 +18,8 @@ const Controls = styled.div`
 `
 
 const NodeContainer = styled.div`
-    
 `
-
+const HORIZONTAL_SPACING = 50;
 
 class BinarySearchTree {
     constructor() {
@@ -123,21 +123,15 @@ function get_translateX_shiftLeftRight(newNode){
 
 // Note that each node has its margin-left set to -${its width}. 
 function initNodePosition(newNode) {
-    var nodeContainer = document.getElementById('nodecontainer');
     var node = document.getElementById(`node${newNode.id}`);
-    const center = get_translateX_center(nodeContainer, node) + node.getBoundingClientRect().width;
-    const x_translation = center + get_translateX_shiftLeftRight(newNode); 
     anime({
         targets: `#node${newNode.id}`,
         marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
         keyframes: [
-            { translateX: x_translation, translateY: newNode.level * 80, scale: 0, duration: 0 },
-            { scale: 1 },
+            { translateX: 1, translateY: 1, scale: 0, duration: 5 },
+            { scale: 1, duration: 4000 },
         ],
-        duration: 1500,
     });
-
-    var node = document.getElementById(`node${newNode.id}`);
 }
 
 function clearForm() {
@@ -145,24 +139,55 @@ function clearForm() {
     form.reset();
 }
 
-let shiftTotal = 370;
+let shift_x_total;
+
+function formatBinaryTree(root) {
+    adjustNode(root);
+}
+
+// Returns length of path from smallest element to root.
+function inOrderToRootLength(root){
+    if (root === null) return 0;     
+    const left = root.left ? inOrderToRootLength(root.left) : 0;
+    const right = root.right ? inOrderToRootLength(root.right) : 0;
+    return left + right + 1;
+}
 
 function adjustNode(root) {
-    
     if (root.left !== null) adjustNode(root.left);
     const node = document.getElementById(`node${root.id}`);
     anime({
         targets: `#node${root.id}`,
         marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
         keyframes: [
-            { translateX: shiftTotal, translateY: root.level * 80 }
+            { translateX: shift_x_total, translateY: root.level * 80 }
         ],
-        duration: 1000,
     });
 
-    shiftTotal += 80;
+    shift_x_total += HORIZONTAL_SPACING;
 
     if (root.right !== null) adjustNode(root.right);
+}
+
+function addLineToDom(parent, child){
+    if (parent === null) return;
+
+    const parent_selector = document.getElementById(`node${parent.id}`);
+    const child_selector = document.getElementById(`node${child.id}`);
+    let svg = document.createElementNS('https://www.w3.org/2000/svg', 'svg');
+    let line = document.createElementNS('https://www.w3.org/2000/svg', 'line');
+    svg.setAttribute('width', '800px');
+    svg.setAttribute('height', '100px');
+    line.setAttribute('stroke-width', '1px');
+    line.setAttribute('stroke', '#000000');
+    line.setAttribute('x1', parent_selector.getBoundingClientRect().x);
+    line.setAttribute('x2', child_selector.getBoundingClientRect().x);
+    line.setAttribute('class', 'line');
+    line.setAttribute('y1', parent_selector.getBoundingClientRect().y);
+    line.setAttribute('y2', child_selector.getBoundingClientRect().y);
+    svg.appendChild(line);
+    document.getElementById('nodecontainer').appendChild(svg);
+    console.log(line);
 }
 
 class AnimeTest extends Component {
@@ -190,12 +215,14 @@ class AnimeTest extends Component {
     handleInputSubmit(event) {
         event.preventDefault();
         if (this.state.inputValue === '') return;
+        const nodeContainer = document.getElementById('nodecontainer');
         const newNode  = this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
-        //initNodePosition(newNode);
-        adjustNode(this.state.bst.root);
-        shiftTotal = 370;
-        this.setState({ count: this.state.count + 1 });
+        //addLineToDom(newNode.parent, newNode);
+        shift_x_total = getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING;
+        formatBinaryTree(this.state.bst.root);
+        console.log(`shift total: ${shift_x_total}`);
+        this.setState({ count: this.state.count + 1, inputValue: '' });
         clearForm();
     }
     
@@ -210,7 +237,9 @@ class AnimeTest extends Component {
     }
 
     componentDidMount(){
-        window.addEventListener('resize', this.adjustToResize)
+        window.addEventListener('resize', this.adjustToResize);
+        const nodeContainer = document.getElementById('nodecontainer');
+        shift_x_total = getWidthMidpoint(nodeContainer);
     }
 
     adjustToResize(){
@@ -239,7 +268,5 @@ class AnimeTest extends Component {
         );
     }
 }
-
-
 
 export default AnimeTest;
