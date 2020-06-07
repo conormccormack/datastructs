@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useLayoutEffect } from 'react';
 import anime from 'animejs';
 import '../css/bst.css';
 import styled from 'styled-components';
@@ -23,9 +23,18 @@ const NodeContainer = styled.div`
 
 class BinarySearchTree {
     constructor() {
-        this.root = null;   
+        this.root = null;
+        this.heights = new Map();
     }
 
+    updateHeights(leaf) {
+        const leftHeight = leaf.left !== null ? this.heights.get(leaf.left.id) : -1;
+        const rightHeight = leaf.right !== null ? this.heights.get(leaf.right.id) : -1;
+        this.heights.set(leaf.id, 1 + Math.max(leftHeight, rightHeight));
+        if (leaf.parent !== null) this.updateHeights(leaf.parent);
+    }
+
+    // Insert node into tree and update heights map.
     insert(value, count) {
         var newNode = new Node (value, 0, count);
         if (this.root === null) this.root = newNode;
@@ -33,6 +42,7 @@ class BinarySearchTree {
             newNode.level = newNode.level + 1;
             this.insertNode(this.root, newNode);
         }
+        this.updateHeights(newNode);
         return newNode;
     }
 
@@ -66,7 +76,6 @@ class Node {
         this.right = null;
         this.level = level;
         this.parent = null;
-        this.height = 0;
         this.id = id;
     }
 }
@@ -136,6 +145,26 @@ function clearForm() {
     form.reset();
 }
 
+let shiftTotal = 370;
+
+function adjustNode(root) {
+    
+    if (root.left !== null) adjustNode(root.left);
+    const node = document.getElementById(`node${root.id}`);
+    anime({
+        targets: `#node${root.id}`,
+        marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
+        keyframes: [
+            { translateX: shiftTotal, translateY: root.level * 80 }
+        ],
+        duration: 1000,
+    });
+
+    shiftTotal += 80;
+
+    if (root.right !== null) adjustNode(root.right);
+}
+
 class AnimeTest extends Component {
     constructor (props) {
         super(props);
@@ -163,7 +192,9 @@ class AnimeTest extends Component {
         if (this.state.inputValue === '') return;
         const newNode  = this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
-        initNodePosition(newNode);
+        //initNodePosition(newNode);
+        adjustNode(this.state.bst.root);
+        shiftTotal = 370;
         this.setState({ count: this.state.count + 1 });
         clearForm();
     }
