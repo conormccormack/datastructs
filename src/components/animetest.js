@@ -12,18 +12,18 @@ const PageWrapper = styled.div`
     display: grid;
     grid-template-columns: 2fr 1fr;
 `
-
 const Controls = styled.div`
     margin-left: auto;
 `
-
 const NodeContainer = styled.div`
 `
+
 const HORIZONTAL_SPACING = 40;
 const NODE_RADIUS = 30;
+const VERTICAL_SPACING = 70;
 let shift_x_total;
-
 let x_distances = new Map();
+let resizeTimer;
 
 class BinarySearchTree {
     constructor() {
@@ -84,10 +84,6 @@ class Node {
     }
 }
 
-function adjustToResize(){
-
-}
-
 function addNodeToDOM(value, count) {
     var node = document.createElement("div");
     node.setAttribute('class', 'bstnode');
@@ -127,13 +123,14 @@ function buildEdgeTimeline(root){
     if (root.left !== null) buildEdgeTimeline(root.left);
     if (root.parent !== null){
         const x1 = x_distances.get(`node${root.parent.id}`); 
-        const y1 = root.parent.level * 80 + NODE_RADIUS;
+        const y1 = root.parent.level * VERTICAL_SPACING + NODE_RADIUS;
         const x2 = x_distances.get(`node${root.id}`);
-        const y2 = root.level * 80 + NODE_RADIUS;
+        const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
         console.log( {x1, y1, x2, y2});
         formatTimeline.add({
             targets: `#path${root.id}`,
             d: `M ${x1}, ${y1} L ${x2}, ${y2} `,
+            opacity: { value: '1.0', easing: 'easeInSine', delay: 100, duration: 600 },
         }, 0);
     }
     if (root.right !== null) buildEdgeTimeline(root.right);
@@ -144,17 +141,14 @@ function buildNodeTimeline(root){
     const node = document.getElementById(`node${root.id}`);
     const x = shift_x_total - NODE_RADIUS;
     x_distances.set(`node${root.id}`, x );
+    root.parent !== null && root.line === null && addPathToDom(root);
+    root.line = root.line === null && `line${root.id}`;
     formatTimeline.add({
         targets: `#node${root.id}`,
         marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
         keyframes: [
-            { translateX: shift_x_total, translateY: root.level * 80 }
+            { translateX: shift_x_total, translateY: root.level * VERTICAL_SPACING }
         ],
-        complete: function() {
-            // root.parent !== null && root.line === null && addLineToDom(root.parent, root);
-            root.parent !== null && root.line === null && addPathToDom(root);
-            root.line = root.line === null && `line${root.id}`;
-        },
     }, 0);
     
     shift_x_total += HORIZONTAL_SPACING;
@@ -179,6 +173,7 @@ function addPathToDom(child){
     path.setAttribute('d', `M ${x1}, ${y1} L ${x2}, ${y2} `);
     path.setAttribute('stroke', '#DEAAFF');
     path.setAttribute('stroke-width', '3px');
+    path.setAttribute('opacity', '0.0');
     svg.appendChild(path);
 }
 
@@ -186,10 +181,6 @@ function clearForm() {
     const form = document.getElementById('input-form');
     form.reset();
 }
-
-let resizeTimer;
-let window_width;
-let window_height;
 
 class AnimeTest extends Component {
     constructor (props) {
@@ -209,7 +200,7 @@ class AnimeTest extends Component {
         this.setState({ inputValue: parseFloat(event.target.value) });
     }
 
-    handleRemoveSubmit(event) {
+    handleRemoveChange(event) {
         this.setState({ removeValue: parseFloat(event.target.value) });
     }
 
@@ -239,8 +230,6 @@ class AnimeTest extends Component {
         window.addEventListener('resize', this.onResize);
         const nodeContainer = document.getElementById('nodecontainer');
         shift_x_total = getWidthMidpoint(nodeContainer);
-        window_height = window.innerHeight;
-        window_width = window.innerWidth;
     }
 
     onResize(){
@@ -255,10 +244,7 @@ class AnimeTest extends Component {
         return(
             <PageWrapper id="pagewrapper">
                 <NodeContainer id="nodecontainer" >
-                <svg class="linecontainer" id="svg-line">
-
-                </svg>
-                    
+                <svg class="linecontainer" id="svg-line" />                    
                 </NodeContainer>
                 <Controls>
                     <form id='input-form' onSubmit={this.handleInputSubmit}>

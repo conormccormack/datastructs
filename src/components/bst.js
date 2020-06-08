@@ -7,12 +7,20 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
     background-color: #EFE7E2;
     height: 100vh;
+`   
+
+const Headline = styled.div`
+    font-family: Ramaraja;
+    font-size: 50px;
+    padding-left: 100px;
+    background-color: #EFE7E2;
 `
 
 function BST (props){
     return (
         <Wrapper>
             <Navbar/>
+            <Headline>Binary Search Tree</Headline>
             <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
                 <AnimeTest/>
             </motion.div>
