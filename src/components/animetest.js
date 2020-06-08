@@ -19,14 +19,17 @@ const Controls = styled.div`
 
 const NodeContainer = styled.div`
 `
-const HORIZONTAL_SPACING = 50;
+const HORIZONTAL_SPACING = 40;
+const NODE_RADIUS = 30;
+let shift_x_total;
+
+let x_distances = new Map();
 
 class BinarySearchTree {
     constructor() {
         this.root = null;
         this.heights = new Map();
     }
-
     updateHeights(leaf) {
         const leftHeight = leaf.left !== null ? this.heights.get(leaf.left.id) : -1;
         const rightHeight = leaf.right !== null ? this.heights.get(leaf.right.id) : -1;
@@ -77,7 +80,12 @@ class Node {
         this.level = level;
         this.parent = null;
         this.id = id;
+        this.line = null;
     }
+}
+
+function adjustToResize(){
+
 }
 
 function addNodeToDOM(value, count) {
@@ -95,57 +103,7 @@ function getWidthMidpoint(selector) {
     return (selector.getBoundingClientRect().width / 2);
 }
 
-/* Given an element and its container, return the value for translating X s.t.
-*  the element is centered within container.
-*/
-function get_translateX_center(container_selector, element_selector) {
-    return getWidthMidpoint(container_selector) - getWidthMidpoint(element_selector);
-}
-
-function get_translateX_centerWithParentNode(container_selector, node){
-    const parent = document.getElementById(`node${node.parent.id}`);
-    const newElement = document.getElementById(`node${node.id}`);
-    return getWidthMidpoint(container_selector) - getWidthMidpoint(newElement) - parent.getBoundingClientRect().width;
-}
-
-/* If element is root node, return 0.
-* If element is left child, shift left. Else, shift right.  
-*/
-function get_translateX_shiftLeftRight(newNode){
-    if (newNode.parent === null) return 0;
-    else if (newNode.parent.left === newNode) {
-        return -50;
-    } else {       
-        return 50;
-    }
-}
-
-
-// Note that each node has its margin-left set to -${its width}. 
-function initNodePosition(newNode) {
-    var node = document.getElementById(`node${newNode.id}`);
-    anime({
-        targets: `#node${newNode.id}`,
-        marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
-        keyframes: [
-            { translateX: 1, translateY: 1, scale: 0, duration: 5 },
-            { scale: 1, duration: 4000 },
-        ],
-    });
-}
-
-function clearForm() {
-    const form = document.getElementById('input-form');
-    form.reset();
-}
-
-let shift_x_total;
-
-function formatBinaryTree(root) {
-    adjustNode(root);
-}
-
-// Returns length of path from smallest element to root.
+// Returns length of in-order traversal from smallest element to root.
 function inOrderToRootLength(root){
     if (root === null) return 0;     
     const left = root.left ? inOrderToRootLength(root.left) : 0;
@@ -153,42 +111,85 @@ function inOrderToRootLength(root){
     return left + right + 1;
 }
 
-function adjustNode(root) {
-    if (root.left !== null) adjustNode(root.left);
+let formatTimeline = anime.timeline({
+    autoplay: false,
+});
+
+function formatBinaryTree(root){
+    formatTimeline = anime.timeline({
+    });
+    buildNodeTimeline(root);
+    buildEdgeTimeline(root);
+    formatTimeline.play();
+}
+
+function buildEdgeTimeline(root){
+    if (root.left !== null) buildEdgeTimeline(root.left);
+    if (root.parent !== null){
+        const x1 = x_distances.get(`node${root.parent.id}`); 
+        const y1 = root.parent.level * 80 + NODE_RADIUS;
+        const x2 = x_distances.get(`node${root.id}`);
+        const y2 = root.level * 80 + NODE_RADIUS;
+        console.log( {x1, y1, x2, y2});
+        formatTimeline.add({
+            targets: `#path${root.id}`,
+            d: `M ${x1}, ${y1} L ${x2}, ${y2} `,
+        }, 0);
+    }
+    if (root.right !== null) buildEdgeTimeline(root.right);
+}
+
+function buildNodeTimeline(root){
+    if (root.left !== null) buildNodeTimeline(root.left);
     const node = document.getElementById(`node${root.id}`);
-    anime({
+    const x = shift_x_total - NODE_RADIUS;
+    x_distances.set(`node${root.id}`, x );
+    formatTimeline.add({
         targets: `#node${root.id}`,
         marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
         keyframes: [
             { translateX: shift_x_total, translateY: root.level * 80 }
         ],
-    });
-
+        complete: function() {
+            // root.parent !== null && root.line === null && addLineToDom(root.parent, root);
+            root.parent !== null && root.line === null && addPathToDom(root);
+            root.line = root.line === null && `line${root.id}`;
+        },
+    }, 0);
+    
     shift_x_total += HORIZONTAL_SPACING;
 
-    if (root.right !== null) adjustNode(root.right);
+    if (root.right !== null) buildNodeTimeline(root.right);
 }
 
-function addLineToDom(parent, child){
-    if (parent === null) return;
-
-    const parent_selector = document.getElementById(`node${parent.id}`);
+function addPathToDom(child){
+    if (child.parent === null) return;
+    let svg = document.getElementById('svg-line');
+    const parent_selector = document.getElementById(`node${child.parent.id}`);
     const child_selector = document.getElementById(`node${child.id}`);
-    let svg = document.createElementNS('https://www.w3.org/2000/svg', 'svg');
-    let line = document.createElementNS('https://www.w3.org/2000/svg', 'line');
-    svg.setAttribute('width', '800px');
-    svg.setAttribute('height', '100px');
-    line.setAttribute('stroke-width', '1px');
-    line.setAttribute('stroke', '#000000');
-    line.setAttribute('x1', parent_selector.getBoundingClientRect().x);
-    line.setAttribute('x2', child_selector.getBoundingClientRect().x);
-    line.setAttribute('class', 'line');
-    line.setAttribute('y1', parent_selector.getBoundingClientRect().y);
-    line.setAttribute('y2', child_selector.getBoundingClientRect().y);
-    svg.appendChild(line);
-    document.getElementById('nodecontainer').appendChild(svg);
-    console.log(line);
+    const container = document.getElementById(`nodecontainer`);
+
+    const x1 = (parent_selector.getBoundingClientRect().x + parent_selector.getBoundingClientRect().right)/2 - container.getBoundingClientRect().x;
+    const y1 =  parent_selector.getBoundingClientRect().bottom - container.getBoundingClientRect().y - NODE_RADIUS;
+    const x2 = (child_selector.getBoundingClientRect().x + child_selector.getBoundingClientRect().right)/2 - container.getBoundingClientRect().x;
+    const y2 = child_selector.getBoundingClientRect().y - container.getBoundingClientRect().y + NODE_RADIUS;
+
+    let path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('id', `path${child.id}`);
+    path.setAttribute('d', `M ${x1}, ${y1} L ${x2}, ${y2} `);
+    path.setAttribute('stroke', '#DEAAFF');
+    path.setAttribute('stroke-width', '3px');
+    svg.appendChild(path);
 }
+
+function clearForm() {
+    const form = document.getElementById('input-form');
+    form.reset();
+}
+
+let resizeTimer;
+let window_width;
+let window_height;
 
 class AnimeTest extends Component {
     constructor (props) {
@@ -201,7 +202,7 @@ class AnimeTest extends Component {
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
-        this.adjustToResize = this.adjustToResize.bind(this);
+        this.onResize = this.onResize.bind(this);
     }
 
     handleInputChange(event) {
@@ -214,14 +215,12 @@ class AnimeTest extends Component {
 
     handleInputSubmit(event) {
         event.preventDefault();
-        if (this.state.inputValue === '') return;
+        if (this.state.inputValue === '' || isNaN(this.state.inputValue)) return;
         const nodeContainer = document.getElementById('nodecontainer');
         const newNode  = this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
-        //addLineToDom(newNode.parent, newNode);
-        shift_x_total = getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING;
+        shift_x_total = Math.max(0, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
         formatBinaryTree(this.state.bst.root);
-        console.log(`shift total: ${shift_x_total}`);
         this.setState({ count: this.state.count + 1, inputValue: '' });
         clearForm();
     }
@@ -237,19 +236,30 @@ class AnimeTest extends Component {
     }
 
     componentDidMount(){
-        window.addEventListener('resize', this.adjustToResize);
+        window.addEventListener('resize', this.onResize);
         const nodeContainer = document.getElementById('nodecontainer');
         shift_x_total = getWidthMidpoint(nodeContainer);
+        window_height = window.innerHeight;
+        window_width = window.innerWidth;
     }
 
-    adjustToResize(){
-        console.log('resize');
+    onResize(){
+        if (this.state.bst.root === null) return;
+        clearTimeout(resizeTimer);
+        const nodeContainer = document.getElementById('nodecontainer');
+        shift_x_total = Math.max(0, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
+        resizeTimer = setTimeout(formatBinaryTree(this.state.bst.root), 200);
     }
 
     render(){ 
         return(
             <PageWrapper id="pagewrapper">
-                <NodeContainer id="nodecontainer" />
+                <NodeContainer id="nodecontainer" >
+                <svg class="linecontainer" id="svg-line">
+
+                </svg>
+                    
+                </NodeContainer>
                 <Controls>
                     <form id='input-form' onSubmit={this.handleInputSubmit}>
                         <label>
