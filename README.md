@@ -4,7 +4,7 @@
 DataStructs is a beautiful, intuitive platform for vizualizing data structures and algorithms. 
 
 ## Technologies
-DataStructs is built on `React` and `Node.js`, animated with `Framer Motion`, and hosted on AWS Amplify.
+DataStructs is built on `React` and `Node.js`, animated with [anime.js](https://animejs.com/), and hosted on AWS Amplify.
 
 ## Available Scripts
 
