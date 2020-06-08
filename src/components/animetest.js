@@ -126,7 +126,6 @@ function buildEdgeTimeline(root){
         const y1 = root.parent.level * VERTICAL_SPACING + NODE_RADIUS;
         const x2 = x_distances.get(`node${root.id}`);
         const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
-        console.log( {x1, y1, x2, y2});
         formatTimeline.add({
             targets: `#path${root.id}`,
             d: `M ${x1}, ${y1} L ${x2}, ${y2} `,
@@ -140,6 +139,7 @@ function buildNodeTimeline(root){
     if (root.left !== null) buildNodeTimeline(root.left);
     const node = document.getElementById(`node${root.id}`);
     const x = shift_x_total - NODE_RADIUS;
+    const isNew = root.parent !== null && root.line === null ? true : false;
     x_distances.set(`node${root.id}`, x );
     root.parent !== null && root.line === null && addPathToDom(root);
     root.line = root.line === null && `line${root.id}`;
@@ -147,7 +147,9 @@ function buildNodeTimeline(root){
         targets: `#node${root.id}`,
         marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
         keyframes: [
-            { translateX: shift_x_total, translateY: root.level * VERTICAL_SPACING }
+            { scale: isNew ? 0 : 1, duration: 0 },
+            { translateX: isNew ? 0 : shift_x_total, scale: 1, duration: 800 },
+            { translateX: shift_x_total, translateY: root.level * VERTICAL_SPACING, duration: 1000 }
         ],
     }, 0);
     
@@ -210,12 +212,12 @@ class AnimeTest extends Component {
         const nodeContainer = document.getElementById('nodecontainer');
         const newNode  = this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
-        shift_x_total = Math.max(0, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
+        shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
         formatBinaryTree(this.state.bst.root);
         this.setState({ count: this.state.count + 1, inputValue: '' });
         clearForm();
     }
-    
+
     // TODO: Implement Remove functionality.
     handleRemoveSubmit(event) {
         event.preventDefault();
@@ -236,8 +238,8 @@ class AnimeTest extends Component {
         if (this.state.bst.root === null) return;
         clearTimeout(resizeTimer);
         const nodeContainer = document.getElementById('nodecontainer');
-        shift_x_total = Math.max(0, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
-        resizeTimer = setTimeout(formatBinaryTree(this.state.bst.root), 200);
+        shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
+        resizeTimer = setTimeout(formatBinaryTree(this.state.bst.root), 2000 );
     }
 
     render(){ 
@@ -253,12 +255,12 @@ class AnimeTest extends Component {
                             <button onClick={this.handleInputSubmit} className='inputButton'>Input</button>
                         </label>
                     </form>
-                    {/* <form id='remove-form' onSubmit={this.handleRemoveSubmit}>
+                    <form id='remove-form' onSubmit={this.handleRemoveSubmit}>
                         <label>
                             <input type="number" onChange={this.handleRemoveSubmit}/> 
                             <button onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
                         </label>
-                    </form> */}
+                    </form>
                 </Controls>
             </PageWrapper>
         );

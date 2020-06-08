@@ -1,6 +1,6 @@
 .bstnode {
     background: rgb(222,170,255);
-    background: linear-gradient(225deg, rgba(222,170,255,1) 34%, rgba(208,209,255,1) 80%);
+    background: linear-gradient(210deg, rgba(222,170,255,1) 34%, rgba(208,209,255,1) 80%);
     border-radius: 50%;
     height: 60px;
     width: 60px;
@@ -26,6 +26,7 @@
     text-align: center;
     margin-top: 2px;
     height: 28px;
+    border-style: none;
     background-color: #3C5B6F;
     color: white;
     padding: 4px;
@@ -41,6 +42,7 @@
     min-width: 20px;
     text-align: center;
     margin-top: 2px;
+    border-style: none;
     height: 28px;
     background-color: #3C5B6F;
     color: white;
