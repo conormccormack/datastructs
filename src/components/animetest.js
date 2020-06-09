@@ -1,8 +1,22 @@
+/* Summary:
+*  The following is a React component that will never update after it has mounted.
+*  This allows for the use of Vanilla JavaScript to directly manipulate the DOM.
+*  The binary tree is initialized as part of the component state so that the component
+*  can readily access the tree data. The tree is maintained by Vanilla JavaScript, however,
+*  and is animated using Anime.js.
+*
+*  The animation is implemented as an Anime timeline, which is built with an
+*  in-order traversal of the nodes of the tree followed by its edges. The X position
+*  of each node and its edges is based on size of the container and the immediate 
+*  successors of each node. There is a fixed distance between each node and its predecessor,
+*  defined by HORIZONTAL_SPACING. Somewhat similarly, each level of the tree is seperated
+*  by the VERTICAL_SPACING constant. 
+*/
+
 import React, { Component, useLayoutEffect } from 'react';
 import anime from 'animejs';
 import '../css/bst.css';
 import styled from 'styled-components';
-import { parse } from 'query-string';
 
 const PageWrapper = styled.div`
     padding-left: 6rem;
@@ -22,6 +36,8 @@ const HORIZONTAL_SPACING = 40;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
 let shift_x_total;
+/* Map which stores the next x position of each node. Used to calculate
+** where points of edges should move before the animation is executed */
 let x_distances = new Map();
 let resizeTimer;
 
@@ -35,6 +51,12 @@ class BinarySearchTree {
         const rightHeight = leaf.right !== null ? this.heights.get(leaf.right.id) : -1;
         this.heights.set(leaf.id, 1 + Math.max(leftHeight, rightHeight));
         if (leaf.parent !== null) this.updateHeights(leaf.parent);
+    }
+
+    updateLevels(root, level){
+        root.level = level;
+        if (root.right !== null) this.updateLevels(root.right, level + 1);
+        if (root.left !== null) this.updateLevels(root.left, level + 1 );
     }
 
     // Insert node into tree and update heights map.
@@ -71,11 +93,6 @@ class BinarySearchTree {
         }
     }
 
-    /* 3 cases:
-    1. No children (leaf). Delete from tree.  
-    2. One child. Left or right. Delete and fill in with child.
-    3. Two children. Find and replace with successor. Delete where successor lies.
-    */
     removeRecurse(root, value){
         if (root === null) return;
         else if (value < root.value) this.removeRecurse(root.left, value);
@@ -90,7 +107,13 @@ class BinarySearchTree {
         }
     }
 
+    /* 3 cases:
+    1. No children (leaf). Delete from tree.  
+    2. One child. Left or right. Delete and fill in with child.
+    3. Two children. Find and replace with successor. Delete where successor lies.
+    */
     deleteNode(node){
+        let removeNodeID = `node${node.id}`;
         if (node.left === null && node.right === null){
             if (node.parent !== null){
                 node.parent.left = node.parent.left === node ? null : node.parent.left;
@@ -99,12 +122,51 @@ class BinarySearchTree {
             } else {
                 this.root = null;
             }
-            removeElementFromDOM(`node${node.id}`);
+            removeElementFromDOM(removeNodeID);
+        } else if (node.left === null) {
+            if (node.parent !== null){
+                node.parent.left = node.parent.left === node ? node.right : node.parent.left;
+                node.parent.right = node.parent.right === node ? node.right : node.parent.right;
+                node.right.parent = node.parent;
+                this.updateLevels(this.root, 0);
+                removeElementFromDOM(`path${node.id}`);
+            } else {
+                this.root = node.right;
+                node.right.parent = null;
+                this.updateLevels(this.root, 0);
+                removeElementFromDOM(`path${node.right.id}`);
+            }
+            removeElementFromDOM(removeNodeID);
+        } else if (node.right === null){
+            if (node.parent !== null){
+                node.parent.left = node.parent.left === node ? node.left : node.parent.left;
+                node.parent.right = node.parent.right === node ? node.left : node.parent.right;
+                node.left.parent = node.parent;
+                this.updateLevels(this.root, 0);
+                removeElementFromDOM(`path${node.id}`);
+            } else {
+                this.root = node.left;
+                node.left.parent = null;
+                this.updateLevels(this.root, 0);
+                removeElementFromDOM(`path${node.left.id}`);
+            }
+            removeElementFromDOM(removeNodeID);
+        } else {
+            const swap = this.findLeftmost(node.right);
+            node.value = swap.value;
+            anime({
+                targets: document.getElementById(`node${node.id}`),
+                innerHTML: node.value,
+                easing: 'easeOutCubic',
+                round: 1,
+                duration: 500,
+            })
+            this.deleteNode(swap);
         }
     }
 
-    findSucessor(root){
-        return root.left === null ? root : this.findSucessor(root.left);
+    findLeftmost(root){
+        return root.left === null ? root : this.findLeftmost(root.left);
     }
 }
 
@@ -122,10 +184,13 @@ class Node {
 
 function removeElementFromDOM(id) {    
     var toRemove = document.getElementById(id);
+    console.log(id);
+    if (id === null) return;
     anime({
         targets: toRemove,
         opacity: 0,
         duration: 800,
+        delay: id.includes('line') ? 150 : 0,
         complete: function(anim){
             toRemove.remove();
         },
@@ -196,7 +261,7 @@ function buildNodeTimeline(root){
         marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
         keyframes: [
             { scale: isNew ? 0 : 1, duration: 0 },
-            { translateX: isNew ? 0 : shift_x_total, scale: 1, duration: 800 },
+            { translateX: isNew ? 0 : shift_x_total, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
             { translateX: shift_x_total, translateY: root.level * VERTICAL_SPACING, duration: 1000 }
         ],
     }, 0);
@@ -206,6 +271,7 @@ function buildNodeTimeline(root){
     if (root.right !== null) buildNodeTimeline(root.right);
 }
 
+// Given child nodee, create path from child to parent, add to DOM.
 function addPathToDom(child){
     if (child.parent === null) return;
     let svg = document.getElementById('svg-line');
