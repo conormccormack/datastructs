@@ -70,6 +70,42 @@ class BinarySearchTree {
             }
         }
     }
+
+    /* 3 cases:
+    1. No children (leaf). Delete from tree.  
+    2. One child. Left or right. Delete and fill in with child.
+    3. Two children. Find and replace with successor. Delete where successor lies.
+    */
+    removeRecurse(root, value){
+        if (root === null) return;
+        else if (value < root.value) this.removeRecurse(root.left, value);
+        else if (value > root.value) this.removeRecurse(root.right, value);
+        else {
+            if (root.right !== null){
+                if (root.right.value !== value) this.deleteNode(root);
+                else this.removeRecurse(root.right, value);
+            } else {
+                this.deleteNode(root);
+            }
+        }
+    }
+
+    deleteNode(node){
+        if (node.left === null && node.right === null){
+            if (node.parent !== null){
+                node.parent.left = node.parent.left === node ? null : node.parent.left;
+                node.parent.right = node.parent.right === node ? null: node.parent.right;
+                removeElementFromDOM(`path${node.id}`);
+            } else {
+                this.root = null;
+            }
+            removeElementFromDOM(`node${node.id}`);
+        }
+    }
+
+    findSucessor(root){
+        return root.left === null ? root : this.findSucessor(root.left);
+    }
 }
 
 class Node {
@@ -82,6 +118,18 @@ class Node {
         this.id = id;
         this.line = null;
     }
+}
+
+function removeElementFromDOM(id) {    
+    var toRemove = document.getElementById(id);
+    anime({
+        targets: toRemove,
+        opacity: 0,
+        duration: 800,
+        complete: function(anim){
+            toRemove.remove();
+        },
+    });
 }
 
 function addNodeToDOM(value, count) {
@@ -179,8 +227,13 @@ function addPathToDom(child){
     svg.appendChild(path);
 }
 
-function clearForm() {
+function clearInputForm() {
     const form = document.getElementById('input-form');
+    form.reset();
+}
+
+function clearRemoveForm() {
+    const form = document.getElementById('remove-form');
     form.reset();
 }
 
@@ -189,12 +242,15 @@ class AnimeTest extends Component {
         super(props);
         this.state = {
             inputValue: '',
+            removeValue: '',
             bst: new BinarySearchTree,
             count: 0,
             numActiveNodes: 0,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleRemoveChange = this.handleRemoveChange.bind(this);
+        this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this); 
         this.onResize = this.onResize.bind(this);
     }
 
@@ -210,18 +266,25 @@ class AnimeTest extends Component {
         event.preventDefault();
         if (this.state.inputValue === '' || isNaN(this.state.inputValue)) return;
         const nodeContainer = document.getElementById('nodecontainer');
-        const newNode  = this.state.bst.insert(this.state.inputValue, this.state.count);
+        this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
         shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
         formatBinaryTree(this.state.bst.root);
         this.setState({ count: this.state.count + 1, inputValue: '' });
-        clearForm();
+        clearInputForm();
     }
 
     // TODO: Implement Remove functionality.
     handleRemoveSubmit(event) {
         event.preventDefault();
-        if (this.state.inputValue === '') return;
+        if (this.state.removeValue === '' || isNaN(this.state.removeValue)) return;
+        const nodeContainer = document.getElementById('nodecontainer');
+        this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
+        if (this.state.bst.root !== null) {
+            shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
+            formatBinaryTree(this.state.bst.root);
+        };
+        clearRemoveForm();
     }
 
     shouldComponentUpdate(){
@@ -257,7 +320,7 @@ class AnimeTest extends Component {
                     </form>
                     <form id='remove-form' onSubmit={this.handleRemoveSubmit}>
                         <label>
-                            <input type="number" onChange={this.handleRemoveSubmit}/> 
+                            <input type="number" onChange={this.handleRemoveChange}/> 
                             <button onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
                         </label>
                     </form>
