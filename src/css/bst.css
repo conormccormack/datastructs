@@ -52,6 +52,10 @@
     height: 100%;
 }
 
+#nodecontainer {
+    height: 100%;
+}
+
 .linecontainer {
     height: 100%;
     width: 100%;

@@ -30,6 +30,8 @@ const Controls = styled.div`
     margin-left: auto;
 `
 const NodeContainer = styled.div`
+    height: 100%;
+    width: 100%
 `
 
 const HORIZONTAL_SPACING = 40;
@@ -241,7 +243,7 @@ function buildEdgeTimeline(root){
         const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
         formatTimeline.add({
             targets: `#path${root.id}`,
-            d: `M ${x1}, ${y1} L ${x2}, ${y2} `,
+            d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
             opacity: { value: '1.0', easing: 'easeInSine', delay: 100, duration: 600 },
         }, 0);
     }
@@ -271,7 +273,7 @@ function buildNodeTimeline(root){
     if (root.right !== null) buildNodeTimeline(root.right);
 }
 
-// Given child nodee, create path from child to parent, add to DOM.
+// Given child node, create path from child to parent, add to DOM.
 function addPathToDom(child){
     if (child.parent === null) return;
     let svg = document.getElementById('svg-line');
@@ -374,9 +376,11 @@ class AnimeTest extends Component {
     render(){ 
         return(
             <PageWrapper id="pagewrapper">
+                <div>
                 <NodeContainer id="nodecontainer" >
                 <svg class="linecontainer" id="svg-line" />                    
                 </NodeContainer>
+                </div>
                 <Controls>
                     <form id='input-form' onSubmit={this.handleInputSubmit}>
                         <label>
