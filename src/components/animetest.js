@@ -64,7 +64,10 @@ class BinarySearchTree {
     // Insert node into tree and update heights map.
     insert(value, count) {
         var newNode = new Node (value, 0, count);
-        if (this.root === null) this.root = newNode;
+        if (this.root === null) {
+            this.root = newNode;
+            addMessageToLog(`Inserting ${value} as root.`, 'end');
+        }
         else { 
             newNode.level = newNode.level + 1;
             this.insertNode(this.root, newNode);
@@ -74,23 +77,28 @@ class BinarySearchTree {
     }
 
     insertNode(root, newNode){  
+        addMessageToLog(`Comparing ${newNode.value} to ${root.value}...`);
         if (newNode.value < root.value){
             if (root.left !== null) {
                 newNode.level = newNode.level + 1;
+                addMessageToLog(`${newNode.value} < ${root.value}, search left.`);
                 this.insertNode(root.left, newNode);
             }
             else { 
                 root.left = newNode; 
                 newNode.parent = root;
+                addMessageToLog(`${newNode.value} < ${root.value}, insert as leaf.`, 'end');
             }
         } else if (newNode.value >= root.value){
             if (root.right !== null) {
                 newNode.level = newNode.level + 1;
+                addMessageToLog(`${newNode.value} >= ${root.value}, search right.`);
                 this.insertNode(root.right, newNode);
             }
             else { 
                 root.right = newNode; 
                 newNode.parent = root;
+                addMessageToLog(`${newNode.value} >= ${root.value}, insert as leaf.`, 'end');
             }
         }
     }
@@ -191,7 +199,8 @@ function removeElementFromDOM(id) {
     anime({
         targets: toRemove,
         opacity: 0,
-        duration: 800,
+        duration: 600,
+        easing: 'easeOutExpo',
         delay: id.includes('line') ? 150 : 0,
         complete: function(anim){
             toRemove.remove();
@@ -226,6 +235,29 @@ let formatTimeline = anime.timeline({
     autoplay: false,
 });
 
+let traverseTimeline = anime.timeline({
+    autoplay: false,
+});
+
+function addMessageToLog(message, options){
+    let p = document.createElement('div');
+    p.setAttribute('class', 'log')
+    p.classList.add('log')
+    if (options) {
+        if (options === 'end') p.classList.add('log-border-bottom');
+    }
+    let msg = document.createTextNode(message);
+    p.appendChild(msg);
+    let logs = document.getElementById('logs');
+    logs.appendChild(p);
+    logs.scrollTop = logs.scrollHeight;
+}
+
+function setErrorMessage(message){
+    document.getElementById('error-message').innerHTML = message;
+}
+
+
 function formatBinaryTree(root){
     formatTimeline = anime.timeline({
     });
@@ -244,7 +276,8 @@ function buildEdgeTimeline(root){
         formatTimeline.add({
             targets: `#path${root.id}`,
             d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
-            opacity: { value: '1.0', easing: 'easeInSine', delay: 100, duration: 600 },
+            opacity: { value: '1.0', easing: 'easeInSine', delay: 400, duration: 600 },
+            easing: 'easeInOutExpo',
         }, 0);
     }
     if (root.right !== null) buildEdgeTimeline(root.right);
@@ -264,8 +297,9 @@ function buildNodeTimeline(root){
         keyframes: [
             { scale: isNew ? 0 : 1, duration: 0 },
             { translateX: isNew ? 0 : shift_x_total, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
-            { translateX: shift_x_total, translateY: root.level * VERTICAL_SPACING, duration: 1000 }
+            { translateX: shift_x_total, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
         ],
+        easing: 'easeInOutExpo',
     }, 0);
     
     shift_x_total += HORIZONTAL_SPACING;
@@ -296,13 +330,13 @@ function addPathToDom(child){
 }
 
 function clearInputForm() {
-    const form = document.getElementById('input-form');
-    form.reset();
+    document.getElementById('input-form').reset();
+    document.getElementById('input-field').value = '';
 }
 
 function clearRemoveForm() {
-    const form = document.getElementById('remove-form');
-    form.reset();
+    document.getElementById('remove-form').reset();
+    document.getElementById('remove-field').value = '';
 }
 
 class AnimeTest extends Component {
@@ -332,7 +366,11 @@ class AnimeTest extends Component {
 
     handleInputSubmit(event) {
         event.preventDefault();
-        if (this.state.inputValue === '' || isNaN(this.state.inputValue)) return;
+        if (this.state.inputValue === '' || isNaN(this.state.inputValue)) {
+            setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>')
+            return;
+        }
+        setErrorMessage('');
         const nodeContainer = document.getElementById('nodecontainer');
         this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
@@ -377,24 +415,28 @@ class AnimeTest extends Component {
         return(
             <PageWrapper id="pagewrapper">
                 <div>
-                <NodeContainer id="nodecontainer" >
-                <svg class="linecontainer" id="svg-line" />                    
-                </NodeContainer>
+                    <NodeContainer id="nodecontainer" >
+                    <svg class="linecontainer" id="svg-line" />                    
+                    </NodeContainer>
                 </div>
-                <Controls>
-                    <form id='input-form' onSubmit={this.handleInputSubmit}>
-                        <label>
-                            <input type="number" onChange={this.handleInputChange}/> 
-                            <button onClick={this.handleInputSubmit} className='inputButton'>Input</button>
-                        </label>
-                    </form>
-                    <form id='remove-form' onSubmit={this.handleRemoveSubmit}>
-                        <label>
-                            <input type="number" onChange={this.handleRemoveChange}/> 
-                            <button onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
-                        </label>
-                    </form>
-                </Controls>
+                <div>
+                    <Controls>
+                        <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
+                            <label>
+                                <input type="number" id="input-field" onChange={this.handleInputChange}/> 
+                                <button onClick={this.handleInputSubmit} className='inputButton'>Input</button>
+                            </label>
+                        </form>
+                        <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
+                            <label>
+                                <input type="number" id="remove-field" onChange={this.handleRemoveChange}/> 
+                                <button onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
+                            </label>
+                        </form>
+                    </Controls>
+                    <div id='error-message'/>
+                    <div id='logs'/>
+                </div>
             </PageWrapper>
         );
     }

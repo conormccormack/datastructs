@@ -60,3 +60,25 @@
     height: 100%;
     width: 100%;
 }
+
+.log {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: #444;
+    padding: 2px;
+}
+
+.log-border-bottom {
+    border-bottom: 1px dashed #888;
+}
+
+#logs {
+    margin-top: 2em;
+    height: 300px;
+    width: 14rem;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 2px;
+    border-color: #888;
+    overflow: scroll;
+}
