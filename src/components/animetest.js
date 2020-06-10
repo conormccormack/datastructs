@@ -13,7 +13,7 @@
 *  by the VERTICAL_SPACING constant. 
 */
 
-import React, { Component, useLayoutEffect } from 'react';
+import React, { Component } from 'react';
 import anime from 'animejs';
 import '../css/bst.css';
 import styled from 'styled-components';
@@ -37,11 +37,34 @@ const NodeContainer = styled.div`
 const HORIZONTAL_SPACING = 40;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
+const TRAVERSE_DURATION = 800;
 let shift_x_total;
 /* Map which stores the next x position of each node. Used to calculate
 ** where points of edges should move before the animation is executed */
 let x_distances = new Map();
 let resizeTimer;
+let traverseCount = 0;
+
+
+// Class for implemented Undo and Redo stack.
+class TreeStack {
+    constructor(){
+        this.trees = [];
+    }
+    push(tree){ 
+        const copy = Object.assign({}, tree);
+        this.trees.push(copy);
+    }
+    pop(){
+        return this.trees.pop();
+    }
+    peek(){
+        return this.trees[this.trees.length - 1];
+    }
+    isEmpty(){
+        return this.trees.length === 0;
+    }
+}
 
 class BinarySearchTree {
     constructor() {
@@ -61,6 +84,19 @@ class BinarySearchTree {
         if (root.left !== null) this.updateLevels(root.left, level + 1 );
     }
 
+    copy(){
+        let bstCopy = new BinarySearchTree();
+        this.copyRecurse(bstCopy.root, this.root);
+        return bstCopy;
+    }
+
+    copyRecurse(newRoot, ogRoot) {
+        const leftNode = ogRoot.left !== null ? ogRoot.left : null;
+        const rightNode = ogRoot.right !== null ? ogRoot.right : null;
+        if (leftNode) newRoot.left = leftNode;
+        if (rightNode) newRoot.right = rightNode;
+    }
+
     // Insert node into tree and update heights map.
     insert(value, count) {
         var newNode = new Node (value, 0, count);
@@ -69,7 +105,7 @@ class BinarySearchTree {
             addMessageToLog(`Inserting ${value} as root.`, 'end');
         }
         else { 
-            newNode.level = newNode.level + 1;
+            newNode.level += 1;
             this.insertNode(this.root, newNode);
         }
         this.updateHeights(newNode);
@@ -77,6 +113,7 @@ class BinarySearchTree {
     }
 
     insertNode(root, newNode){  
+        addTraverseStep(root.id);
         addMessageToLog(`Comparing ${newNode.value} to ${root.value}...`);
         if (newNode.value < root.value){
             if (root.left !== null) {
@@ -104,7 +141,10 @@ class BinarySearchTree {
     }
 
     removeRecurse(root, value){
-        if (root === null) return;
+        if (root === null) {
+            setErrorMessage(`${value} is not in the tree!`);
+            return;
+        }
         else if (value < root.value) this.removeRecurse(root.left, value);
         else if (value > root.value) this.removeRecurse(root.right, value);
         else {
@@ -113,6 +153,7 @@ class BinarySearchTree {
                 else this.removeRecurse(root.right, value);
             } else {
                 this.deleteNode(root);
+                setErrorMessage('');
             }
         }
     }
@@ -192,6 +233,28 @@ class Node {
     }
 }
 
+function addTraverseStep(nodeID){
+    formatTimeline.add({
+        targets: `#node${nodeID}`,
+        keyframes: [
+            { scale: 1.05, translateX: `-=${NODE_RADIUS}`, translateY: `-=${NODE_RADIUS*.05}`},
+            { scale: 1, translateX: `+=${NODE_RADIUS}`, translateY: `+=${NODE_RADIUS*.05}`},
+        ],
+        easing: 'easeInOutBack',
+        duration: TRAVERSE_DURATION,
+    }, traverseCount * TRAVERSE_DURATION);
+    formatTimeline.add({
+        targets: `#frontnode${nodeID}`,
+        keyframes: [
+            { background: '#3C5B6F' },
+            { background: ' ' },
+        ],
+        easing: 'easeInOutBack',
+        duration: TRAVERSE_DURATION,
+    }, traverseCount * TRAVERSE_DURATION);
+    traverseCount += 1;
+}
+
 function removeElementFromDOM(id) {    
     var toRemove = document.getElementById(id);
     console.log(id);
@@ -209,12 +272,16 @@ function removeElementFromDOM(id) {
 }
 
 function addNodeToDOM(value, count) {
-    var node = document.createElement("div");
-    node.setAttribute('class', 'bstnode');
+    let node = document.createElement("div");
+    node.classList.add('bstnode')
     node.setAttribute('id', `node${count}`);
     node.setAttribute('style', `float: left;`);
-    var text = document.createTextNode(value);
-    node.appendChild(text);
+    let frontHighlight = document.createElement('div');
+    frontHighlight.classList.add('front-node');
+    frontHighlight.setAttribute('id', `frontnode${count}`);
+    let text = document.createTextNode(value);
+    frontHighlight.appendChild(text);
+    node.appendChild(frontHighlight);
     document.getElementById("nodecontainer").appendChild(node);
 }
 
@@ -235,10 +302,6 @@ let formatTimeline = anime.timeline({
     autoplay: false,
 });
 
-let traverseTimeline = anime.timeline({
-    autoplay: false,
-});
-
 function addMessageToLog(message, options){
     let p = document.createElement('div');
     p.setAttribute('class', 'log')
@@ -246,8 +309,7 @@ function addMessageToLog(message, options){
     if (options) {
         if (options === 'end') p.classList.add('log-border-bottom');
     }
-    let msg = document.createTextNode(message);
-    p.appendChild(msg);
+    p.appendChild(document.createTextNode(message));
     let logs = document.getElementById('logs');
     logs.appendChild(p);
     logs.scrollTop = logs.scrollHeight;
@@ -257,13 +319,13 @@ function setErrorMessage(message){
     document.getElementById('error-message').innerHTML = message;
 }
 
-
 function formatBinaryTree(root){
-    formatTimeline = anime.timeline({
-    });
     buildNodeTimeline(root);
     buildEdgeTimeline(root);
     formatTimeline.play();
+    formatTimeline = anime.timeline({
+    });
+    traverseCount = 0;
 }
 
 function buildEdgeTimeline(root){
@@ -278,7 +340,7 @@ function buildEdgeTimeline(root){
             d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
             opacity: { value: '1.0', easing: 'easeInSine', delay: 400, duration: 600 },
             easing: 'easeInOutExpo',
-        }, 0);
+        }, traverseCount * TRAVERSE_DURATION);
     }
     if (root.right !== null) buildEdgeTimeline(root.right);
 }
@@ -300,7 +362,7 @@ function buildNodeTimeline(root){
             { translateX: shift_x_total, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
         ],
         easing: 'easeInOutExpo',
-    }, 0);
+    }, traverseCount * TRAVERSE_DURATION);
     
     shift_x_total += HORIZONTAL_SPACING;
 
@@ -345,7 +407,9 @@ class AnimeTest extends Component {
         this.state = {
             inputValue: '',
             removeValue: '',
-            bst: new BinarySearchTree,
+            bst: new BinarySearchTree(),
+            undoStack: [],
+            redoStack: new TreeStack(),
             count: 0,
             numActiveNodes: 0,
         };
@@ -383,7 +447,10 @@ class AnimeTest extends Component {
     // TODO: Implement Remove functionality.
     handleRemoveSubmit(event) {
         event.preventDefault();
-        if (this.state.removeValue === '' || isNaN(this.state.removeValue)) return;
+        if (this.state.removeValue === '' || isNaN(this.state.removeValue)) {
+            setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>');
+            return;
+        }
         const nodeContainer = document.getElementById('nodecontainer');
         this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
         if (this.state.bst.root !== null) {
@@ -408,7 +475,7 @@ class AnimeTest extends Component {
         clearTimeout(resizeTimer);
         const nodeContainer = document.getElementById('nodecontainer');
         shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
-        resizeTimer = setTimeout(formatBinaryTree(this.state.bst.root), 2000 );
+        resizeTimer = setTimeout(formatBinaryTree(this.state.bst.root), 3000 );
     }
 
     render(){ 
@@ -434,8 +501,8 @@ class AnimeTest extends Component {
                             </label>
                         </form>
                     </Controls>
-                    <div id='error-message'/>
                     <div id='logs'/>
+                    <div id='error-message'/>
                 </div>
             </PageWrapper>
         );

@@ -14,6 +14,21 @@
     color: #FFF;
 }
 
+.front-node {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 20px;
+    font-family: Helvetica;
+    color: #FFF;
+}
+
 .bstnode:hover {
     cursor: pointer;
 }
@@ -61,6 +76,11 @@
     width: 100%;
 }
 
+#error-message {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 .log {
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
@@ -75,7 +95,7 @@
 #logs {
     margin-top: 2em;
     height: 300px;
-    width: 14rem;
+    width: 14.5rem;
     border-style: solid;
     border-width: 1px;
     border-radius: 2px;
