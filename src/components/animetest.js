@@ -44,6 +44,7 @@ let shift_x_total;
 let x_distances = new Map();
 let resizeTimer;
 let traverseCount = 0;
+let formDisabled = false;
 
 
 // Class for implemented Undo and Redo stack.
@@ -300,6 +301,7 @@ function inOrderToRootLength(root){
 
 let formatTimeline = anime.timeline({
     autoplay: false,
+    complete: toggleFormDisable,
 });
 
 function addMessageToLog(message, options){
@@ -324,6 +326,7 @@ function formatBinaryTree(root){
     buildEdgeTimeline(root);
     formatTimeline.play();
     formatTimeline = anime.timeline({
+        complete: toggleFormDisable,
     });
     traverseCount = 0;
 }
@@ -338,7 +341,8 @@ function buildEdgeTimeline(root){
         formatTimeline.add({
             targets: `#path${root.id}`,
             d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
-            opacity: { value: '1.0', easing: 'easeInSine', delay: 400, duration: 600 },
+            opacity: { value: '1.0', easing: 'easeInSine', delay: 600, duration: 600 },
+            stroke: { value: '#DEAAFF', delay: 800 },
             easing: 'easeInOutExpo',
         }, traverseCount * TRAVERSE_DURATION);
     }
@@ -385,10 +389,15 @@ function addPathToDom(child){
     let path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('id', `path${child.id}`);
     path.setAttribute('d', `M ${x1}, ${y1} L ${x2}, ${y2} `);
-    path.setAttribute('stroke', '#DEAAFF');
+    path.setAttribute('stroke', '#3C5B6F');
     path.setAttribute('stroke-width', '3px');
     path.setAttribute('opacity', '0.0');
     svg.appendChild(path);
+}
+
+function toggleFormDisable(){
+    document.getElementById('input-field').disabled =  !document.getElementById('input-field').disabled;
+    document.getElementById('remove-field').disabled = !document.getElementById('remove-field').disabled;
 }
 
 function clearInputForm() {
