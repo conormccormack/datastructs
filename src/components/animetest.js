@@ -1,8 +1,8 @@
 /* Summary:
 *  The following is a React component that will never update after it has mounted.
-*  This allows for the use of Vanilla JavaScript to directly manipulate the DOM.
+*  This allows for the use of vanilla JavaScript to directly manipulate the DOM.
 *  The binary tree is initialized as part of the component state so that the component
-*  can readily access the tree data. The tree is maintained by Vanilla JavaScript, however,
+*  can readily access the tree data. The tree is maintained with vanilla JavaScript, however,
 *  and is animated using Anime.js.
 *
 *  The animation is implemented as an Anime timeline, which is built with an
@@ -142,22 +142,33 @@ class BinarySearchTree {
     }
 
     removeRecurse(root, value){
+        if (root!== null) addTraverseStep(root);
         if (root === null) {
+            addMessageToLog(`${value} not found.`, 'end');
             setErrorMessage(`${value} is not in the tree!`);
             return false;
         }
-        else if (value < root.value) this.removeRecurse(root.left, value);
-        else if (value > root.value) this.removeRecurse(root.right, value);
+        else if (value < root.value) {
+            addMessageToLog(`${value} < ${root.value}, search left.`);
+            this.removeRecurse(root.left, value);
+        }
+        else if (value > root.value) {
+            addMessageToLog(`${value} >= ${root.value}, search right.`);
+            this.removeRecurse(root.right, value);
+        }
         else {
             if (root.right !== null){
                 if (root.right.value !== value) this.deleteNode(root);
-                else this.removeRecurse(root.right, value);
+                else {
+                    addMessageToLog(`${value} >= ${root.value}, search right.`);
+                    this.removeRecurse(root.right, value);
+                }
             } else {
                 this.deleteNode(root);
                 setErrorMessage('');
             }
+            return true;
         }
-        return true;
     }
 
     /* 3 cases:
@@ -166,6 +177,7 @@ class BinarySearchTree {
     3. Two children. Find and replace with successor. Delete where successor lies.
     */
     deleteNode(node){
+        addMessageToLog(`Found ${node.value}, removing from tree.`, 'end');
         let removeNodeID = `node${node.id}`;
         if (node.left === null && node.right === null){
             if (node.parent !== null){
@@ -208,7 +220,7 @@ class BinarySearchTree {
             const swap = this.findLeftmost(node.right);
             node.value = swap.value;
             anime({
-                targets: document.getElementById(`node${node.id}`),
+                targets: document.getElementById(`frontnode${node.id}`),
                 innerHTML: node.value,
                 easing: 'easeOutCubic',
                 round: 1,
@@ -410,6 +422,8 @@ function addPathToDom(child){
 function toggleFormDisable(){
     document.getElementById('input-field').disabled =  !document.getElementById('input-field').disabled;
     document.getElementById('remove-field').disabled = !document.getElementById('remove-field').disabled;
+    document.getElementById('input-button').disabled = !document.getElementById('input-button').disabled;
+    document.getElementById('remove-button').disabled = !document.getElementById('remove-button').disabled;
 }
 
 function clearInputForm() {
@@ -479,11 +493,14 @@ class AnimeTest extends Component {
         }
         const nodeContainer = document.getElementById('nodecontainer');
         const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
-        if (success) numActiveNodes -= 1;
-        if (this.state.bst.root !== null) {
-            shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
-            formatBinaryTree(this.state.bst.root);
-        };
+        if (success) {
+            numActiveNodes -= 1;
+            if (this.state.bst.root !== null) {
+                shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
+                formatBinaryTree(this.state.bst.root);
+            };
+        }
+        this.setState({removeValue: ''});
         clearRemoveForm();
         updateActiveNodeCount();
     }
@@ -527,21 +544,23 @@ class AnimeTest extends Component {
                         <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
                             <label>
                                 <input type="number" id="input-field" onChange={this.handleInputChange}/> 
-                                <button onClick={this.handleInputSubmit} className='inputButton'>Input</button>
+                                <button id='input-button' onClick={this.handleInputSubmit} className='inputButton'>Input</button>
                             </label>
                         </form>
                         <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
                             <label>
                                 <input type="number" id="remove-field" onChange={this.handleRemoveChange}/> 
-                                <button onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
+                                <button id='remove-button' onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
                             </label>
                         </form>
                         <label>
-                            <input type='checkbox' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
                             Animate traversal
+                            <input type='checkbox' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
                         </label>
+                        <br/>
                         <label>
                             <input type='range' min='300' max='1200' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
+                            Traversal Speed
                         </label>
                     </Controls>
                     <div id='logs'/>
