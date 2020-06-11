@@ -44,6 +44,11 @@ let traverseCount = 0;
 let traverseOn = true;
 let allowDuplicate = false; 
 
+let formatTimeline = anime.timeline({
+    autoplay: false,
+    complete: toggleFormDisable,
+});
+
 class BinarySearchTree {
     constructor() {
         this.root = null;
@@ -83,7 +88,6 @@ class BinarySearchTree {
 
     insertNode(root, newNode){  
         if (traverseOn) addTraverseStep(root, 0);
-        //addMessageToLog(`Comparing ${newNode.value} to ${root.value}...`);
         if (newNode.value < root.value){
             if (root.left !== null) {
                 newNode.level = newNode.level + 1;
@@ -145,12 +149,10 @@ class BinarySearchTree {
                 node.parent.left = node.parent.left === node ? node.right : node.parent.left;
                 node.parent.right = node.parent.right === node ? node.right : node.parent.right;
                 node.right.parent = node.parent;
-                this.updateLevels(this.root, 0);
                 removeElementFromDOM(`path${node.id}`);
             } else {
                 this.root = node.right;
                 node.right.parent = null;
-                this.updateLevels(this.root, 0);
                 removeElementFromDOM(`path${node.right.id}`);
             }
             removeElementFromDOM(removeNodeID);
@@ -159,12 +161,10 @@ class BinarySearchTree {
                 node.parent.left = node.parent.left === node ? node.left : node.parent.left;
                 node.parent.right = node.parent.right === node ? node.left : node.parent.right;
                 node.left.parent = node.parent;
-                this.updateLevels(this.root, 0);
                 removeElementFromDOM(`path${node.id}`);
             } else {
                 this.root = node.left;
                 node.left.parent = null;
-                this.updateLevels(this.root, 0);
                 removeElementFromDOM(`path${node.left.id}`);
             }
             removeElementFromDOM(removeNodeID);
@@ -181,6 +181,7 @@ class BinarySearchTree {
             }, (traverseCount - 1) * TRAVERSE_DURATION)
             this.deleteNode(swap);
         }
+        if (this.root) this.updateLevels(this.root, 0);
     }
     findLeftmost(root){
         return root.left === null ? root : this.findLeftmost(root.left);
@@ -273,11 +274,6 @@ function size(root){
     const right = root.right ? size(root.right) : 0;
     return left + right + 1;
 }
-
-let formatTimeline = anime.timeline({
-    autoplay: false,
-    complete: toggleFormDisable,
-});
 
 function addMessageToLog(message, options){
     formatTimeline.add({
@@ -382,20 +378,6 @@ function toggleFormDisable(){
     document.getElementById('remove-button').disabled = !document.getElementById('remove-button').disabled;
 }
 
-function clearInputForm() {
-    document.getElementById('input-form').reset();
-    document.getElementById('input-field').value = '';
-}
-
-function clearRemoveForm() {
-    document.getElementById('remove-form').reset();
-    document.getElementById('remove-field').value = '';
-}
-
-function updateActiveNodeCount(bst){
-    document.getElementById('active-node-count').innerHTML = `Number of Nodes: ${bst.numActiveNodes}`;
-}
-
 class AnimeTest extends Component {
     constructor (props) {
         super(props);
@@ -410,7 +392,25 @@ class AnimeTest extends Component {
         this.handleRemoveChange = this.handleRemoveChange.bind(this);
         this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this); 
         this.toggleAllowDuplicate = this.toggleAllowDuplicate.bind(this);
+        this.calculateShiftX = this.calculateShiftX.bind(this);
         this.onResize = this.onResize.bind(this);
+        this.clearInputForm = this.clearInputForm.bind(this);
+        this.clearRemoveForm = this.clearRemoveForm.bind(this);
+        this.updateActiveNodeCount = this.updateActiveNodeCount.bind(this);
+    }
+
+    clearInputForm() {
+        document.getElementById('input-form').reset();
+        document.getElementById('input-field').value = '';
+    }
+
+    clearRemoveForm() {
+        document.getElementById('remove-form').reset();
+        document.getElementById('remove-field').value = '';
+    }
+
+    updateActiveNodeCount(){
+        document.getElementById('active-node-count').innerHTML = `Number of Nodes: ${this.state.bst.numActiveNodes}`;
     }
 
     handleInputChange(event) {
@@ -428,16 +428,14 @@ class AnimeTest extends Component {
             return;
         }
         setErrorMessage('');
-        const nodeContainer = document.getElementById('nodecontainer');
         this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
-        const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
-        shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         formatBinaryTree(this.state.bst);
         this.setState({ count: this.state.count + 1, inputValue: '' });
         this.state.bst.numActiveNodes += 1;
-        clearInputForm();
-        updateActiveNodeCount(this.state.bst);
+        this.clearInputForm();
+        this.updateActiveNodeCount();
     }
 
     handleRemoveSubmit(event) {
@@ -446,43 +444,39 @@ class AnimeTest extends Component {
             setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>');
             return;
         }
-        const nodeContainer = document.getElementById('nodecontainer');
         const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
         if (this.state.bst.root !== null) {
-            const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
-            shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
+            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
             formatBinaryTree(this.state.bst);
         };
         if (success) this.state.bst.numActiveNodes -= 1;
         this.setState({removeValue: ''});
-        clearRemoveForm();
-        updateActiveNodeCount(this.state.bst);
+        this.clearRemoveForm();
+        this.updateActiveNodeCount();
         if (success && this.state.bst.root === null) toggleFormDisable();
     }
 
-    shouldComponentUpdate(){
-        return false;
+    shouldComponentUpdate(){ return false; }
+
+    calculateShiftX(nodeContainer) {
+        const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
+        return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
     }
 
     componentDidMount(){
         window.addEventListener('resize', this.onResize);
-        const nodeContainer = document.getElementById('nodecontainer');
-        shift_x = getWidthMidpoint(nodeContainer);
+        shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
     }
     
     toggleTraverseOn(){ traverseOn = !traverseOn; }
     toggleAllowDuplicate() { allowDuplicate = !allowDuplicate; }
 
-    handleIntervalChange(event){
-        TRAVERSE_DURATION = 1500 - event.target.value;
-    }
+    handleIntervalChange(event){ TRAVERSE_DURATION = 1500 - event.target.value; }
 
     onResize(){
         if (this.state.bst.root === null) return;
         clearTimeout(resizeTimer);
-        const nodeContainer = document.getElementById('nodecontainer');
-        const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
-        shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         resizeTimer = setTimeout(formatBinaryTree(this.state.bst), 3000 );
     }
 
