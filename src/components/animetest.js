@@ -486,7 +486,7 @@ class AnimeTest extends Component {
     }
 
     handleIntervalChange(event){
-        TRAVERSE_DURATION = event.target.value;
+        TRAVERSE_DURATION = 1500 - event.target.value;
     }
 
     onResize(){
@@ -525,7 +525,7 @@ class AnimeTest extends Component {
                         </label>
                         <br/>
                         <label>
-                            <input type='range' min='300' max='1200' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
+                            <input type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
                             Traversal Speed
                         </label>
                     </Controls>
