@@ -8,7 +8,7 @@
 *  The animation is implemented as an Anime timeline, which is built with an
 *  in-order traversal of the nodes of the tree followed by its edges. The X position
 *  of each node and its edges is based on size of the container and the immediate 
-*  successors of each node. There is a fixed distance between each node and its predecessor,
+*  successors of each node. There is a fixed distance between each node and its pecessor,
 *  defined by HORIZONTAL_SPACING. Somewhat similarly, each level of the tree is seperated
 *  by the VERTICAL_SPACING constant. 
 */
@@ -47,26 +47,6 @@ let traverseCount = 0;
 let numActiveNodes = 0;
 let traverseOn = false;
 
-// Class for implemented Undo and Redo stack.
-class TreeStack {
-    constructor(){
-        this.trees = [];
-    }
-    push(tree){ 
-        const copy = Object.assign({}, tree);
-        this.trees.push(copy);
-    }
-    pop(){
-        return this.trees.pop();
-    }
-    peek(){
-        return this.trees[this.trees.length - 1];
-    }
-    isEmpty(){
-        return this.trees.length === 0;
-    }
-}
-
 class BinarySearchTree {
     constructor() {
         this.root = null;
@@ -83,19 +63,6 @@ class BinarySearchTree {
         root.level = level;
         if (root.right !== null) this.updateLevels(root.right, level + 1);
         if (root.left !== null) this.updateLevels(root.left, level + 1 );
-    }
-
-    copy(){
-        let bstCopy = new BinarySearchTree();
-        this.copyRecurse(bstCopy.root, this.root);
-        return bstCopy;
-    }
-
-    copyRecurse(newRoot, ogRoot) {
-        const leftNode = ogRoot.left !== null ? ogRoot.left : null;
-        const rightNode = ogRoot.right !== null ? ogRoot.right : null;
-        if (leftNode) newRoot.left = leftNode;
-        if (rightNode) newRoot.right = rightNode;
     }
 
     // Insert node into tree and update heights map.
@@ -142,33 +109,34 @@ class BinarySearchTree {
     }
 
     removeRecurse(root, value){
-        if (root!== null) addTraverseStep(root);
+        if (root!== null && traverseOn) addTraverseStep(root);
+
         if (root === null) {
             addMessageToLog(`${value} not found.`, 'end');
             setErrorMessage(`${value} is not in the tree!`);
             return false;
-        }
-        else if (value < root.value) {
+        } else if (value < root.value) {
             addMessageToLog(`${value} < ${root.value}, search left.`);
-            this.removeRecurse(root.left, value);
-        }
-        else if (value > root.value) {
+            return this.removeRecurse(root.left, value);
+        } else if (value > root.value) {
             addMessageToLog(`${value} >= ${root.value}, search right.`);
-            this.removeRecurse(root.right, value);
-        }
-        else {
+            return this.removeRecurse(root.right, value);
+        } else {
             if (root.right !== null){
-                if (root.right.value !== value) this.deleteNode(root);
-                else {
+                // Check if duplicate exists in tree.
+                if (root.right.value !== value) { 
+                    this.deleteNode(root);
+                    return true;
+                } else {
                     addMessageToLog(`${value} >= ${root.value}, search right.`);
-                    this.removeRecurse(root.right, value);
+                    return this.removeRecurse(root.right, value);
                 }
             } else {
                 this.deleteNode(root);
                 setErrorMessage('');
+                return true;
             }
-            return true;
-        }
+        }  
     }
 
     /* 3 cases:
@@ -282,7 +250,6 @@ function addTraverseStep(node){
 
 function removeElementFromDOM(id) {    
     var toRemove = document.getElementById(id);
-    console.log(id);
     if (id === null) return;
     anime({
         targets: toRemove,
@@ -447,8 +414,6 @@ class AnimeTest extends Component {
             inputValue: '',
             removeValue: '',
             bst: new BinarySearchTree(),
-            undoStack: [],
-            redoStack: new TreeStack(),
             count: 0,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
@@ -493,12 +458,13 @@ class AnimeTest extends Component {
         }
         const nodeContainer = document.getElementById('nodecontainer');
         const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
+        console.log({success});
+        if (this.state.bst.root !== null) {
+            shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
+            formatBinaryTree(this.state.bst.root);
+        };
         if (success) {
             numActiveNodes -= 1;
-            if (this.state.bst.root !== null) {
-                shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
-                formatBinaryTree(this.state.bst.root);
-            };
         }
         this.setState({removeValue: ''});
         clearRemoveForm();
