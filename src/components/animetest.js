@@ -49,6 +49,18 @@ let formatTimeline = anime.timeline({
     complete: toggleFormDisable,
 });
 
+class Node {
+    constructor (value, level, id){
+        this.value = value;
+        this.left = null;
+        this.right = null;
+        this.level = level;
+        this.parent = null;
+        this.id = id;
+        this.line = null;
+    }
+}
+
 class BinarySearchTree {
     constructor() {
         this.root = null;
@@ -134,41 +146,10 @@ class BinarySearchTree {
     }
 
     deleteNode(node){
-        let removeNodeID = `node${node.id}`;
-        if (node.left === null && node.right === null){
-            if (node.parent !== null){
-                node.parent.left = node.parent.left === node ? null : node.parent.left;
-                node.parent.right = node.parent.right === node ? null: node.parent.right;
-                removeElementFromDOM(`path${node.id}`);
-            } else {
-                this.root = null;
-            }
-            removeElementFromDOM(removeNodeID);
-        } else if (node.left === null) {
-            if (node.parent !== null){
-                node.parent.left = node.parent.left === node ? node.right : node.parent.left;
-                node.parent.right = node.parent.right === node ? node.right : node.parent.right;
-                node.right.parent = node.parent;
-                removeElementFromDOM(`path${node.id}`);
-            } else {
-                this.root = node.right;
-                node.right.parent = null;
-                removeElementFromDOM(`path${node.right.id}`);
-            }
-            removeElementFromDOM(removeNodeID);
-        } else if (node.right === null){
-            if (node.parent !== null){
-                node.parent.left = node.parent.left === node ? node.left : node.parent.left;
-                node.parent.right = node.parent.right === node ? node.left : node.parent.right;
-                node.left.parent = node.parent;
-                removeElementFromDOM(`path${node.id}`);
-            } else {
-                this.root = node.left;
-                node.left.parent = null;
-                removeElementFromDOM(`path${node.left.id}`);
-            }
-            removeElementFromDOM(removeNodeID);
-        } else {
+        let child_of = (node.parent !== null) ? (node.parent.right === node) ? 'right' : 'left' : 'root';
+        let replacement = (node.left === null && node.right === null) ? null : (node.left === null) ? node.right : node.left;
+
+        if (node.left !== null && node.right !== null){
             const swap = this.findLeftmost(node.right);
             addTraverseStep(swap, -1);
             node.value = swap.value;
@@ -180,23 +161,21 @@ class BinarySearchTree {
                 duration: 500,
             }, (traverseCount - 1) * TRAVERSE_DURATION)
             this.deleteNode(swap);
+        } else {
+            if (child_of !== 'root') removeElementFromDOM(`path${node.id}`);
+            else if (replacement) removeElementFromDOM(`path${replacement.id}`);
+            if (child_of === 'right') node.parent.right = replacement;
+            else if (child_of === 'left') node.parent.left = replacement;
+            else this.root = replacement;
+            if (replacement) replacement.parent = node.parent;
+            removeElementFromDOM(`node${node.id}`);
         }
+
         if (this.root) this.updateLevels(this.root, 0);
     }
+
     findLeftmost(root){
         return root.left === null ? root : this.findLeftmost(root.left);
-    }
-}
-
-class Node {
-    constructor (value, level, id){
-        this.value = value;
-        this.left = null;
-        this.right = null;
-        this.level = level;
-        this.parent = null;
-        this.id = id;
-        this.line = null;
     }
 }
 
