@@ -38,14 +38,14 @@ const HORIZONTAL_SPACING = 40;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
 let TRAVERSE_DURATION = 500;
-let shift_x_total;
-/* Map which stores the next x position of each node. Used to calculate
-** where points of edges should move before the animation is executed */
-let x_distances = new Map();
+let shift_x;
 let resizeTimer;
 let traverseCount = 0;
 let numActiveNodes = 0;
 let traverseOn = false;
+/* Map which stores the next x position of each node. Used to calculate
+** where points of edges should move before the animation is executed */
+let x_distances = new Map();
 
 class BinarySearchTree {
     constructor() {
@@ -109,8 +109,7 @@ class BinarySearchTree {
     }
 
     removeRecurse(root, value){
-        if (root!== null && traverseOn) addTraverseStep(root);
-
+        if (root !== null && traverseOn) addTraverseStep(root);
         if (root === null) {
             addMessageToLog(`${value} not found.`, 'end');
             setErrorMessage(`${value} is not in the tree!`);
@@ -250,7 +249,7 @@ function addTraverseStep(node){
 function removeElementFromDOM(id) {    
     var toRemove = document.getElementById(id);
     if (id === null) return;
-    anime({
+    formatTimeline.add({
         targets: toRemove,
         opacity: 0,
         duration: 600,
@@ -259,7 +258,7 @@ function removeElementFromDOM(id) {
         complete: function(anim){
             toRemove.remove();
         },
-    });
+    }, traverseCount * TRAVERSE_DURATION);
 }
 
 function addNodeToDOM(value, count) {
@@ -342,7 +341,7 @@ function buildEdgeTimeline(root){
 function buildNodeTimeline(root){
     if (root.left !== null) buildNodeTimeline(root.left);
     const node = document.getElementById(`node${root.id}`);
-    const x = shift_x_total - NODE_RADIUS;
+    const x = shift_x - NODE_RADIUS;
     const isNew = root.parent !== null && root.line === null ? true : false;
     x_distances.set(`node${root.id}`, x );
     root.parent !== null && root.line === null && addPathToDom(root);
@@ -352,13 +351,13 @@ function buildNodeTimeline(root){
         marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
         keyframes: [
             { scale: isNew ? 0 : 1, duration: 0 },
-            { translateX: isNew ? 0 : shift_x_total, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
-            { translateX: shift_x_total, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
+            { translateX: isNew ? 0 : shift_x, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
+            { translateX: shift_x, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
         ],
         easing: 'easeInOutExpo',
     }, traverseCount * TRAVERSE_DURATION);
     
-    shift_x_total += HORIZONTAL_SPACING;
+    shift_x += HORIZONTAL_SPACING;
 
     if (root.right !== null) buildNodeTimeline(root.right);
 }
@@ -441,7 +440,7 @@ class AnimeTest extends Component {
         this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
-        shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
+        shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
         formatBinaryTree(this.state.bst.root);
         this.setState({ count: this.state.count + 1, inputValue: '' });
         numActiveNodes += 1;
@@ -449,7 +448,6 @@ class AnimeTest extends Component {
         updateActiveNodeCount();
     }
 
-    // TODO: Implement Remove functionality.
     handleRemoveSubmit(event) {
         event.preventDefault();
         if (this.state.removeValue === '' || isNaN(this.state.removeValue)) {
@@ -458,17 +456,16 @@ class AnimeTest extends Component {
         }
         const nodeContainer = document.getElementById('nodecontainer');
         const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
-        console.log({success});
         if (this.state.bst.root !== null) {
-            shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING);
+            const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
+            shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
             formatBinaryTree(this.state.bst.root);
         };
-        if (success) {
-            numActiveNodes -= 1;
-        }
+        if (success) numActiveNodes -= 1;
         this.setState({removeValue: ''});
         clearRemoveForm();
         updateActiveNodeCount();
+        if (success && this.state.bst.root === null) toggleFormDisable();
     }
 
     shouldComponentUpdate(){
@@ -478,7 +475,7 @@ class AnimeTest extends Component {
     componentDidMount(){
         window.addEventListener('resize', this.onResize);
         const nodeContainer = document.getElementById('nodecontainer');
-        shift_x_total = getWidthMidpoint(nodeContainer);
+        shift_x = getWidthMidpoint(nodeContainer);
     }
     
     toggleTraverseOn(){
@@ -493,7 +490,8 @@ class AnimeTest extends Component {
         if (this.state.bst.root === null) return;
         clearTimeout(resizeTimer);
         const nodeContainer = document.getElementById('nodecontainer');
-        shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
+        const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
+        shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
         resizeTimer = setTimeout(formatBinaryTree(this.state.bst.root), 3000 );
     }
 
