@@ -197,7 +197,6 @@ class BinarySearchTree {
             this.deleteNode(swap);
         }
     }
-
     findLeftmost(root){
         return root.left === null ? root : this.findLeftmost(root.left);
     }
@@ -283,10 +282,10 @@ function getWidthMidpoint(selector) {
 }
 
 // Returns length of in-order traversal from smallest element to root.
-function inOrderToRootLength(root){
+function size(root){
     if (root === null) return 0;     
-    const left = root.left ? inOrderToRootLength(root.left) : 0;
-    const right = root.right ? inOrderToRootLength(root.right) : 0;
+    const left = root.left ? size(root.left) : 0;
+    const right = root.right ? size(root.right) : 0;
     return left + right + 1;
 }
 
@@ -441,7 +440,8 @@ class AnimeTest extends Component {
         const nodeContainer = document.getElementById('nodecontainer');
         this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
-        shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
+        const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
+        shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
         formatBinaryTree(this.state.bst.root);
         this.setState({ count: this.state.count + 1, inputValue: '' });
         numActiveNodes += 1;
@@ -460,7 +460,7 @@ class AnimeTest extends Component {
         const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
         console.log({success});
         if (this.state.bst.root !== null) {
-            shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
+            shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING);
             formatBinaryTree(this.state.bst.root);
         };
         if (success) {
@@ -493,7 +493,7 @@ class AnimeTest extends Component {
         if (this.state.bst.root === null) return;
         clearTimeout(resizeTimer);
         const nodeContainer = document.getElementById('nodecontainer');
-        shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
+        shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left, 0) * HORIZONTAL_SPACING);
         resizeTimer = setTimeout(formatBinaryTree(this.state.bst.root), 3000 );
     }
 
