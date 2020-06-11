@@ -37,7 +37,7 @@ const NodeContainer = styled.div`
 const HORIZONTAL_SPACING = 40;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
-const TRAVERSE_DURATION = 800;
+const TRAVERSE_DURATION = 600;
 let shift_x_total;
 /* Map which stores the next x position of each node. Used to calculate
 ** where points of edges should move before the animation is executed */
@@ -114,7 +114,7 @@ class BinarySearchTree {
     }
 
     insertNode(root, newNode){  
-        addTraverseStep(root.id);
+        addTraverseStep(root);
         addMessageToLog(`Comparing ${newNode.value} to ${root.value}...`);
         if (newNode.value < root.value){
             if (root.left !== null) {
@@ -234,9 +234,9 @@ class Node {
     }
 }
 
-function addTraverseStep(nodeID){
+function addTraverseStep(node){
     formatTimeline.add({
-        targets: `#node${nodeID}`,
+        targets: `#node${node.id}`,
         keyframes: [
             { scale: 1.05, translateX: `-=${NODE_RADIUS}`, translateY: `-=${NODE_RADIUS*.05}`},
             { scale: 1, translateX: `+=${NODE_RADIUS}`, translateY: `+=${NODE_RADIUS*.05}`},
@@ -245,7 +245,7 @@ function addTraverseStep(nodeID){
         duration: TRAVERSE_DURATION,
     }, traverseCount * TRAVERSE_DURATION);
     formatTimeline.add({
-        targets: `#frontnode${nodeID}`,
+        targets: `#frontnode${node.id}`,
         keyframes: [
             { background: '#3C5B6F' },
             { background: ' ' },
@@ -253,6 +253,17 @@ function addTraverseStep(nodeID){
         easing: 'easeInOutBack',
         duration: TRAVERSE_DURATION,
     }, traverseCount * TRAVERSE_DURATION);
+    if (node.parent !== null) {
+        formatTimeline.add({
+            targets: `#path${node.id}`,
+            keyframes: [
+                { stroke: '#3C5B6F' },
+                { stroke: '#DEAAFF' },
+            ],
+            duration: TRAVERSE_DURATION,
+            easing: 'easeInOutBack',
+        }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION/3) );
+    }
     traverseCount += 1;
 }
 
