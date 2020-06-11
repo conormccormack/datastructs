@@ -14,7 +14,7 @@
 */
 
 import React, { Component } from 'react';
-import anime from 'animejs';
+import anime, { timeline } from 'animejs';
 import '../css/bst.css';
 import styled from 'styled-components';
 
@@ -81,7 +81,7 @@ class BinarySearchTree {
     }
 
     insertNode(root, newNode){  
-        if (traverseOn) addTraverseStep(root);
+        if (traverseOn) addTraverseStep(root, 0);
         addMessageToLog(`Comparing ${newNode.value} to ${root.value}...`);
         if (newNode.value < root.value){
             if (root.left !== null) {
@@ -109,7 +109,7 @@ class BinarySearchTree {
     }
 
     removeRecurse(root, value){
-        if (root !== null && traverseOn) addTraverseStep(root);
+        if (root !== null && traverseOn) addTraverseStep(root, 0);
         if (root === null) {
             addMessageToLog(`${value} not found.`, 'end');
             setErrorMessage(`${value} is not in the tree!`);
@@ -124,6 +124,7 @@ class BinarySearchTree {
             if (root.right !== null){
                 // Check if duplicate exists in tree.
                 if (root.right.value !== value) { 
+                    addMessageToLog(`Found ${value}, removing from tree.`, 'end');
                     this.deleteNode(root);
                     return true;
                 } else {
@@ -131,6 +132,7 @@ class BinarySearchTree {
                     return this.removeRecurse(root.right, value);
                 }
             } else {
+                addMessageToLog(`Found ${value}, removing from tree.`, 'end');
                 this.deleteNode(root);
                 setErrorMessage('');
                 return true;
@@ -144,7 +146,6 @@ class BinarySearchTree {
     3. Two children. Find and replace with successor. Delete where successor lies.
     */
     deleteNode(node){
-        addMessageToLog(`Found ${node.value}, removing from tree.`, 'end');
         let removeNodeID = `node${node.id}`;
         if (node.left === null && node.right === null){
             if (node.parent !== null){
@@ -185,14 +186,15 @@ class BinarySearchTree {
             removeElementFromDOM(removeNodeID);
         } else {
             const swap = this.findLeftmost(node.right);
+            addTraverseStep(swap, -1);
             node.value = swap.value;
-            anime({
+            formatTimeline.add({
                 targets: document.getElementById(`frontnode${node.id}`),
                 innerHTML: node.value,
                 easing: 'easeOutCubic',
                 round: 1,
                 duration: 500,
-            })
+            }, (traverseCount - 1) * TRAVERSE_DURATION)
             this.deleteNode(swap);
         }
     }
@@ -213,7 +215,7 @@ class Node {
     }
 }
 
-function addTraverseStep(node){
+function addTraverseStep(node, shift_order){
     formatTimeline.add({
         targets: `#node${node.id}`,
         keyframes: [
@@ -222,7 +224,7 @@ function addTraverseStep(node){
         ],
         easing: 'easeInOutBack',
         duration: TRAVERSE_DURATION,
-    }, traverseCount * TRAVERSE_DURATION);
+    }, (traverseCount + shift_order) * TRAVERSE_DURATION);
     formatTimeline.add({
         targets: `#frontnode${node.id}`,
         keyframes: [
@@ -231,8 +233,8 @@ function addTraverseStep(node){
         ],
         easing: 'easeInOutBack',
         duration: TRAVERSE_DURATION,
-    }, traverseCount * TRAVERSE_DURATION);
-    if (node.parent !== null) {
+    }, (traverseCount + shift_order) * TRAVERSE_DURATION);
+    if (node.parent !== null && shift_order === 0) {
         formatTimeline.add({
             targets: `#path${node.id}`,
             keyframes: [
