@@ -41,17 +41,17 @@ let TRAVERSE_DURATION = 500;
 let shift_x;
 let resizeTimer;
 let traverseCount = 0;
-let numActiveNodes = 0;
 let traverseOn = true;
 let allowDuplicate = false; 
-/* Map which stores the next x position of each node. Used to calculate
-** where points of edges should move before the animation is executed */
-let x_distances = new Map();
 
 class BinarySearchTree {
     constructor() {
         this.root = null;
         this.heights = new Map();
+        this.numActiveNodes = 0;
+        /* Map which stores the next x position of each node. Used to calculate
+        ** where points of edges should move before the animation is executed */
+        this.x_distances = new Map();
     }
     updateHeights(leaf) {
         const leftHeight = leaf.left !== null ? this.heights.get(leaf.left.id) : -1;
@@ -59,12 +59,12 @@ class BinarySearchTree {
         this.heights.set(leaf.id, 1 + Math.max(leftHeight, rightHeight));
         if (leaf.parent !== null) this.updateHeights(leaf.parent);
     }
-
     updateLevels(root, level){
         root.level = level;
         if (root.right !== null) this.updateLevels(root.right, level + 1);
         if (root.left !== null) this.updateLevels(root.left, level + 1 );
     }
+    getTreeHeight(){ return Math.max(...this.heights.values()) }
 
     // Insert node into tree and update heights map.
     insert(value, count) {
@@ -122,30 +122,13 @@ class BinarySearchTree {
             addMessageToLog(`${value} >= ${root.value}, search right.`);
             return this.removeRecurse(root.right, value);
         } else {
-            if (root.right !== null){
-                // Check if duplicate exists in tree.
-                if (root.right.value !== value) { 
-                    this.deleteNode(root);
-                    addMessageToLog(`Found ${value}: removing ${value} from tree.`, 'end');
-                    return true;
-                } else {
-                    addMessageToLog(`${value} >= ${root.value}, search right.`);
-                    return this.removeRecurse(root.right, value);
-                }
-            } else {
-                this.deleteNode(root);
-                addMessageToLog(`Found ${value}: removing ${value} from tree.`, 'end');
-                setErrorMessage('');
-                return true;
-            }
+            this.deleteNode(root);
+            addMessageToLog(`Found ${value}: removing ${value} from tree.`, 'end');
+            setErrorMessage('');
+            return true;
         }  
     }
 
-    /* 3 cases:
-    1. No children (leaf). Delete from tree.  
-    2. One child. Left or right. Delete and fill in with child.
-    3. Two children. Find and replace with successor. Delete where successor lies.
-    */
     deleteNode(node){
         let removeNodeID = `node${node.id}`;
         if (node.left === null && node.right === null){
@@ -318,9 +301,9 @@ function setErrorMessage(message){
     document.getElementById('error-message').innerHTML = message;
 }
 
-function formatBinaryTree(root){
-    buildNodeTimeline(root);
-    buildEdgeTimeline(root);
+function formatBinaryTree(tree){
+    buildNodeTimeline(tree.root, tree);
+    buildEdgeTimeline(tree.root, tree);
     formatTimeline.play();
     formatTimeline = anime.timeline({
         complete: toggleFormDisable,
@@ -328,12 +311,12 @@ function formatBinaryTree(root){
     traverseCount = 0;
 }
 
-function buildEdgeTimeline(root){
-    if (root.left !== null) buildEdgeTimeline(root.left);
+function buildEdgeTimeline(root, tree){
+    if (root.left !== null) buildEdgeTimeline(root.left, tree);
     if (root.parent !== null){
-        const x1 = x_distances.get(`node${root.parent.id}`); 
+        const x1 = tree.x_distances.get(`node${root.parent.id}`); 
         const y1 = root.parent.level * VERTICAL_SPACING + NODE_RADIUS;
-        const x2 = x_distances.get(`node${root.id}`);
+        const x2 = tree.x_distances.get(`node${root.id}`);
         const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
         formatTimeline.add({
             targets: `#path${root.id}`,
@@ -343,15 +326,15 @@ function buildEdgeTimeline(root){
             easing: 'easeInOutExpo',
         }, traverseCount * TRAVERSE_DURATION);
     }
-    if (root.right !== null) buildEdgeTimeline(root.right);
+    if (root.right !== null) buildEdgeTimeline(root.right, tree);
 }
 
-function buildNodeTimeline(root){
-    if (root.left !== null) buildNodeTimeline(root.left);
+function buildNodeTimeline(root, tree){
+    if (root.left !== null) buildNodeTimeline(root.left, tree);
     const node = document.getElementById(`node${root.id}`);
     const x = shift_x - NODE_RADIUS;
     const isNew = root.parent !== null && root.line === null ? true : false;
-    x_distances.set(`node${root.id}`, x );
+    tree.x_distances.set(`node${root.id}`, x );
     root.parent !== null && root.line === null && addPathToDom(root);
     root.line = root.line === null && `line${root.id}`;
     formatTimeline.add({
@@ -367,7 +350,7 @@ function buildNodeTimeline(root){
     
     shift_x += HORIZONTAL_SPACING;
 
-    if (root.right !== null) buildNodeTimeline(root.right);
+    if (root.right !== null) buildNodeTimeline(root.right, tree);
 }
 
 // Given child node, create path from child to parent, add to DOM.
@@ -409,8 +392,8 @@ function clearRemoveForm() {
     document.getElementById('remove-field').value = '';
 }
 
-function updateActiveNodeCount(){
-    document.getElementById('active-node-count').innerHTML = `Number of Nodes: ${numActiveNodes}`;
+function updateActiveNodeCount(bst){
+    document.getElementById('active-node-count').innerHTML = `Number of Nodes: ${bst.numActiveNodes}`;
 }
 
 class AnimeTest extends Component {
@@ -450,11 +433,11 @@ class AnimeTest extends Component {
         addNodeToDOM(this.state.inputValue, this.state.count);
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
         shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
-        formatBinaryTree(this.state.bst.root);
+        formatBinaryTree(this.state.bst);
         this.setState({ count: this.state.count + 1, inputValue: '' });
-        numActiveNodes += 1;
+        this.state.bst.numActiveNodes += 1;
         clearInputForm();
-        updateActiveNodeCount();
+        updateActiveNodeCount(this.state.bst);
     }
 
     handleRemoveSubmit(event) {
@@ -468,12 +451,12 @@ class AnimeTest extends Component {
         if (this.state.bst.root !== null) {
             const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
             shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
-            formatBinaryTree(this.state.bst.root);
+            formatBinaryTree(this.state.bst);
         };
-        if (success) numActiveNodes -= 1;
+        if (success) this.state.bst.numActiveNodes -= 1;
         this.setState({removeValue: ''});
         clearRemoveForm();
-        updateActiveNodeCount();
+        updateActiveNodeCount(this.state.bst);
         if (success && this.state.bst.root === null) toggleFormDisable();
     }
 
@@ -500,7 +483,7 @@ class AnimeTest extends Component {
         const nodeContainer = document.getElementById('nodecontainer');
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
         shift_x = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
-        resizeTimer = setTimeout(formatBinaryTree(this.state.bst.root), 3000 );
+        resizeTimer = setTimeout(formatBinaryTree(this.state.bst), 3000 );
     }
 
     render(){ 
