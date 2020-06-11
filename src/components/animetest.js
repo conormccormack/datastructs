@@ -42,7 +42,8 @@ let shift_x;
 let resizeTimer;
 let traverseCount = 0;
 let numActiveNodes = 0;
-let traverseOn = false;
+let traverseOn = true;
+let allowDuplicate = false; 
 /* Map which stores the next x position of each node. Used to calculate
 ** where points of edges should move before the animation is executed */
 let x_distances = new Map();
@@ -70,7 +71,7 @@ class BinarySearchTree {
         var newNode = new Node (value, 0, count);
         if (this.root === null) {
             this.root = newNode;
-            addMessageToLog(`Inserting ${value} as root.`, 'end');
+            addMessageToLog(`Tree empty: inserting ${value} as root.`, 'end');
         }
         else { 
             newNode.level += 1;
@@ -82,7 +83,7 @@ class BinarySearchTree {
 
     insertNode(root, newNode){  
         if (traverseOn) addTraverseStep(root, 0);
-        addMessageToLog(`Comparing ${newNode.value} to ${root.value}...`);
+        //addMessageToLog(`Comparing ${newNode.value} to ${root.value}...`);
         if (newNode.value < root.value){
             if (root.left !== null) {
                 newNode.level = newNode.level + 1;
@@ -92,7 +93,7 @@ class BinarySearchTree {
             else { 
                 root.left = newNode; 
                 newNode.parent = root;
-                addMessageToLog(`${newNode.value} < ${root.value}, insert as leaf.`, 'end');
+                addMessageToLog(`${newNode.value} < ${root.value}, insert as left leaf.`, 'end');
             }
         } else if (newNode.value >= root.value){
             if (root.right !== null) {
@@ -103,7 +104,7 @@ class BinarySearchTree {
             else { 
                 root.right = newNode; 
                 newNode.parent = root;
-                addMessageToLog(`${newNode.value} >= ${root.value}, insert as leaf.`, 'end');
+                addMessageToLog(`${newNode.value} >= ${root.value}, insert as right leaf.`, 'end');
             }
         }
     }
@@ -124,16 +125,16 @@ class BinarySearchTree {
             if (root.right !== null){
                 // Check if duplicate exists in tree.
                 if (root.right.value !== value) { 
-                    addMessageToLog(`Found ${value}, removing from tree.`, 'end');
                     this.deleteNode(root);
+                    addMessageToLog(`Found ${value}: removing ${value} from tree.`, 'end');
                     return true;
                 } else {
                     addMessageToLog(`${value} >= ${root.value}, search right.`);
                     return this.removeRecurse(root.right, value);
                 }
             } else {
-                addMessageToLog(`Found ${value}, removing from tree.`, 'end');
                 this.deleteNode(root);
+                addMessageToLog(`Found ${value}: removing ${value} from tree.`, 'end');
                 setErrorMessage('');
                 return true;
             }
@@ -296,16 +297,21 @@ let formatTimeline = anime.timeline({
 });
 
 function addMessageToLog(message, options){
-    let p = document.createElement('div');
-    p.setAttribute('class', 'log')
-    p.classList.add('log')
-    if (options) {
-        if (options === 'end') p.classList.add('log-border-bottom');
-    }
-    p.appendChild(document.createTextNode(message));
-    let logs = document.getElementById('logs');
-    logs.appendChild(p);
-    logs.scrollTop = logs.scrollHeight;
+    formatTimeline.add({
+        duration: TRAVERSE_DURATION,
+        begin: function (){
+            let p = document.createElement('div');
+            p.setAttribute('class', 'log')
+            p.classList.add('log')
+            if (options) {
+                if (options === 'end') p.classList.add('log-border-bottom');
+            }
+            p.appendChild(document.createTextNode(message));
+            let logs = document.getElementById('logs');
+            logs.appendChild(p);
+            logs.scrollTop = logs.scrollHeight;
+        }
+    }, traverseOn ? (traverseCount - 1) * TRAVERSE_DURATION : 0);
 }
 
 function setErrorMessage(message){
@@ -420,6 +426,7 @@ class AnimeTest extends Component {
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleRemoveChange = this.handleRemoveChange.bind(this);
         this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this); 
+        this.toggleAllowDuplicate = this.toggleAllowDuplicate.bind(this);
         this.onResize = this.onResize.bind(this);
     }
 
@@ -480,9 +487,8 @@ class AnimeTest extends Component {
         shift_x = getWidthMidpoint(nodeContainer);
     }
     
-    toggleTraverseOn(){
-        traverseOn = !traverseOn;
-    }
+    toggleTraverseOn(){ traverseOn = !traverseOn; }
+    toggleAllowDuplicate() { allowDuplicate = !allowDuplicate; }
 
     handleIntervalChange(event){
         TRAVERSE_DURATION = 1500 - event.target.value;
@@ -521,8 +527,12 @@ class AnimeTest extends Component {
                         </form>
                         <label>
                             Animate traversal
-                            <input type='checkbox' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
+                            <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
                         </label>
+                        {/* <label>
+                            Allow duplicate keys
+                            <input type='checkbox' id='duplicate-checkbox' onChange={this.toggleAllowDuplicate} />
+                        </label> */}
                         <br/>
                         <label>
                             <input type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
