@@ -44,7 +44,7 @@ let shift_x_total;
 let x_distances = new Map();
 let resizeTimer;
 let traverseCount = 0;
-let formDisabled = false;
+let numActiveNodes = 0;
 
 
 // Class for implemented Undo and Redo stack.
@@ -144,7 +144,7 @@ class BinarySearchTree {
     removeRecurse(root, value){
         if (root === null) {
             setErrorMessage(`${value} is not in the tree!`);
-            return;
+            return false;
         }
         else if (value < root.value) this.removeRecurse(root.left, value);
         else if (value > root.value) this.removeRecurse(root.right, value);
@@ -157,6 +157,7 @@ class BinarySearchTree {
                 setErrorMessage('');
             }
         }
+        return true;
     }
 
     /* 3 cases:
@@ -262,7 +263,7 @@ function addTraverseStep(node){
             ],
             duration: TRAVERSE_DURATION,
             easing: 'easeInOutBack',
-        }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION/3) );
+        }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION/2));
     }
     traverseCount += 1;
 }
@@ -421,6 +422,10 @@ function clearRemoveForm() {
     document.getElementById('remove-field').value = '';
 }
 
+function updateActiveNodeCount(){
+    document.getElementById('active-node-count').innerHTML = `Number of Nodes: ${numActiveNodes}`;
+}
+
 class AnimeTest extends Component {
     constructor (props) {
         super(props);
@@ -431,7 +436,6 @@ class AnimeTest extends Component {
             undoStack: [],
             redoStack: new TreeStack(),
             count: 0,
-            numActiveNodes: 0,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -461,7 +465,9 @@ class AnimeTest extends Component {
         shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
         formatBinaryTree(this.state.bst.root);
         this.setState({ count: this.state.count + 1, inputValue: '' });
+        numActiveNodes += 1;
         clearInputForm();
+        updateActiveNodeCount();
     }
 
     // TODO: Implement Remove functionality.
@@ -472,12 +478,14 @@ class AnimeTest extends Component {
             return;
         }
         const nodeContainer = document.getElementById('nodecontainer');
-        this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
+        const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
+        if (success) numActiveNodes -= 1;
         if (this.state.bst.root !== null) {
             shift_x_total = Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - inOrderToRootLength(this.state.bst.root.left) * HORIZONTAL_SPACING);
             formatBinaryTree(this.state.bst.root);
         };
         clearRemoveForm();
+        updateActiveNodeCount();
     }
 
     shouldComponentUpdate(){
@@ -523,6 +531,7 @@ class AnimeTest extends Component {
                     </Controls>
                     <div id='logs'/>
                     <div id='error-message'/>
+                    <div id='active-node-count'/>
                 </div>
             </PageWrapper>
         );
