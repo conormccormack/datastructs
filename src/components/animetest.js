@@ -37,7 +37,7 @@ const NodeContainer = styled.div`
 const HORIZONTAL_SPACING = 40;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
-const TRAVERSE_DURATION = 600;
+let TRAVERSE_DURATION = 500;
 let shift_x_total;
 /* Map which stores the next x position of each node. Used to calculate
 ** where points of edges should move before the animation is executed */
@@ -45,7 +45,7 @@ let x_distances = new Map();
 let resizeTimer;
 let traverseCount = 0;
 let numActiveNodes = 0;
-
+let traverseOn = false;
 
 // Class for implemented Undo and Redo stack.
 class TreeStack {
@@ -114,7 +114,7 @@ class BinarySearchTree {
     }
 
     insertNode(root, newNode){  
-        addTraverseStep(root);
+        if (traverseOn) addTraverseStep(root);
         addMessageToLog(`Comparing ${newNode.value} to ${root.value}...`);
         if (newNode.value < root.value){
             if (root.left !== null) {
@@ -497,6 +497,14 @@ class AnimeTest extends Component {
         const nodeContainer = document.getElementById('nodecontainer');
         shift_x_total = getWidthMidpoint(nodeContainer);
     }
+    
+    toggleTraverseOn(){
+        traverseOn = !traverseOn;
+    }
+
+    handleIntervalChange(event){
+        TRAVERSE_DURATION = event.target.value;
+    }
 
     onResize(){
         if (this.state.bst.root === null) return;
@@ -528,10 +536,17 @@ class AnimeTest extends Component {
                                 <button onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
                             </label>
                         </form>
+                        <label>
+                            <input type='checkbox' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
+                            Animate traversal
+                        </label>
+                        <label>
+                            <input type='range' min='300' max='1200' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
+                        </label>
                     </Controls>
                     <div id='logs'/>
-                    <div id='error-message'/>
                     <div id='active-node-count'/>
+                    <div id='error-message'/>
                 </div>
             </PageWrapper>
         );
