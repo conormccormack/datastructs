@@ -14,9 +14,10 @@
 */
 
 import React, { Component } from 'react';
-import anime, { timeline } from 'animejs';
+import anime, { random } from 'animejs';
 import '../css/bst.css';
 import styled from 'styled-components';
+import { getByDisplayValue } from '@testing-library/react';
 
 const PageWrapper = styled.div`
     padding-left: 6rem;
@@ -146,7 +147,7 @@ class BinarySearchTree {
     }
 
     deleteNode(node){
-        let child_of = (node.parent !== null) ? (node.parent.right === node) ? 'right' : 'left' : 'root';
+        let child_of_type = (node.parent !== null) ? (node.parent.right === node) ? 'right' : 'left' : 'root';
         let replacement = (node.left === null && node.right === null) ? null : (node.left === null) ? node.right : node.left;
 
         if (node.left !== null && node.right !== null){
@@ -162,10 +163,11 @@ class BinarySearchTree {
             }, (traverseCount - 1) * TRAVERSE_DURATION)
             this.deleteNode(swap);
         } else {
-            if (child_of !== 'root') removeElementFromDOM(`path${node.id}`);
+            if (child_of_type !== 'root') removeElementFromDOM(`path${node.id}`);
             else if (replacement) removeElementFromDOM(`path${replacement.id}`);
-            if (child_of === 'right') node.parent.right = replacement;
-            else if (child_of === 'left') node.parent.left = replacement;
+
+            if (child_of_type === 'right') node.parent.right = replacement;
+            else if (child_of_type === 'left') node.parent.left = replacement;
             else this.root = replacement;
             if (replacement) replacement.parent = node.parent;
             removeElementFromDOM(`node${node.id}`);
@@ -259,7 +261,7 @@ function addMessageToLog(message, options){
         duration: TRAVERSE_DURATION,
         begin: function (){
             let p = document.createElement('div');
-            p.setAttribute('class', 'log')
+            p.setAttribute('className', 'log')
             p.classList.add('log')
             if (options) {
                 if (options === 'end') p.classList.add('log-border-bottom');
@@ -357,6 +359,17 @@ function toggleFormDisable(){
     document.getElementById('remove-button').disabled = !document.getElementById('remove-button').disabled;
 }
 
+// Box-Muller, returns number between [0, 1] w/ approx normal distribution
+function randn_bm() {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    num = num / 10.0 + 0.5; // Translate to 0 -> 1
+    if (num > 1 || num < 0) return randn_bm(); // resample between 0 and 1
+    return num;
+}
+
 class AnimeTest extends Component {
     constructor (props) {
         super(props);
@@ -364,6 +377,7 @@ class AnimeTest extends Component {
             inputValue: '',
             removeValue: '',
             bst: new BinarySearchTree(),
+            multiInput: '',
             count: 0,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
@@ -376,6 +390,8 @@ class AnimeTest extends Component {
         this.clearInputForm = this.clearInputForm.bind(this);
         this.clearRemoveForm = this.clearRemoveForm.bind(this);
         this.updateActiveNodeCount = this.updateActiveNodeCount.bind(this);
+        this.handleMultiSubmit = this.handleMultiSubmit.bind(this);
+        this.handleMultiChange = this.handleMultiChange.bind(this);
     }
 
     clearInputForm() {
@@ -399,6 +415,10 @@ class AnimeTest extends Component {
     handleRemoveChange(event) {
         this.setState({ removeValue: parseFloat(event.target.value) });
     }
+    
+    handleMultiChange(event){
+        this.setState({ multiInput: event.target.value});
+    }
 
     handleInputSubmit(event) {
         event.preventDefault();
@@ -413,8 +433,8 @@ class AnimeTest extends Component {
         formatBinaryTree(this.state.bst);
         this.setState({ count: this.state.count + 1, inputValue: '' });
         this.state.bst.numActiveNodes += 1;
-        this.clearInputForm();
         this.updateActiveNodeCount();
+        // this.clearInputForm();
     }
 
     handleRemoveSubmit(event) {
@@ -433,9 +453,27 @@ class AnimeTest extends Component {
         this.clearRemoveForm();
         this.updateActiveNodeCount();
         if (success && this.state.bst.root === null) toggleFormDisable();
+        // this.clearRemoveForm();
     }
 
-    shouldComponentUpdate(){ return false; }
+    handleMultiSubmit(event){
+        event.preventDefault();
+        const multiInput = this.state.multiInput
+        const newNodes = this.state.multiInput.split(" ");
+        console.log({ multiInput, newNodes });
+        newNodes.forEach( (value, index) => {
+            this.state.bst.insert(parseFloat(value), this.state.count + index);
+            addNodeToDOM(value, this.state.count + index);
+            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+            this.state.bst.numActiveNodes += 1;
+        });
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        formatBinaryTree(this.state.bst);
+        this.setState({count: this.state.count + newNodes.length});
+        this.setState({multiInput: ''});
+    }
+
+    // shouldComponentUpdate(){ return false; }
 
     calculateShiftX(nodeContainer) {
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
@@ -445,6 +483,24 @@ class AnimeTest extends Component {
     componentDidMount(){
         window.addEventListener('resize', this.onResize);
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
+        this.toggleTraverseOn();
+        const randomTree = [...Array(13)].map(() => Math.floor(Math.random() * 999 + 1));
+        const sortedTree = Array.from(randomTree).sort();
+        const median = sortedTree[Math.floor(sortedTree.length/2)];
+        const medianIndex = randomTree.indexOf(median);
+        randomTree[medianIndex] = randomTree[0];
+        randomTree[0] = median;
+        randomTree.forEach( (value, index) => {
+            this.state.bst.insert(parseFloat(value), this.state.count + index);
+            addNodeToDOM(value, this.state.count + index);
+            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+            this.state.bst.numActiveNodes += 1;
+            console.log({value, index})
+        });
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        formatBinaryTree(this.state.bst);
+        this.setState({count: this.state.count + randomTree.length});
+        this.toggleTraverseOn();
     }
     
     toggleTraverseOn(){ traverseOn = !traverseOn; }
@@ -464,20 +520,20 @@ class AnimeTest extends Component {
             <PageWrapper id="pagewrapper">
                 <div>
                     <NodeContainer id="nodecontainer" >
-                    <svg class="linecontainer" id="svg-line" />                    
+                    <svg className="linecontainer" id="svg-line" />                    
                     </NodeContainer>
                 </div>
                 <div>
                     <Controls>
                         <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
                             <label>
-                                <input type="number" id="input-field" onChange={this.handleInputChange}/> 
+                                <input type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
                                 <button id='input-button' onClick={this.handleInputSubmit} className='inputButton'>Input</button>
                             </label>
                         </form>
                         <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
                             <label>
-                                <input type="number" id="remove-field" onChange={this.handleRemoveChange}/> 
+                                <input type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
                                 <button id='remove-button' onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
                             </label>
                         </form>
@@ -485,16 +541,16 @@ class AnimeTest extends Component {
                             Animate traversal
                             <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
                         </label>
-                        {/* <label>
-                            Allow duplicate keys
-                            <input type='checkbox' id='duplicate-checkbox' onChange={this.toggleAllowDuplicate} />
-                        </label> */}
                         <br/>
                         <label>
                             <input type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
                             Traversal Speed
                         </label>
                     </Controls>
+                    <form id='multi-input' onSubmit={this.handleMultiSubmit}>
+                        <textarea rows='5' onChange={this.handleMultiChange}/>
+                        <input value='Run' type='submit' />
+                    </form>
                     <div id='logs'/>
                     <div id='active-node-count'/>
                     <div id='error-message'/>
