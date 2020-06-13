@@ -47,7 +47,7 @@ let allowDuplicate = false;
 
 let formatTimeline = anime.timeline({
     autoplay: false,
-    complete: toggleFormDisable,
+    
 });
 
 class Node {
@@ -106,8 +106,7 @@ class BinarySearchTree {
                 newNode.level = newNode.level + 1;
                 addMessageToLog(`${newNode.value} < ${root.value}, search left.`);
                 this.insertNode(root.left, newNode);
-            }
-            else { 
+            } else { 
                 root.left = newNode; 
                 newNode.parent = root;
                 addMessageToLog(`${newNode.value} < ${root.value}, insert as left leaf.`, 'end');
@@ -117,8 +116,7 @@ class BinarySearchTree {
                 newNode.level = newNode.level + 1;
                 addMessageToLog(`${newNode.value} >= ${root.value}, search right.`);
                 this.insertNode(root.right, newNode);
-            }
-            else { 
+            } else { 
                 root.right = newNode; 
                 newNode.parent = root;
                 addMessageToLog(`${newNode.value} >= ${root.value}, insert as right leaf.`, 'end');
@@ -261,8 +259,8 @@ function addMessageToLog(message, options){
         duration: TRAVERSE_DURATION,
         begin: function (){
             let p = document.createElement('div');
-            p.setAttribute('className', 'log')
-            p.classList.add('log')
+            p.setAttribute('className', 'log');
+            p.classList.add('log');
             if (options) {
                 if (options === 'end') p.classList.add('log-border-bottom');
             }
@@ -272,19 +270,26 @@ function addMessageToLog(message, options){
             logs.scrollTop = logs.scrollHeight;
         }
     }, traverseOn ? (traverseCount - 1) * TRAVERSE_DURATION : 0);
+    formatTimeline.add({
+        duration: TRAVERSE_DURATION,
+
+    }, traverseOn ? (traverseCount - 1) * TRAVERSE_DURATION : 0);
 }
 
 function setErrorMessage(message){
     document.getElementById('error-message').innerHTML = message;
 }
 
-function formatBinaryTree(tree){
+async function formatBinaryTree(tree){
+    toggleFormDisable();
     buildNodeTimeline(tree.root, tree);
     buildEdgeTimeline(tree.root, tree);
     formatTimeline.play();
-    formatTimeline = anime.timeline({
-        complete: toggleFormDisable,
-    });
+    await formatTimeline.finished;
+    console.log('done');
+    toggleFormDisable();
+    formatTimeline = anime.timeline({});
+    return;
 }
 
 function buildEdgeTimeline(root, tree){
@@ -356,17 +361,8 @@ function toggleFormDisable(){
     document.getElementById('remove-field').disabled = !document.getElementById('remove-field').disabled;
     document.getElementById('input-button').disabled = !document.getElementById('input-button').disabled;
     document.getElementById('remove-button').disabled = !document.getElementById('remove-button').disabled;
-}
-
-// Box-Muller, returns number between [0, 1] w/ approx normal distribution
-function randn_bm() {
-    let u = 0, v = 0;
-    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-    while(v === 0) v = Math.random();
-    let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-    num = num / 10.0 + 0.5; // Translate to 0 -> 1
-    if (num > 1 || num < 0) return randn_bm(); // resample between 0 and 1
-    return num;
+    document.getElementById('multi-field').disabled = !document.getElementById('multi-field').disabled;
+    document.getElementById('multi-button').disabled = !document.getElementById('multi-button').disabled;
 }
 
 class AnimeTest extends Component {
@@ -386,21 +382,9 @@ class AnimeTest extends Component {
         this.toggleAllowDuplicate = this.toggleAllowDuplicate.bind(this);
         this.calculateShiftX = this.calculateShiftX.bind(this);
         this.onResize = this.onResize.bind(this);
-        this.clearInputForm = this.clearInputForm.bind(this);
-        this.clearRemoveForm = this.clearRemoveForm.bind(this);
         this.updateActiveNodeCount = this.updateActiveNodeCount.bind(this);
         this.handleMultiSubmit = this.handleMultiSubmit.bind(this);
         this.handleMultiChange = this.handleMultiChange.bind(this);
-    }
-
-    clearInputForm() {
-        document.getElementById('input-form').reset();
-        document.getElementById('input-field').value = '';
-    }
-
-    clearRemoveForm() {
-        document.getElementById('remove-form').reset();
-        document.getElementById('remove-field').value = '';
     }
 
     updateActiveNodeCount(){
@@ -435,7 +419,6 @@ class AnimeTest extends Component {
         this.state.bst.numActiveNodes += 1;
         this.updateActiveNodeCount();
         document.getElementById('input-field').focus();
-        // this.clearInputForm();
     }
 
     handleRemoveSubmit(event) {
@@ -457,20 +440,21 @@ class AnimeTest extends Component {
         traverseCount = 0;
     }
 
-    handleMultiSubmit(event){
+    async handleMultiSubmit(event){
         event.preventDefault();
         const multiInput = this.state.multiInput
         const newNodes = this.state.multiInput.split(" ");
         console.log({ multiInput, newNodes });
-        newNodes.forEach( (value, index) => {
-            this.state.bst.insert(parseFloat(value), this.state.count + index);
-            addNodeToDOM(value, this.state.count + index);
+        
+        for (const [idx, value] of newNodes.entries()){
+            this.state.bst.insert(parseFloat(value), this.state.count + idx);
+            addNodeToDOM(value, this.state.count + idx);
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            formatBinaryTree(this.state.bst);
+            await formatBinaryTree(this.state.bst);
+            console.log('done!');
             this.state.bst.numActiveNodes += 1;
-        });
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        // formatBinaryTree(this.state.bst);
+        }
+        // shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         traverseCount = 0;
         this.setState({count: this.state.count + newNodes.length});
         this.setState({multiInput: ''});
@@ -552,7 +536,7 @@ class AnimeTest extends Component {
                     </Controls>
                     <form id='multi-input' onSubmit={this.handleMultiSubmit}>
                         <textarea rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
-                        <input value='Run' type='submit' />
+                        <input id='multi-button' value='Run' type='submit' />
                     </form>
                     <div id='logs'/>
                     <div id='active-node-count'/>
