@@ -285,7 +285,6 @@ function formatBinaryTree(tree){
     formatTimeline = anime.timeline({
         complete: toggleFormDisable,
     });
-    traverseCount = 0;
 }
 
 function buildEdgeTimeline(root, tree){
@@ -431,9 +430,11 @@ class AnimeTest extends Component {
         addNodeToDOM(this.state.inputValue, this.state.count);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         formatBinaryTree(this.state.bst);
+        traverseCount = 0;
         this.setState({ count: this.state.count + 1, inputValue: '' });
         this.state.bst.numActiveNodes += 1;
         this.updateActiveNodeCount();
+        document.getElementById('input-field').focus();
         // this.clearInputForm();
     }
 
@@ -450,10 +451,10 @@ class AnimeTest extends Component {
         };
         if (success) this.state.bst.numActiveNodes -= 1;
         this.setState({removeValue: ''});
-        this.clearRemoveForm();
         this.updateActiveNodeCount();
         if (success && this.state.bst.root === null) toggleFormDisable();
-        // this.clearRemoveForm();
+        document.getElementById('remove-field').focus();
+        traverseCount = 0;
     }
 
     handleMultiSubmit(event){
@@ -465,15 +466,17 @@ class AnimeTest extends Component {
             this.state.bst.insert(parseFloat(value), this.state.count + index);
             addNodeToDOM(value, this.state.count + index);
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+            formatBinaryTree(this.state.bst);
             this.state.bst.numActiveNodes += 1;
         });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        formatBinaryTree(this.state.bst);
+        // formatBinaryTree(this.state.bst);
+        traverseCount = 0;
         this.setState({count: this.state.count + newNodes.length});
         this.setState({multiInput: ''});
+        document.getElementById('multi-field').focus();
+        document.getElementById('multi-field').focus();
     }
-
-    // shouldComponentUpdate(){ return false; }
 
     calculateShiftX(nodeContainer) {
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
@@ -548,7 +551,7 @@ class AnimeTest extends Component {
                         </label>
                     </Controls>
                     <form id='multi-input' onSubmit={this.handleMultiSubmit}>
-                        <textarea rows='5' onChange={this.handleMultiChange}/>
+                        <textarea rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
                         <input value='Run' type='submit' />
                     </form>
                     <div id='logs'/>
