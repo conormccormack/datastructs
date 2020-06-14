@@ -25,7 +25,7 @@ const PageWrapper = styled.div`
     padding-top: 2rem;
     height: 80vh;
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 3fr 1fr;
 `
 const Controls = styled.div`
     margin-left: auto;
@@ -65,24 +65,21 @@ class Node {
 class BinarySearchTree {
     constructor() {
         this.root = null;
-        this.heights = new Map();
         this.numActiveNodes = 0;
         /* Map which stores the next x position of each node. Used to calculate
         ** where points of edges should move before the animation is executed */
         this.x_distances = new Map();
-    }
-    updateHeights(leaf) {
-        const leftHeight = leaf.left !== null ? this.heights.get(leaf.left.id) : -1;
-        const rightHeight = leaf.right !== null ? this.heights.get(leaf.right.id) : -1;
-        this.heights.set(leaf.id, 1 + Math.max(leftHeight, rightHeight));
-        if (leaf.parent !== null) this.updateHeights(leaf.parent);
     }
     updateLevels(root, level){
         root.level = level;
         if (root.right !== null) this.updateLevels(root.right, level + 1);
         if (root.left !== null) this.updateLevels(root.left, level + 1 );
     }
-    getTreeHeight(){ return Math.max(...this.heights.values()) }
+    getTreeHeight(node, total){ 
+        const left = node.left !== null ? this.getTreeHeight(node.left, total) + 1 : 0;
+        const right = node.right !== null ? this.getTreeHeight(node.right, total) + 1 : 0;
+        return total + Math.max(left, right);
+    }
 
     // Insert node into tree and update heights map.
     insert(value, count) {
@@ -95,7 +92,6 @@ class BinarySearchTree {
             newNode.level += 1;
             this.insertNode(this.root, newNode);
         }
-        this.updateHeights(newNode);
         return newNode;
     }
 
@@ -147,7 +143,6 @@ class BinarySearchTree {
     deleteNode(node){
         let child_of_type = (node.parent !== null) ? (node.parent.right === node) ? 'right' : 'left' : 'root';
         let replacement = (node.left === null && node.right === null) ? null : (node.left === null) ? node.right : node.left;
-
         if (node.left !== null && node.right !== null){
             const swap = this.findLeftmost(node.right);
             addTraverseStep(swap, -1);
@@ -388,7 +383,11 @@ class AnimeTest extends Component {
     }
 
     updateActiveNodeCount(){
-        document.getElementById('active-node-count').innerHTML = `Number of Nodes: ${this.state.bst.numActiveNodes}`;
+        document.getElementById('active-node-count').innerHTML = `Number of Nodes: <strong>${this.state.bst.numActiveNodes}</strong>`;
+    }
+
+    updateTreeHeight(){
+        document.getElementById('tree-height').innerHTML = `Tree Height: <strong>${this.state.bst.getTreeHeight(this.state.bst.root, 0) + 1}</strong>`;
     }
 
     handleInputChange(event) {
@@ -418,10 +417,11 @@ class AnimeTest extends Component {
         this.setState({ count: this.state.count + 1, inputValue: '' });
         this.state.bst.numActiveNodes += 1;
         this.updateActiveNodeCount();
+        this.updateTreeHeight();
         document.getElementById('input-field').focus();
     }
 
-    handleRemoveSubmit(event) {
+    async handleRemoveSubmit(event) {
         event.preventDefault();
         if (this.state.removeValue === '' || isNaN(this.state.removeValue)) {
             setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>');
@@ -430,11 +430,12 @@ class AnimeTest extends Component {
         const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
         if (this.state.bst.root !== null) {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            formatBinaryTree(this.state.bst);
+            await formatBinaryTree(this.state.bst);
         };
         if (success) this.state.bst.numActiveNodes -= 1;
         this.setState({removeValue: ''});
         this.updateActiveNodeCount();
+        this.updateTreeHeight();
         if (success && this.state.bst.root === null) toggleFormDisable();
         document.getElementById('remove-field').focus();
         traverseCount = 0;
@@ -453,9 +454,10 @@ class AnimeTest extends Component {
             await formatBinaryTree(this.state.bst);
             console.log('done!');
             this.state.bst.numActiveNodes += 1;
+            traverseCount = 0;
+            this.updateActiveNodeCount();
+            this.updateTreeHeight();
         }
-        // shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        traverseCount = 0;
         this.setState({count: this.state.count + newNodes.length});
         this.setState({multiInput: ''});
         document.getElementById('multi-field').focus();
@@ -486,6 +488,8 @@ class AnimeTest extends Component {
         });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         formatBinaryTree(this.state.bst);
+        this.updateActiveNodeCount();
+        this.updateTreeHeight();
         this.setState({count: this.state.count + randomTree.length});
         this.toggleTraverseOn();
     }
@@ -507,39 +511,38 @@ class AnimeTest extends Component {
             <PageWrapper id="pagewrapper">
                 <div>
                     <NodeContainer id="nodecontainer" >
-                    <svg className="linecontainer" id="svg-line" />                    
+                        <svg className="linecontainer" id="svg-line" />                    
                     </NodeContainer>
                 </div>
-                <div>
-                    <Controls>
-                        <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
-                            <label>
-                                <input type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
-                                <button id='input-button' onClick={this.handleInputSubmit} className='inputButton'>Input</button>
-                            </label>
-                        </form>
-                        <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
-                            <label>
-                                <input type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
-                                <button id='remove-button' onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
-                            </label>
-                        </form>
+                <div>    
+                    <div id='active-node-count'/>
+                    <div id='tree-height'/>
+                    <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
                         <label>
-                            Animate traversal
-                            <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
+                            <input className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
+                            <button id='input-button' onClick={this.handleInputSubmit} className='inputButton'>Input</button>
                         </label>
-                        <br/>
+                    </form>
+                    <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
                         <label>
-                            <input type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
-                            Traversal Speed
+                            <input className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
+                            <button id='remove-button' onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
                         </label>
-                    </Controls>
+                    </form>
+                    <label>
+                        Animate traversal
+                        <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
+                    </label>
+                    <br/>
+                    <label>
+                        <input type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
+                        Traversal Speed
+                    </label>
                     <form id='multi-input' onSubmit={this.handleMultiSubmit}>
                         <textarea rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
                         <input id='multi-button' value='Run' type='submit' />
                     </form>
                     <div id='logs'/>
-                    <div id='active-node-count'/>
                     <div id='error-message'/>
                 </div>
             </PageWrapper>
