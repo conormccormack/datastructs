@@ -17,7 +17,6 @@ import React, { Component } from 'react';
 import anime, { random } from 'animejs';
 import '../css/bst.css';
 import styled from 'styled-components';
-import { getByDisplayValue } from '@testing-library/react';
 
 const PageWrapper = styled.div`
     padding-left: 6rem;
@@ -38,6 +37,7 @@ const NodeContainer = styled.div`
 const HORIZONTAL_SPACING = 40;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
+const NUM_STARTING_NODE = 8;
 let TRAVERSE_DURATION = 500;
 let shift_x;
 let resizeTimer;
@@ -281,7 +281,6 @@ async function formatBinaryTree(tree){
     buildEdgeTimeline(tree.root, tree);
     formatTimeline.play();
     await formatTimeline.finished;
-    console.log('done');
     toggleFormDisable();
     formatTimeline = anime.timeline({});
     return;
@@ -294,11 +293,13 @@ function buildEdgeTimeline(root, tree){
         const y1 = root.parent.level * VERTICAL_SPACING + NODE_RADIUS;
         const x2 = tree.x_distances.get(`node${root.id}`);
         const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
+        const curr_opacity = parseFloat(document.getElementById(`path${root.id}`).getAttribute('opacity'));
+        const isNew = curr_opacity > 0.7 ? false : true;
         formatTimeline.add({
             targets: `#path${root.id}`,
             d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
-            opacity: { value: '1.0', easing: 'easeInSine', delay: 600, duration: 600 },
-            stroke: { value: '#DEAAFF', delay: 800 },
+            opacity: { value: '1.0', easing: 'easeInSine', delay: isNew ? 600: 0, duration: isNew ? 200 : 0 },
+            stroke: { value: '#DEAAFF', delay: isNew ? 800 : 0 },
             easing: 'easeInOutExpo',
         }, traverseCount * TRAVERSE_DURATION);
     }
@@ -313,17 +314,30 @@ function buildNodeTimeline(root, tree){
     tree.x_distances.set(`node${root.id}`, x );
     root.parent !== null && root.line === null && addPathToDom(root);
     root.line = root.line === null && `line${root.id}`;
-    formatTimeline.add({
-        targets: `#node${root.id}`,
-        marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
-        keyframes: [
-            { scale: isNew ? 0 : 1, duration: 0 },
-            { translateX: isNew ? 0 : shift_x, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
-            { translateX: shift_x, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
-        ],
-        easing: 'easeInOutExpo',
-    }, traverseCount * TRAVERSE_DURATION);
-    
+    if (isNew){
+        formatTimeline.add({
+            targets: `#node${root.id}`,
+            marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
+            keyframes: [
+                { scale: isNew ? 0 : 1, duration: 0 },
+                { translateX: isNew ? 0 : shift_x, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
+                { translateX: shift_x, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
+            ],
+            easing: 'easeInOutExpo',
+        }, traverseCount * TRAVERSE_DURATION);
+    } else {
+        formatTimeline.add({
+            targets: `#node${root.id}`,
+            marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
+            keyframes: [
+                { scale: isNew ? 0 : 1, duration: 0 },
+                { translateX: isNew ? 0 : shift_x, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
+                { translateX: shift_x, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
+            ],
+            easing: 'easeInOutExpo',
+        }, traverseCount * TRAVERSE_DURATION);
+    }
+
     shift_x += HORIZONTAL_SPACING;
 
     if (root.right !== null) buildNodeTimeline(root.right, tree);
@@ -380,6 +394,7 @@ class AnimeTest extends Component {
         this.updateActiveNodeCount = this.updateActiveNodeCount.bind(this);
         this.handleMultiSubmit = this.handleMultiSubmit.bind(this);
         this.handleMultiChange = this.handleMultiChange.bind(this);
+        this.parseMulti = this.parseMulti.bind(this);
     }
 
     updateActiveNodeCount(){
@@ -387,7 +402,8 @@ class AnimeTest extends Component {
     }
 
     updateTreeHeight(){
-        document.getElementById('tree-height').innerHTML = `Tree Height: <strong>${this.state.bst.getTreeHeight(this.state.bst.root, 0) + 1}</strong>`;
+        document.getElementById('tree-height').innerHTML = 
+        `Tree Height: <strong>${this.state.bst.root !== null ? this.state.bst.getTreeHeight(this.state.bst.root, 0) + 1 : 0}</strong>`;
     }
 
     handleInputChange(event) {
@@ -402,7 +418,7 @@ class AnimeTest extends Component {
         this.setState({ multiInput: event.target.value});
     }
 
-    handleInputSubmit(event) {
+    async handleInputSubmit(event) {
         event.preventDefault();
         if (this.state.inputValue === '' || isNaN(this.state.inputValue)) {
             setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>')
@@ -412,7 +428,7 @@ class AnimeTest extends Component {
         this.state.bst.insert(this.state.inputValue, this.state.count);
         addNodeToDOM(this.state.inputValue, this.state.count);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        formatBinaryTree(this.state.bst);
+        await formatBinaryTree(this.state.bst);
         traverseCount = 0;
         this.setState({ count: this.state.count + 1, inputValue: '' });
         this.state.bst.numActiveNodes += 1;
@@ -436,32 +452,69 @@ class AnimeTest extends Component {
         this.setState({removeValue: ''});
         this.updateActiveNodeCount();
         this.updateTreeHeight();
-        if (success && this.state.bst.root === null) toggleFormDisable();
         document.getElementById('remove-field').focus();
         traverseCount = 0;
+    }
+
+    parseMulti(){
+        const multiInput = this.state.multiInput.toLowerCase();
+        let instructions = [];
+        for (let idx = 0; idx < multiInput.length; idx++){
+            if (!isNaN(multiInput[idx]) && multiInput[idx] !== ' ' && multiInput[idx] !== '') {
+                
+            } else if (multiInput[idx] === 'r'){
+
+            }  else if (multiInput[idx] === 'a' || (multiInput[idx] === 'd')){
+                const open_brack = multiInput.substring(idx).indexOf('[') + idx;
+                const close_brack = multiInput.substring(idx).indexOf(']') + idx;
+
+                console.log(multiInput.substring(idx + 1, idx + 3));
+                if (open_brack !== -1 && close_brack === -1) throw 'Expected ]';
+                else if (open_brack === -1 && close_brack !== -1) throw 'Expected ['; 
+                else if (open_brack === -1 && close_brack === -1) throw 'Expected [...]';
+                else if (multiInput.substring(idx + 1, idx + 3) !== 'dd' && multiInput.substring(idx + 1, idx + 3) !== 'el') 
+                    throw 'Unknown command';
+                
+                if (open_brack !== -1 && close_brack !== -1){
+                    let add_group = multiInput.substring(open_brack + 1, close_brack).split(/\s*(\s|,)\s*/)
+                            .filter(el => !isNaN(parseFloat(el)))
+                                .map(el => multiInput[idx] === 'a' ? `${el}` : `d${el}`);
+                    instructions = instructions.concat(add_group);
+                }
+                idx = close_brack;
+            }
+            
+            console.log(multiInput[idx]);
+        }
+        console.log({instructions});
     }
 
     async handleMultiSubmit(event){
         event.preventDefault();
         const multiInput = this.state.multiInput
         const newNodes = this.state.multiInput.split(" ");
-        console.log({ multiInput, newNodes });
-        
-        for (const [idx, value] of newNodes.entries()){
-            this.state.bst.insert(parseFloat(value), this.state.count + idx);
-            addNodeToDOM(value, this.state.count + idx);
-            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            await formatBinaryTree(this.state.bst);
-            console.log('done!');
-            this.state.bst.numActiveNodes += 1;
-            traverseCount = 0;
-            this.updateActiveNodeCount();
-            this.updateTreeHeight();
+
+        try { this.parseMulti();
+        } catch (error){
+            console.log({error});
         }
-        this.setState({count: this.state.count + newNodes.length});
-        this.setState({multiInput: ''});
-        document.getElementById('multi-field').focus();
-        document.getElementById('multi-field').focus();
+        
+        // for (const [idx, value] of newNodes.entries()){
+        //     this.state.bst.removeRecurse(this.state.bst.root, parseFloat(value));
+        //     //this.state.bst.insert(parseFloat(value), this.state.count + idx);
+        //     addNodeToDOM(value, this.state.count + idx);
+        //     shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        //     await formatBinaryTree(this.state.bst);
+        //     console.log('done!');
+        //     this.state.bst.numActiveNodes += 1;
+        //     traverseCount = 0;
+        //     this.updateActiveNodeCount();
+        //     this.updateTreeHeight();
+        // }
+        // this.setState({count: this.state.count + newNodes.length});
+        // this.setState({multiInput: ''});
+        // document.getElementById('multi-field').focus();
+        // document.getElementById('multi-field').focus();
     }
 
     calculateShiftX(nodeContainer) {
@@ -473,7 +526,7 @@ class AnimeTest extends Component {
         window.addEventListener('resize', this.onResize);
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
         this.toggleTraverseOn();
-        const randomTree = [...Array(13)].map(() => Math.floor(Math.random() * 999 + 1));
+        const randomTree = [...Array(NUM_STARTING_NODE)].map(() => Math.floor(Math.random() * 999 + 1));
         const sortedTree = Array.from(randomTree).sort();
         const median = sortedTree[Math.floor(sortedTree.length/2)];
         const medianIndex = randomTree.indexOf(median);
@@ -484,7 +537,6 @@ class AnimeTest extends Component {
             addNodeToDOM(value, this.state.count + index);
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
             this.state.bst.numActiveNodes += 1;
-            console.log({value, index})
         });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         formatBinaryTree(this.state.bst);
