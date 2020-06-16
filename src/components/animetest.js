@@ -37,7 +37,7 @@ const NodeContainer = styled.div`
 const HORIZONTAL_SPACING = 40;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
-const NUM_STARTING_NODE = 8;
+const NUM_STARTING_NODE = 11;
 let TRAVERSE_DURATION = 500;
 let shift_x;
 let resizeTimer;
@@ -484,37 +484,39 @@ class AnimeTest extends Component {
                 idx = close_brack;
             }
             
-            console.log(multiInput[idx]);
         }
-        console.log({instructions});
+        return instructions;
     }
 
     async handleMultiSubmit(event){
         event.preventDefault();
         const multiInput = this.state.multiInput
-        const newNodes = this.state.multiInput.split(" ");
+        var newNodes;
 
-        try { this.parseMulti();
+        try { newNodes = this.parseMulti();
         } catch (error){
             console.log({error});
         }
         
-        // for (const [idx, value] of newNodes.entries()){
-        //     this.state.bst.removeRecurse(this.state.bst.root, parseFloat(value));
-        //     //this.state.bst.insert(parseFloat(value), this.state.count + idx);
-        //     addNodeToDOM(value, this.state.count + idx);
-        //     shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        //     await formatBinaryTree(this.state.bst);
-        //     console.log('done!');
-        //     this.state.bst.numActiveNodes += 1;
-        //     traverseCount = 0;
-        //     this.updateActiveNodeCount();
-        //     this.updateTreeHeight();
-        // }
-        // this.setState({count: this.state.count + newNodes.length});
-        // this.setState({multiInput: ''});
-        // document.getElementById('multi-field').focus();
-        // document.getElementById('multi-field').focus();
+        for (const value of newNodes){
+            if (value.toString().includes('d')) {
+                const success = this.state.bst.removeRecurse(this.state.bst.root, parseFloat(value.toString().substring(1)));
+                if (success) this.state.bst.numActiveNodes -= 1;
+            }
+            else {
+                this.state.bst.insert(parseFloat(value), this.state.count);
+                addNodeToDOM(value, this.state.count);
+                this.state.bst.numActiveNodes += 1;
+                this.setState({count: this.state.count + 1});
+            }
+            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+            await formatBinaryTree(this.state.bst);
+            traverseCount = 0;
+            this.updateActiveNodeCount();
+            this.updateTreeHeight();
+        }
+        this.setState({multiInput: ''});
+        document.getElementById('multi-field').focus();
     }
 
     calculateShiftX(nodeContainer) {
@@ -567,8 +569,8 @@ class AnimeTest extends Component {
                     </NodeContainer>
                 </div>
                 <div>    
-                    <div id='active-node-count'/>
-                    <div id='tree-height'/>
+                    <div className='tree-info' id='active-node-count'/>
+                    <div className='tree-info' id='tree-height'/>
                     <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
                         <label>
                             <input className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
@@ -581,21 +583,22 @@ class AnimeTest extends Component {
                             <button id='remove-button' onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
                         </label>
                     </form>
+                    <div className='tree-info'> 
+                        <label >
+                            Animate traversal
+                            <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
+                        </label>
+                    </div>
                     <label>
-                        Animate traversal
-                        <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
-                    </label>
-                    <br/>
-                    <label>
-                        <input type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
                         Traversal Speed
+                        <input className='tree-info' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
                     </label>
                     <form id='multi-input' onSubmit={this.handleMultiSubmit}>
-                        <textarea rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
+                        <textarea className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
                         <input id='multi-button' value='Run' type='submit' />
                     </form>
-                    <div id='logs'/>
-                    <div id='error-message'/>
+                    <div className='tree-info' id='logs'/>
+                    <div className='tree-info' id='error-message'/>
                 </div>
             </PageWrapper>
         );
