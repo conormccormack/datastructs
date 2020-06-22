@@ -55,7 +55,7 @@
 }
 
 .field {
-    background: transparent;
+    background: #eee;
     border: solid 1px #888;
     -webkit-appearance: none; 
     margin: 8px 0px;
@@ -78,6 +78,8 @@ input[type=number] {
 textarea {
     resize: none;
     overflow-x: none;
+    overflow-y: auto;
+    background: #eee;
 }
 
 .removeButton {

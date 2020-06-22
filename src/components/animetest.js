@@ -524,6 +524,7 @@ class AnimeTest extends Component {
         return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
     }
 
+
     componentDidMount(){
         window.addEventListener('resize', this.onResize);
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
@@ -595,8 +596,8 @@ class AnimeTest extends Component {
                     </label>
                     <form id='multi-input' onSubmit={this.handleMultiSubmit}>
                         <textarea className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
-                        <input id='multi-button' value='Run' type='submit' />
-                    </form>
+                        <button id='multi-button' type='submit' />
+                    </form> 
                     <div className='tree-info' id='logs'/>
                     <div className='tree-info' id='error-message'/>
                 </div>

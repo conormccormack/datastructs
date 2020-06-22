@@ -10,6 +10,7 @@ import TestAnimation from "./components/testanimation";
 import HackAnimation from "./components/hackanimation";
 import {AnimatePresence} from "framer-motion";
 import AnimeTest from './components/animetest';
+import Reftree from './components/reftest';
 import BST from './components/bst';
 
 const PageVariants = {
@@ -40,6 +41,7 @@ function App() {
           <AnimatePresence exitBeforeEnter>
               <Switch location={location} key={location.pathname}>
                   <Route path='/' exact render={(props) => <Home {...props} transition={PageTransition} variants={PageVariants}/>} />
+                  <Route path='/test' exact render={(props) => <Reftree {...props} transition={PageTransition} variants={PageVariants}/>} />
                   <Route path='/Binary Search Tree' exact render={(props) => <BST {...props} transition={PageTransition} variants={PageVariants}/> } />
                   <Route path='/about' render={(props) => <About {...props} transition={PageTransition} variants={PageVariants}/>}/>
                   <Route path='/catalog' exact render={(props) => <Catalog {...props} transition={PageTransition} variants={PageVariants}/>}/>
