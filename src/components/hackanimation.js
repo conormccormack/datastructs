@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from "react";
 import styled from 'styled-components';
-import {AnimatePresence, motion} from 'framer-motion';
+import {motion} from 'framer-motion';
 import Navbar from './navbar';
 import PageHeadline from './PageHeadline';
-import RelatedPagesCard from "./relatedpagescard";
+import BSTNode from './bstnode'
 import BinaryTree from "./binarytree";
-import BSTNode from './bstnode';
-import animejs from "animejs";
+
 
 const TestSandbox = styled.div`
     height: 100vh;
@@ -48,11 +47,11 @@ function HackAnimation(){
         return Math.max(max, recursiveMaxDepth(max, tree[root].left), recursiveMaxDepth(max, tree[root].right));
     };
 
-    useEffect(() => {
-        const depth = recursiveMaxDepth(0, 0);
-        setHeight(depth);
-        updateDisplay();
-    },[tree]);
+    // useEffect(() => {
+    //     const depth = recursiveMaxDepth(0, 0);
+    //     setHeight(depth);
+    //     updateDisplay();
+    // },[tree]);
 
     const insertRecurse = (root, value) => {
         if (parseInt(value, 10) < parseInt(tree[root].data, 10)) {
@@ -168,11 +167,13 @@ function HackAnimation(){
             const indexOnLevel = computeIndexOnLevel(node.id, node.level);
             const shift = indexOnLevel % 2 === 0 ? indexOnLevel*(-20) : indexOnLevel * 20;
             return (
-                <motion.div key={index} className="bstnode" style={{float: 'left'}} exit={{ scale: 0}} initial={{ scale: 0}}
-                animate={{ scale: 1}} whileHover={{scale: 1.25}}>
-                    {node.data}
-                </motion.div>
-                //<BSTNode key={count} data={node.data} shift={shift}/>
+                <>
+                    <motion.div key={index} className="bstnode" style={{float: 'left'}} exit={{ scale: 0}} initial={{ scale: 0}}
+                    animate={{ scale: 1}} whileHover={{scale: 1.25}}>
+                        {node.data}
+                    </motion.div>
+                    <BSTNode key={count} data={node.data} shift={shift}/>
+                </>
             )
         }
         ));

@@ -1,7 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
 import { gsap } from 'gsap';
 import '../css/bst.css';
-import styled from 'styled-components';
 import { Transition } from 'react-transition-group';
 
 const RefNode = React.forwardRef((props, ref) => {

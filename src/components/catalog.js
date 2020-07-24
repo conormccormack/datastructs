@@ -3,9 +3,7 @@ import Navbar from './navbar';
 import queryString from 'query-string';
 import styled from 'styled-components';
 import {motion} from "framer-motion";
-import Home from "./home/home";
-import {Link, Route} from "react-router-dom";
-import HackAnimation from "./hackanimation";
+import {Link} from "react-router-dom";
 
 const CatalogContainer = styled.div`
     background-color: #EFE7E2;

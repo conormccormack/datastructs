@@ -1,15 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import './App.css';
 import Home from './components/home/home'
 import About from './components/about'
 import Catalog from './components/catalog'
 import Premium from './components/premium'
-import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom';
-import TestAnimation from "./components/testanimation";
-import HackAnimation from "./components/hackanimation";
+import { BrowserRouter as Switch, Route, useLocation } from 'react-router-dom';
 import {AnimatePresence} from "framer-motion";
-import AnimeTest from './components/animetest';
 import Reftree from './components/reftest';
 import BST from './components/bst';
 

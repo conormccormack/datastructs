@@ -14,7 +14,7 @@
 */
 
 import React, { Component } from 'react';
-import anime, { random } from 'animejs';
+import anime from 'animejs';
 import '../css/bst.css';
 import styled from 'styled-components';
 
@@ -26,9 +26,7 @@ const PageWrapper = styled.div`
     display: grid;
     grid-template-columns: 3fr 1fr;
 `
-const Controls = styled.div`
-    margin-left: auto;
-`
+
 const NodeContainer = styled.div`
     height: 100%;
     width: 100%
@@ -70,6 +68,11 @@ class BinarySearchTree {
         ** where points of edges should move before the animation is executed */
         this.x_distances = new Map();
     }
+
+    incrementActiveNodes(){
+        this.numActiveNodes += 1;
+    }
+
     updateLevels(root, level){
         root.level = level;
         if (root.right !== null) this.updateLevels(root.right, level + 1);
@@ -431,7 +434,7 @@ class AnimeTest extends Component {
         await formatBinaryTree(this.state.bst);
         traverseCount = 0;
         this.setState({ count: this.state.count + 1, inputValue: '' });
-        this.state.bst.numActiveNodes += 1;
+        this.state.bst.incrementActiveNodes();
         this.updateActiveNodeCount();
         this.updateTreeHeight();
         document.getElementById('input-field').focus();
@@ -469,11 +472,11 @@ class AnimeTest extends Component {
                 const close_brack = multiInput.substring(idx).indexOf(']') + idx;
 
                 console.log(multiInput.substring(idx + 1, idx + 3));
-                if (open_brack !== -1 && close_brack === -1) throw 'Expected ]';
-                else if (open_brack === -1 && close_brack !== -1) throw 'Expected ['; 
-                else if (open_brack === -1 && close_brack === -1) throw 'Expected [...]';
+                if (open_brack !== -1 && close_brack === -1) throw Error('Expected ]');
+                else if (open_brack === -1 && close_brack !== -1) throw Error('Expected ['); 
+                else if (open_brack === -1 && close_brack === -1) throw Error('Expected [...]');
                 else if (multiInput.substring(idx + 1, idx + 3) !== 'dd' && multiInput.substring(idx + 1, idx + 3) !== 'el') 
-                    throw 'Unknown command';
+                    throw Error('Unknown command');
                 
                 if (open_brack !== -1 && close_brack !== -1){
                     let add_group = multiInput.substring(open_brack + 1, close_brack).split(/\s*(\s|,)\s*/)
@@ -490,12 +493,12 @@ class AnimeTest extends Component {
 
     async handleMultiSubmit(event){
         event.preventDefault();
-        const multiInput = this.state.multiInput
+        
         var newNodes;
 
         try { newNodes = this.parseMulti();
         } catch (error){
-            console.log({error});
+            console.error(error)
         }
         
         for (const value of newNodes){
@@ -539,7 +542,7 @@ class AnimeTest extends Component {
             this.state.bst.insert(parseFloat(value), this.state.count + index);
             addNodeToDOM(value, this.state.count + index);
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            this.state.bst.numActiveNodes += 1;
+            this.state.bst.incrementActiveNodes();
         });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         formatBinaryTree(this.state.bst);

@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import '../css/bst.css';
 import styled from 'styled-components';
 import RefNode from './refnode';
-import { TransitionGroup, Transition } from 'react-transition-group';
+import { TransitionGroup } from 'react-transition-group';
 
 const TreeContainer = styled.div`
     margin-left: 60px;
@@ -145,7 +145,7 @@ class BinarySearchTree {
 
 const Reftree = React.memo(() => {
     const nodeRef = useRef([]);
-    const bst = useRef(new BinarySearchTree);
+    const bst = useRef(new BinarySearchTree());
     const [ nodeData, setNodeData ] = useState([]);
     
     const [ removeCount, setRemoveCount ] = useState(0);
@@ -160,7 +160,7 @@ const Reftree = React.memo(() => {
 
     const HORIZONTAL_SPACING = 50;
     const VERTICAL_SPACING = 80;
-    const NODE_RADIUS = 30;
+    //const NODE_RADIUS = 30;
 
     useEffect(() => {        
         if (bst.current.root === null) return;
@@ -182,7 +182,7 @@ const Reftree = React.memo(() => {
             }
         }
 
-    }, [ insertCount ])
+    }, [ insertCount, nodeData ])
 
     const handleInputSubmit = (e) => {
         e.preventDefault();
@@ -217,7 +217,7 @@ const Reftree = React.memo(() => {
             //     nodeData[i].isNew = false;  
             // }
         }
-    }, [ removeCount ] )
+    }, [ removeCount, nodeData ] )
 
     const handleRemoveSubmit = (e) => {
         e.preventDefault();
@@ -239,24 +239,7 @@ const Reftree = React.memo(() => {
             <TreeContainer>
                 <TransitionGroup>
                     {nodeData.map( (node, i ) =>  
-                        <Transition 
-                            key={node.id}
-                            mountOnEnter
-                            unmountOnExit
-                            addEndListener={(node, done) => {
-                                gsap.from(
-                                    node,
-                                     .5,
-                                    {
-                                        scale: 0, 
-                                        ease: 'back.out(2)',
-                                        onComplete: done,
-                                    }
-                                )
-                            }}
-                        >
-                            <RefNode key={node.id} node={node} ref={el => nodeRef.current.includes(el) ? nodeRef.current[nodeRef.current.indexOf(el)] = el : nodeRef.current[i] = el}/>
-                        </Transition>
+                        <RefNode key={node.id} node={node} ref={el => nodeRef.current.includes(el) ? nodeRef.current[nodeRef.current.indexOf(el)] = el : nodeRef.current[i] = el}/>
                     )}
                 </TransitionGroup>
             </TreeContainer>
