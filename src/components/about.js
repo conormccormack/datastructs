@@ -32,7 +32,7 @@ const AboutBody = styled.div`
     font-weight: 500;
 `
 
-const GitHubLink = styled.a`
+const Link = styled.a`
     text-decoration: none;
     color: black;
     hover: 
@@ -51,11 +51,11 @@ function About (props){
                     <AboutBody>
                         DataStructs is a beautiful, intuitive platform for vizualizing data structures and algorithms.<br/>
                         <br/>
-                        As of May 2020, DataStructs is built around React, animated with Anime.js, and hosted on AWS S3.
+                        As of August 2020, DataStructs is built with <Link style={{textDecoration: 'underline'}} href="https://reactjs.org">React</Link>, animated with <Link style={{textDecoration: 'underline'}} href="https://greensock.com">GreenSock</Link>, and hosted on Netlify.
                         <br/><br/>
-                        <GitHubLink className="hoverHighlit" href='https://github.com/conormccormack/datastructs'>
+                        <Link className="hoverHighlit" href='https://github.com/conormccormack/datastructs'>
                             <i className="fab fa-github"></i> View this project on <strong>Github</strong>
-                        </GitHubLink> @conormccormack/datastructs
+                        </Link> @conormccormack/datastructs
                     </AboutBody>
                 </AboutMessage>
                 <AboutMainGraphic/>
