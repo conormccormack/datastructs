@@ -1,0 +1,27 @@
+{
+  "files": {
+    "main.css": "/static/css/main.3e52a853.chunk.css",
+    "main.js": "/static/js/main.fff04962.chunk.js",
+    "main.js.map": "/static/js/main.fff04962.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.6ffb7502.js",
+    "runtime-main.js.map": "/static/js/runtime-main.6ffb7502.js.map",
+    "static/js/2.ae2e36e2.chunk.js": "/static/js/2.ae2e36e2.chunk.js",
+    "static/js/2.ae2e36e2.chunk.js.map": "/static/js/2.ae2e36e2.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.2f4a2f3d8167b14b22d09c156a413f9b.js": "/precache-manifest.2f4a2f3d8167b14b22d09c156a413f9b.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/main.3e52a853.chunk.css.map": "/static/css/main.3e52a853.chunk.css.map",
+    "static/js/2.ae2e36e2.chunk.js.LICENSE.txt": "/static/js/2.ae2e36e2.chunk.js.LICENSE.txt",
+    "static/media/Ramaraja-Regular.ttf": "/static/media/Ramaraja-Regular.0358271b.ttf",
+    "static/media/darklogo.png": "/static/media/darklogo.474e48eb.png",
+    "static/media/darklogotag.svg": "/static/media/darklogotag.fb6502fe.svg",
+    "static/media/all.css": "/static/media/fa-solid-900.ec763292.svg",
+    "static/media/logo_waves.svg": "/static/media/logo_waves.4c2dd6ca.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.6ffb7502.js",
+    "static/js/2.ae2e36e2.chunk.js",
+    "static/css/main.3e52a853.chunk.css",
+    "static/js/main.fff04962.chunk.js"
+  ]
+}
