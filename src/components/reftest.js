@@ -163,30 +163,30 @@ const Reftree = React.memo(() => {
 
     const HORIZONTAL_SPACING = 50;
     const VERTICAL_SPACING = 80;
-    //const NODE_RADIUS = 30;
+    // const NODE_RADIUS = 30;
 
-    // useEffect(() => {        
-    //     console.log('Insert count useEffect()...')
-    //     if (bst.current.root === null) return;
-    //     setHeight(bst.current.getTreeHeight(bst.current.root, 0));
-    //     console.log(nodeData, nodeRef);
-        // for (let i = 0; i < nodeData.length; i++){
-        //     gsap.to(
-        //         nodeRef.current[i],
-        //         .5,
-        //         { delay: nodeData[i].isNew ? .4 : 0, y: (nodeData[i].level) * VERTICAL_SPACING , x: HORIZONTAL_SPACING * i - (bst.current.subTreeSize(bst.current.root.left) * HORIZONTAL_SPACING)},
-        //     );
-        //     if (nodeData[i].isNew){
-        //         gsap.from(
-        //             nodeRef.current[i],
-        //             .4,
-        //             { scale: 0, ease: 'back.out(2)'},
-        //         )
-        //         nodeData[i].isNew = false;  
-        //     }
-        // }
+    useEffect(() => {        
+        console.log('Insert count useEffect()...')
+        if (bst.current.root === null) return;
+        setHeight(bst.current.getTreeHeight(bst.current.root, 0));
+        console.log(nodeData, nodeRef);
+        for (let i = 0; i < nodeData.length; i++){
+            gsap.to(
+                nodeRef.current[i],
+                .5,
+                { delay: nodeData[i].isNew ? .4 : 0, y: (nodeData[i].level) * VERTICAL_SPACING , x: HORIZONTAL_SPACING * i - (bst.current.subTreeSize(bst.current.root.left) * HORIZONTAL_SPACING)},
+            );
+            if (nodeData[i].isNew){
+                gsap.from(
+                    nodeRef.current[i],
+                    .4,
+                    { scale: 0, ease: 'back.out(2)'},
+                )
+                nodeData[i].isNew = false;  
+            }
+        }
 
-    // }, [ insertCount, nodeData ])
+    }, [ insertCount, nodeData ])
 
     const handleInputSubmit = (e) => {
         e.preventDefault();

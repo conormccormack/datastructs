@@ -436,7 +436,6 @@ class AnimeTest extends Component {
             setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>');
             return;
         }
-        const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
         if (this.state.bst.root !== null) {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
             await formatBinaryTree(this.state.bst);
