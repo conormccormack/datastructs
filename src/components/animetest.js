@@ -74,10 +74,13 @@ class BinarySearchTree {
         if (root.left !== null) this.updateLevels(root.left, level + 1 );
     }
 
-    getTreeHeight(node, total){ 
-        if (node === null) return -1;
-        const left = node.left !== null ? this.getTreeHeight(node.left, total) + 1 : 0;
-        const right = node.right !== null ? this.getTreeHeight(node.right, total) + 1 : 0;
+    getTreeHeight(){
+        if (this.root === null) return 0;
+        return 1 + this.getTreeHeightRecurse(this.root, 0);
+    }
+    getTreeHeightRecurse(node, total){ 
+        const left = node.left !== null ? this.getTreeHeightRecurse(node.left, total) + 1 : 0;
+        const right = node.right !== null ? this.getTreeHeightRecurse(node.right, total) + 1 : 0;
         return total + Math.max(left, right);
     }
 
@@ -424,7 +427,7 @@ class AnimeTest extends Component {
         this.setState({ count: this.state.count + 1, inputValue: '', 
             formatting: false, 
             numActiveNodes: this.state.bst.numActiveNodes,
-            treeHeight: 1 + this.state.bst.getTreeHeight(this.state.bst.root, 0), 
+            treeHeight: this.state.bst.getTreeHeight(), 
         });
         document.getElementById('input-field').focus();
     }
@@ -444,7 +447,7 @@ class AnimeTest extends Component {
         this.setState({removeValue: '',
             formatting : false, 
             numActiveNodes: this.state.bst.numActiveNodes,
-            treeHeight: 1 + this.state.bst.getTreeHeight(this.state.bst.root, 0),
+            treeHeight: this.state.bst.getTreeHeight(),
         });
         document.getElementById('remove-field').focus();
         traverseCount = 0;
@@ -537,7 +540,7 @@ class AnimeTest extends Component {
         formatBinaryTree(this.state.bst);
         this.setState({count: this.state.count + randomTree.length, 
             numActiveNodes: this.state.bst.numActiveNodes, 
-            treeHeight: 1 + this.state.bst.getTreeHeight(this.state.bst.root, 0),
+            treeHeight: this.state.bst.getTreeHeight(),
         });
         this.toggleTraverseOn();
     }
