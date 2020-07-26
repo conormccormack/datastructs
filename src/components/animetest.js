@@ -557,7 +557,11 @@ class AnimeTest extends Component {
         if (this.state.bst.root === null || this.state.formatting === true) return;
         clearTimeout(resizeTimer);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        resizeTimer = setTimeout(formatBinaryTree(this.state.bst), 4000);
+        resizeTimer = setTimeout(async () => {
+            this.setState({formatting : true});
+            await formatBinaryTree(this.state.bst);
+            this.setState({formatting : false});
+        }, 500);
     }
 
     render(){ 
@@ -601,9 +605,11 @@ class AnimeTest extends Component {
                             <input style={{width: '120px'}} className='slider' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
                         </label>
                     </div>
-                    <button disabled={this.state.formatting} onClick={() => {
+                    <button disabled={this.state.formatting} onClick={async () => {
+                        this.setState({formatting: true });
                         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-                        formatBinaryTree(this.state.bst);
+                        await formatBinaryTree(this.state.bst);
+                        this.setState({formatting: false });
                     }} className='refresh-button'>
                         Something wrong? <i className="fas fa-sync-alt"/>
                     </button>
