@@ -29,7 +29,7 @@ const AboutMessage = styled.div`
 
 const AboutBody = styled.div`
     font-family: Raleway;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
 `
 

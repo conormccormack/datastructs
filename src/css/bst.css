@@ -34,7 +34,19 @@
 }
 
 .tree-info {
-    margin: 8px 0px;
+    padding: 8px 0px;
+    width: 100%;
+}
+
+.tree-info label {
+    width: 100%;
+    display: block;
+}
+
+.slider {
+    width: 120px;
+    margin-left: 10px;
+    padding-top: 0px;
 }
 
 .field-button {
@@ -56,13 +68,11 @@
 
 
 .refresh-button {
-    margin-left: 10px; 
     border-radius: 4px;
-    width: 100px;
-    min-width: 20px;
+    height: 28px;
+    width: 160px;
     text-align: center;
-    margin-top: 2px;
-    height: 100px;
+    margin: 8px 0px;
     border-style: none;
     background-color: #3C5B6F;
     color: white;

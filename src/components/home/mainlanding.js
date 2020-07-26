@@ -9,7 +9,7 @@ const WelcomeHeadline = styled.div`
 
 const WelcomeBody = styled.div`
     font-family: Raleway;
-    font-size: 16px;
+    font-size: 18px;
 `
 
 const MainWrapper = styled.div`
@@ -32,12 +32,12 @@ function Mainlanding(){
             <WelcomeMessage>
                 <WelcomeHeadline>Welcome to DataStructs.</WelcomeHeadline>
                 <WelcomeBody>
-                    DataStructs is a beautiful, intuitive platform for vizualizing essential data structures and algorithms.
+                    DataStructs is a platform for interactive visualizations of data structures and algorithms.
                     <br/><br/>
-                    Each page includes buttery-smooth animations of common data structures that you can build and use <strong>without
+                    Each page includes animations of common data structures that you can build and use <strong>without
                     writing a single line of code.</strong><br/><br/>
                     On top of that, DataStructs provides explanations and automated notes for every animation, so anyone can
-                    build an intuition each approach’s motivating ideas and asymptotic behavior. <br/><br/>
+                    build an intuition each subject's motivating ideas and asymptotic behavior. <br/><br/>
                     Click everything to view the 💯 catalog, or search for a specific data structure or concept in the search bar.
                 </WelcomeBody>
             </WelcomeMessage>

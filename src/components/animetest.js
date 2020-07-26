@@ -16,6 +16,7 @@
 import React, { Component } from 'react';
 import anime from 'animejs';
 import '../css/bst.css';
+import '../css/input-range.css';
 import '../resources/fonts/fontawesome/css/all.css';
 import styled from 'styled-components';
 
@@ -121,12 +122,12 @@ class BinarySearchTree {
         } else if (newNode.value > root.value){
             if (root.right !== null) {
                 newNode.level = newNode.level + 1;
-                addMessageToLog(`${newNode.value} >= ${root.value}, search right.`);
+                addMessageToLog(`${newNode.value} > ${root.value}, search right.`);
                 this.insertNode(root.right, newNode, count);
             } else { 
                 root.right = newNode; 
                 newNode.parent = root;
-                addMessageToLog(`${newNode.value} >= ${root.value}, insert as right leaf.`, 'end');
+                addMessageToLog(`${newNode.value} > ${root.value}, insert as right leaf.`, 'end');
                 this.numActiveNodes += 1;
                 addNodeToDOM(newNode.value, count);
             }
@@ -488,6 +489,7 @@ class AnimeTest extends Component {
 
     async handleMultiSubmit(event){
         event.preventDefault();
+        this.setState({formatting: true})
         var newNodes;
         try { newNodes = this.parseMulti();
         } catch (error){
@@ -509,7 +511,7 @@ class AnimeTest extends Component {
             await formatBinaryTree(this.state.bst);
             traverseCount = 0;
         }
-        this.setState({multiInput: ''});
+        this.setState({multiInput: '', formatting: false});
         document.getElementById('multi-field').focus();
     }
 
@@ -567,39 +569,43 @@ class AnimeTest extends Component {
                     </NodeContainer>
                 </div>
                 <div>    
-                    <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
-                    <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
-                    <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
-                        <label>
-                            <input disabled={this.state.formatting} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
-                            <button disabled={this.state.formatting} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Input</button>
-                        </label>
-                    </form>
-                    <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
-                        <label>
-                            <input disabled={this.state.formatting} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
-                            <button disabled={this.state.formatting} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
-                        </label>
-                    </form>
+                    <div>
+                        <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
+                        <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
+                        <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
+                            <label>
+                                <input disabled={this.state.formatting} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
+                                <button disabled={this.state.formatting} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Input</button>
+                            </label>
+                        </form>
+                        <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
+                            <label>
+                                <input disabled={this.state.formatting} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
+                                <button disabled={this.state.formatting} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
+                            </label>
+                        </form>
+                        {/* <form id='multi-input' onSubmit={this.handleMultiSubmit}>
+                            <textarea disabled={this.state.formatting} className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
+                            <button disabled={this.state.formatting} id='multi-button' type='submit' />
+                        </form>  */}
+                    </div>
                     <div className='tree-info'> 
-                        <label >
+                        <label>
                             Animate traversal
                             <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
                         </label>
                     </div>
-                    <label>
-                        Traversal Speed
-                        <input className='tree-info' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
-                    </label>
-                    <form id='multi-input' onSubmit={this.handleMultiSubmit}>
-                        <textarea disabled={this.state.formatting} className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
-                        <button disabled={this.state.formatting} id='multi-button' type='submit' />
-                    </form> 
+                    <div className='tree-info slider-wrapper'>
+                        <label>
+                            Traversal Speed 
+                            <input style={{width: '120px'}} className='slider' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
+                        </label>
+                    </div>
                     <button disabled={this.state.formatting} onClick={() => {
                         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
                         formatBinaryTree(this.state.bst);
                     }} className='refresh-button'>
-                        Something wrong? <i class="fas fa-sync-alt"></i>
+                        Something wrong? <i className="fas fa-sync-alt"/>
                     </button>
                     <div className='tree-info' id='logs'/>
                     <div className='tree-info' id='error-message'/>

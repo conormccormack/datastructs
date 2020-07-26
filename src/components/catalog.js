@@ -41,7 +41,7 @@ const Pages = [
             },
             {
                 name: 'Binary Search Tree',
-                url: 'tree/bst'
+                url: 'bst'
             },
             {
                 name: 'Red-Black Tree',
@@ -170,7 +170,7 @@ const resultsToHTML = (results) => {
                 <div>
                     <ResultCategory>{cat.category}</ResultCategory>
                     {cat.results.map(result =>
-                        <ResultPage><Link style={{ color:'black'}} to={`/${result.name}`}>{result.name}</Link></ResultPage>)}
+                        <ResultPage><Link style={{ color:'black'}} to={`/${result.url}`}>{result.name}</Link></ResultPage>)}
                 </div>
         )
     };
