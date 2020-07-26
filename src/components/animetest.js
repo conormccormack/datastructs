@@ -596,7 +596,8 @@ class AnimeTest extends Component {
                     <button disabled={this.state.formatting} onClick={() => {
                         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
                         formatBinaryTree(this.state.bst);
-                    }} className='refresh-button'></button>
+                    }} className='refresh-button'><i class="fa fa-refresh" style={{color: '#fff'}} aria-hidden="true"></i>
+                    </button>
                     <div className='tree-info' id='logs'/>
                     <div className='tree-info' id='error-message'/>
                 </div>
