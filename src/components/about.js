@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from './navbar';
+import Navbar from './navigation/navbar';
 import styled from 'styled-components';
 import '../css/about.css';
 import AboutMainGraphic from "./aboutmaingraphic";
@@ -50,7 +50,7 @@ function About (props){
                         About
                     </AboutHeadline>
                     <AboutBody>
-                        DataStructs is a beautiful, intuitive platform for vizualizing data structures and algorithms built by Conor McCormack
+                        DataStructs is a platform for interactive vizualizations of data structures and algorithms built by Conor McCormack
                         to replace existing sites that offer little in the way of explaining how data structures and algorithms work or why we use them.<br/>
                         <br/>
                         I am a third-year student of Computer Science & Math at the University of Southern California concurrently working towards an M.S. in Applied Data Science. My primary interests lie in

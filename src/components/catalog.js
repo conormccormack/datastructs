@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from './navbar';
+import Navbar from './navigation/navbar';
 import queryString from 'query-string';
 import styled from 'styled-components';
 import {motion} from "framer-motion";

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import Navbar from "./navbar";
+import Navbar from "./navigation/navbar";
 import {motion} from "framer-motion";
 
 const PremiumContainer = styled.div`

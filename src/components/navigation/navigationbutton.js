@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 import styled from 'styled-components';
-import '../resources/fonts/fontawesome/css/all.css';
+import '../../resources/fonts/fontawesome/css/all.css';
 
 const Button = styled.div`
     font-size: 16px;
