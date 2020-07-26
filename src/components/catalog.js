@@ -6,7 +6,7 @@ import {motion} from "framer-motion";
 import {Link} from "react-router-dom";
 
 const CatalogContainer = styled.div`
-    background-color: #EFE7E2;
+    background-color: #EAE7DC;
     height: 100vh;
 `
 const CatalogHeadline = styled.div`

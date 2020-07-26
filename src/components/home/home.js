@@ -6,7 +6,7 @@ import {motion} from 'framer-motion';
 
 const HomeContainer = styled.div`
     height: 100vh;
-    background-color: #EFE7E2;
+    background-color: #EAE7DC;
 `
 
 function Home(props) {

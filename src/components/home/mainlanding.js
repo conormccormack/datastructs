@@ -38,8 +38,7 @@ function Mainlanding(){
                     writing a single line of code.</strong><br/><br/>
                     On top of that, DataStructs provides explanations and automated notes for every animation, so anyone can
                     build an intuition each approach’s motivating ideas and asymptotic behavior. <br/><br/>
-                    Open the explore menu to browse the collection categorically, click everything to see 💯, or search for a
-                    specific data structure or concept in the search bar.
+                    Click everything to view the 💯 catalog, or search for a specific data structure or concept in the search bar.
                 </WelcomeBody>
             </WelcomeMessage>
 

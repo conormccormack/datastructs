@@ -7,7 +7,7 @@ import {motion} from "framer-motion";
 
 const AboutContainer = styled.div`
     height: 100vh;
-    background-color: #EFE7E2;
+    background-color: #EAE7DC;
 `
 const AboutHeadline = styled.div`
     font-family: Ramaraja;

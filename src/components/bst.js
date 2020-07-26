@@ -5,7 +5,8 @@ import { motion } from 'framer-motion';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-    background-color: #EFE7E2;
+    background-color: #EAE7DC;
+    // background-color: #EAE7DC;
     height: 100vh;
 `   
 
@@ -13,7 +14,7 @@ const Headline = styled.div`
     font-family: Ramaraja;
     font-size: 50px;
     padding-left: 100px;
-    background-color: #EFE7E2;
+    background-color: #EAE7DC;
 `
 
 function BST (props){

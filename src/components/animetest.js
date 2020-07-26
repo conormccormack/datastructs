@@ -550,7 +550,7 @@ class AnimeTest extends Component {
     handleIntervalChange(event){ TRAVERSE_DURATION = 1500 - event.target.value; }
 
     onResize(){
-        if (this.state.bst.root === null) return;
+        if (this.state.bst.root === null || this.state.formatting === true) return;
         clearTimeout(resizeTimer);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         resizeTimer = setTimeout(formatBinaryTree(this.state.bst), 3000);
@@ -593,7 +593,10 @@ class AnimeTest extends Component {
                         <textarea disabled={this.state.formatting} className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
                         <button disabled={this.state.formatting} id='multi-button' type='submit' />
                     </form> 
-                    <button disabled={this.state.formatting} onClick={() => formatBinaryTree(this.state.bst)} className='refresh-button'></button>
+                    <button disabled={this.state.formatting} onClick={() => {
+                        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+                        formatBinaryTree(this.state.bst);
+                    }} className='refresh-button'></button>
                     <div className='tree-info' id='logs'/>
                     <div className='tree-info' id='error-message'/>
                 </div>

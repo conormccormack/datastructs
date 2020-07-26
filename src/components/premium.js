@@ -4,7 +4,7 @@ import Navbar from "./navbar";
 import {motion} from "framer-motion";
 
 const PremiumContainer = styled.div`
-    background-color: #EFE7E2;
+    background-color: #EAE7DC;
     height: 100vh;
 `
 const PremiumHeadline = styled.div`

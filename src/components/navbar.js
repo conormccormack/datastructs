@@ -12,7 +12,7 @@ const NavLayout = styled.div`
     padding-right: 100px;
     display: flex;
     justify-content: flex-start;
-    background-color: #EFE7E2;
+    background-color: #EAE7DC;
     grid-template-columns: repeat(5,200px);
     height: 50px;
 `
@@ -30,7 +30,7 @@ function Navbar(){
                 <NavigationButton nextPage="about"/>
                 {/* <NavigationButton nextPage="explore"/> */}
                 <NavigationButton nextPage="everything"/>
-                <NavigationButton nextPage="premium"/>
+                {/* <NavigationButton nextPage="premium"/> */}
                 <SearchbarContainer>
                     <Searchbar/>
                 </SearchbarContainer>
