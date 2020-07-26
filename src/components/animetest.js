@@ -41,7 +41,6 @@ let shift_x;
 let resizeTimer;
 let traverseCount = 0;
 let traverseOn = true;
-let allowDuplicate = false; 
 
 let formatTimeline = anime.timeline({
     autoplay: false,
@@ -69,16 +68,14 @@ class BinarySearchTree {
         this.x_distances = new Map();
     }
 
-    incrementActiveNodes(){
-        this.numActiveNodes += 1;
-    }
-
     updateLevels(root, level){
         root.level = level;
         if (root.right !== null) this.updateLevels(root.right, level + 1);
         if (root.left !== null) this.updateLevels(root.left, level + 1 );
     }
+
     getTreeHeight(node, total){ 
+        if (node === null) return -1;
         const left = node.left !== null ? this.getTreeHeight(node.left, total) + 1 : 0;
         const right = node.right !== null ? this.getTreeHeight(node.right, total) + 1 : 0;
         return total + Math.max(left, right);
@@ -90,35 +87,44 @@ class BinarySearchTree {
         if (this.root === null) {
             this.root = newNode;
             addMessageToLog(`Tree empty: inserting ${value} as root.`, 'end');
+            addNodeToDOM(value, count);
+            this.numActiveNodes += 1;
         }
         else { 
             newNode.level += 1;
-            this.insertNode(this.root, newNode);
+            this.insertNode(this.root, newNode, count);
         }
         return newNode;
     }
 
-    insertNode(root, newNode){  
+    insertNode(root, newNode, count){  
         if (traverseOn) addTraverseStep(root, 0);
-        if (newNode.value < root.value){
+        if (newNode.value === root.value) {
+            setErrorMessage(`${newNode.value} already exists in the tree. Please enter an unique value.`)
+            return;
+        } else if (newNode.value < root.value){
             if (root.left !== null) {
                 newNode.level = newNode.level + 1;
                 addMessageToLog(`${newNode.value} < ${root.value}, search left.`);
-                this.insertNode(root.left, newNode);
+                this.insertNode(root.left, newNode, count);
             } else { 
                 root.left = newNode; 
                 newNode.parent = root;
                 addMessageToLog(`${newNode.value} < ${root.value}, insert as left leaf.`, 'end');
+                this.numActiveNodes += 1;
+                addNodeToDOM(newNode.value, count);
             }
-        } else if (newNode.value >= root.value){
+        } else if (newNode.value > root.value){
             if (root.right !== null) {
                 newNode.level = newNode.level + 1;
                 addMessageToLog(`${newNode.value} >= ${root.value}, search right.`);
-                this.insertNode(root.right, newNode);
+                this.insertNode(root.right, newNode, count);
             } else { 
                 root.right = newNode; 
                 newNode.parent = root;
                 addMessageToLog(`${newNode.value} >= ${root.value}, insert as right leaf.`, 'end');
+                this.numActiveNodes += 1;
+                addNodeToDOM(newNode.value, count);
             }
         }
     }
@@ -137,6 +143,7 @@ class BinarySearchTree {
             return this.removeRecurse(root.right, value);
         } else {
             this.deleteNode(root);
+            this.numActiveNodes -= 1;
             addMessageToLog(`Found ${value}: removing ${value} from tree.`, 'end');
             setErrorMessage('');
             return true;
@@ -279,12 +286,10 @@ function setErrorMessage(message){
 }
 
 async function formatBinaryTree(tree){
-    toggleFormDisable();
     buildNodeTimeline(tree.root, tree);
     buildEdgeTimeline(tree.root, tree);
     formatTimeline.play();
     await formatTimeline.finished;
-    toggleFormDisable();
     formatTimeline = anime.timeline({});
     return;
 }
@@ -368,15 +373,6 @@ function addPathToDom(child){
     svg.appendChild(path);
 }
 
-function toggleFormDisable(){
-    document.getElementById('input-field').disabled =  !document.getElementById('input-field').disabled;
-    document.getElementById('remove-field').disabled = !document.getElementById('remove-field').disabled;
-    document.getElementById('input-button').disabled = !document.getElementById('input-button').disabled;
-    document.getElementById('remove-button').disabled = !document.getElementById('remove-button').disabled;
-    document.getElementById('multi-field').disabled = !document.getElementById('multi-field').disabled;
-    document.getElementById('multi-button').disabled = !document.getElementById('multi-button').disabled;
-}
-
 class AnimeTest extends Component {
     constructor (props) {
         super(props);
@@ -386,27 +382,19 @@ class AnimeTest extends Component {
             bst: new BinarySearchTree(),
             multiInput: '',
             count: 0,
+            formatting: false,
+            numActiveNodes: 0,
+            treeHeight: 0,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleRemoveChange = this.handleRemoveChange.bind(this);
         this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this); 
-        this.toggleAllowDuplicate = this.toggleAllowDuplicate.bind(this);
         this.calculateShiftX = this.calculateShiftX.bind(this);
         this.onResize = this.onResize.bind(this);
-        this.updateActiveNodeCount = this.updateActiveNodeCount.bind(this);
         this.handleMultiSubmit = this.handleMultiSubmit.bind(this);
         this.handleMultiChange = this.handleMultiChange.bind(this);
         this.parseMulti = this.parseMulti.bind(this);
-    }
-
-    updateActiveNodeCount(){
-        document.getElementById('active-node-count').innerHTML = `Number of Nodes: <strong>${this.state.bst.numActiveNodes}</strong>`;
-    }
-
-    updateTreeHeight(){
-        document.getElementById('tree-height').innerHTML = 
-        `Tree Height: <strong>${this.state.bst.root !== null ? this.state.bst.getTreeHeight(this.state.bst.root, 0) + 1 : 0}</strong>`;
     }
 
     handleInputChange(event) {
@@ -423,25 +411,27 @@ class AnimeTest extends Component {
 
     async handleInputSubmit(event) {
         event.preventDefault();
+        this.setState({formatting: true, inputValue: ''});
         if (this.state.inputValue === '' || isNaN(this.state.inputValue)) {
             setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>')
             return;
         }
         setErrorMessage('');
         this.state.bst.insert(this.state.inputValue, this.state.count);
-        addNodeToDOM(this.state.inputValue, this.state.count);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         await formatBinaryTree(this.state.bst);
         traverseCount = 0;
-        this.setState({ count: this.state.count + 1, inputValue: '' });
-        this.state.bst.incrementActiveNodes();
-        this.updateActiveNodeCount();
-        this.updateTreeHeight();
+        this.setState({ count: this.state.count + 1, inputValue: '', 
+            formatting: false, 
+            numActiveNodes: this.state.bst.numActiveNodes,
+            treeHeight: 1 + this.state.bst.getTreeHeight(this.state.bst.root, 0), 
+        });
         document.getElementById('input-field').focus();
     }
 
     async handleRemoveSubmit(event) {
         event.preventDefault();
+        this.setState({formatting: true, removeValue: ''});
         if (this.state.removeValue === '' || isNaN(this.state.removeValue)) {
             setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>');
             return;
@@ -451,10 +441,11 @@ class AnimeTest extends Component {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
             await formatBinaryTree(this.state.bst);
         };
-        if (success) this.state.bst.numActiveNodes -= 1;
-        this.setState({removeValue: ''});
-        this.updateActiveNodeCount();
-        this.updateTreeHeight();
+        this.setState({removeValue: '',
+            formatting : false, 
+            numActiveNodes: this.state.bst.numActiveNodes,
+            treeHeight: 1 + this.state.bst.getTreeHeight(this.state.bst.root, 0),
+        });
         document.getElementById('remove-field').focus();
         traverseCount = 0;
     }
@@ -493,9 +484,7 @@ class AnimeTest extends Component {
 
     async handleMultiSubmit(event){
         event.preventDefault();
-        
         var newNodes;
-
         try { newNodes = this.parseMulti();
         } catch (error){
             console.error(error)
@@ -515,8 +504,6 @@ class AnimeTest extends Component {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
             await formatBinaryTree(this.state.bst);
             traverseCount = 0;
-            this.updateActiveNodeCount();
-            this.updateTreeHeight();
         }
         this.setState({multiInput: ''});
         document.getElementById('multi-field').focus();
@@ -532,7 +519,11 @@ class AnimeTest extends Component {
         window.addEventListener('resize', this.onResize);
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
         this.toggleTraverseOn();
-        const randomTree = [...Array(NUM_STARTING_NODE)].map(() => Math.floor(Math.random() * 999 + 1));
+        const randomTree = [];
+        while(randomTree.length < NUM_STARTING_NODE){
+            const s = Math.floor(Math.random() * 999 + 1);
+            if (randomTree.indexOf(s) === -1) randomTree.push(s);
+        }
         const sortedTree = Array.from(randomTree).sort();
         const median = sortedTree[Math.floor(sortedTree.length/2)];
         const medianIndex = randomTree.indexOf(median);
@@ -540,20 +531,18 @@ class AnimeTest extends Component {
         randomTree[0] = median;
         randomTree.forEach( (value, index) => {
             this.state.bst.insert(parseFloat(value), this.state.count + index);
-            addNodeToDOM(value, this.state.count + index);
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            this.state.bst.incrementActiveNodes();
         });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         formatBinaryTree(this.state.bst);
-        this.updateActiveNodeCount();
-        this.updateTreeHeight();
-        this.setState({count: this.state.count + randomTree.length});
+        this.setState({count: this.state.count + randomTree.length, 
+            numActiveNodes: this.state.bst.numActiveNodes, 
+            treeHeight: 1 + this.state.bst.getTreeHeight(this.state.bst.root, 0),
+        });
         this.toggleTraverseOn();
     }
     
     toggleTraverseOn(){ traverseOn = !traverseOn; }
-    toggleAllowDuplicate() { allowDuplicate = !allowDuplicate; }
 
     handleIntervalChange(event){ TRAVERSE_DURATION = 1500 - event.target.value; }
 
@@ -561,7 +550,7 @@ class AnimeTest extends Component {
         if (this.state.bst.root === null) return;
         clearTimeout(resizeTimer);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        resizeTimer = setTimeout(formatBinaryTree(this.state.bst), 3000 );
+        resizeTimer = setTimeout(formatBinaryTree(this.state.bst), 3000);
     }
 
     render(){ 
@@ -573,18 +562,18 @@ class AnimeTest extends Component {
                     </NodeContainer>
                 </div>
                 <div>    
-                    <div className='tree-info' id='active-node-count'/>
-                    <div className='tree-info' id='tree-height'/>
+                    <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
+                    <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
                     <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
                         <label>
-                            <input className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
-                            <button id='input-button' onClick={this.handleInputSubmit} className='inputButton'>Input</button>
+                            <input disabled={this.state.formatting} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
+                            <button disabled={this.state.formatting} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Input</button>
                         </label>
                     </form>
                     <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
                         <label>
-                            <input className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
-                            <button id='remove-button' onClick={this.handleRemoveSubmit} className='removeButton'>Remove</button>
+                            <input disabled={this.state.formatting} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
+                            <button disabled={this.state.formatting} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
                         </label>
                     </form>
                     <div className='tree-info'> 
@@ -598,9 +587,10 @@ class AnimeTest extends Component {
                         <input className='tree-info' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
                     </label>
                     <form id='multi-input' onSubmit={this.handleMultiSubmit}>
-                        <textarea className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
-                        <button id='multi-button' type='submit' />
+                        <textarea disabled={this.state.formatting} className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
+                        <button disabled={this.state.formatting} id='multi-button' type='submit' />
                     </form> 
+                    <button disabled={this.state.formatting} onClick={() => formatBinaryTree(this.state.bst)} className='refresh-button'></button>
                     <div className='tree-info' id='logs'/>
                     <div className='tree-info' id='error-message'/>
                 </div>

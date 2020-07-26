@@ -33,6 +33,7 @@ class Node {
         this.id = id;
         this.line = null;
         this.isNew = true;
+        this.show = false;
     }
 }
 
@@ -75,6 +76,7 @@ class BinarySearchTree {
             newNode.level += 1;
             this.insertNode(this.root, newNode);
         }
+        newNode.show = true;
         return newNode;
     }
 
@@ -112,6 +114,7 @@ class BinarySearchTree {
     }
 
     deleteNode(node){
+        console.log(`Deleting node of key ${node.value}`)
         let child_of_type = (node.parent !== null) ? (node.parent.right === node) ? 'right' : 'left' : 'root';
         let replacement = (node.left === null && node.right === null) ? null : (node.left === null) ? node.right : node.left;
         if (node.left !== null && node.right !== null){
@@ -162,27 +165,28 @@ const Reftree = React.memo(() => {
     const VERTICAL_SPACING = 80;
     //const NODE_RADIUS = 30;
 
-    useEffect(() => {        
-        if (bst.current.root === null) return;
-        setHeight(bst.current.getTreeHeight(bst.current.root, 0));
-        console.log(nodeData, nodeRef);
-        for (let i = 0; i < nodeData.length; i++){
-            gsap.to(
-                nodeRef.current[i],
-                .5,
-                { delay: nodeData[i].isNew ? .4 : 0, y: (nodeData[i].level) * VERTICAL_SPACING , x: HORIZONTAL_SPACING * i - (bst.current.subTreeSize(bst.current.root.left) * HORIZONTAL_SPACING)},
-            );
-            if (nodeData[i].isNew){
-                gsap.from(
-                    nodeRef.current[i],
-                    .4,
-                    { scale: 0, ease: 'back.out(2)'},
-                )
-                nodeData[i].isNew = false;  
-            }
-        }
+    // useEffect(() => {        
+    //     console.log('Insert count useEffect()...')
+    //     if (bst.current.root === null) return;
+    //     setHeight(bst.current.getTreeHeight(bst.current.root, 0));
+    //     console.log(nodeData, nodeRef);
+        // for (let i = 0; i < nodeData.length; i++){
+        //     gsap.to(
+        //         nodeRef.current[i],
+        //         .5,
+        //         { delay: nodeData[i].isNew ? .4 : 0, y: (nodeData[i].level) * VERTICAL_SPACING , x: HORIZONTAL_SPACING * i - (bst.current.subTreeSize(bst.current.root.left) * HORIZONTAL_SPACING)},
+        //     );
+        //     if (nodeData[i].isNew){
+        //         gsap.from(
+        //             nodeRef.current[i],
+        //             .4,
+        //             { scale: 0, ease: 'back.out(2)'},
+        //         )
+        //         nodeData[i].isNew = false;  
+        //     }
+        // }
 
-    }, [ insertCount, nodeData ])
+    // }, [ insertCount, nodeData ])
 
     const handleInputSubmit = (e) => {
         e.preventDefault();
@@ -199,35 +203,41 @@ const Reftree = React.memo(() => {
     }
 
     useEffect(() => {
-        console.log(bst.current);
-        console.log({nodeData});
-        console.log({nodeRef});
-        for (let i = 0; i < nodeData.length; i++){
-            gsap.to(
-                nodeRef.current[i],
-                .5,
-                { delay: nodeData[i].isNew ? .4 : 0, y: (nodeData[i].level) * VERTICAL_SPACING , x: HORIZONTAL_SPACING * i - (bst.current.subTreeSize(bst.current.root.left) * HORIZONTAL_SPACING)},
-            );
-            // if (nodeData[i].isNew){
-            //     gsap.from(
-            //         nodeRef.current[i],
-            //         .4,
-            //         { scale: 0, ease: 'back.out(2)'},
-            //    )
-            //     nodeData[i].isNew = false;  
-            // }
-        }
-    }, [ removeCount, nodeData ] )
+        setNodeData(nodeData => bst.current.getInOrderArray(bst.current.root, []));
+    }, [removeCount] )
 
-    const handleRemoveSubmit = (e) => {
+    // useEffect(() => {
+    //     console.log(bst.current);
+    //     console.log({nodeData});
+    //     console.log({nodeRef});
+    //     for (let i = 0; i < nodeData.length; i++){
+    //         gsap.to(
+    //             nodeRef.current[i],
+    //             .5,
+    //             { delay: nodeData[i].isNew ? .4 : 0, y: (nodeData[i].level) * VERTICAL_SPACING , x: HORIZONTAL_SPACING * i - (bst.current.subTreeSize(bst.current.root.left) * HORIZONTAL_SPACING)},
+    //         );
+    //         // if (nodeData[i].isNew){
+    //         //     gsap.from(
+    //         //         nodeRef.current[i],
+    //         //         .4,
+    //         //         { scale: 0, ease: 'back.out(2)'},
+    //         //    )
+    //         //     nodeData[i].isNew = false;  
+    //         // }
+    //     }
+    // }, [ removeCount, nodeData ] )
+
+   const handleRemoveSubmit = (e) => {
         e.preventDefault();
         if (removeValue !== '' && !isNaN(removeValue)) {
             const success = bst.current.removeRecurse(bst.current.root, parseFloat(removeValue));
-            setNodeData(bst.current.getInOrderArray(bst.current.root, []));
-            success && setMessage('');
-            !success ? bst.current.root === null ? setMessage('Tree is empty.') : setMessage(`${removeValue} not in the tree.`)
-            : setMessage(`${removeValue} removed from the tree.`);
-            if (success) setRemoveCount(removeCount + 1); 
+            if (success){
+                setMessage(`${removeValue} removed from the tree.`);
+                setRemoveCount(removeCount + 1);
+                setCount(count - 1);
+            } else {
+                bst.current.root == null ? setMessage('Tree is empty.') : setMessage(`${removeValue} not in the tree.`)
+            }
         } else {
             setMessage('Please enter a number (e.g. 32, 2.7).');
         }
@@ -238,9 +248,10 @@ const Reftree = React.memo(() => {
         <PageContainer>
             <TreeContainer>
                 <TransitionGroup>
-                    {nodeData.map( (node, i ) =>  
-                        <RefNode key={node.id} node={node} ref={el => nodeRef.current.includes(el) ? nodeRef.current[nodeRef.current.indexOf(el)] = el : nodeRef.current[i] = el}/>
-                    )}
+                    {nodeData.map( (node, i ) =>{
+                        console.log({nodeData, nodeRef})
+                        return(<RefNode key={node.id} node={node} ref={el => nodeRef.current.includes(el) ? nodeRef.current[nodeRef.current.indexOf(el)] = el : nodeRef.current[i] = el}/>);
+})}
                 </TransitionGroup>
             </TreeContainer>
             <ControlContainer>

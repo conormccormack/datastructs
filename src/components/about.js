@@ -51,7 +51,7 @@ function About (props){
                     <AboutBody>
                         DataStructs is a beautiful, intuitive platform for vizualizing data structures and algorithms.<br/>
                         <br/>
-                        As of August 2020, DataStructs is built with <Link style={{textDecoration: 'underline'}} href="https://reactjs.org">React</Link>, animated with <Link style={{textDecoration: 'underline'}} href="https://greensock.com">GreenSock</Link>, and hosted on Netlify.
+                        As of August 2020, DataStructs is built with <Link style={{textDecoration: 'underline'}} href="https://reactjs.org">React</Link>, animated with <Link style={{textDecoration: 'underline'}} href="https://greensock.com">GreenSock</Link>, and continuously deployed via Netlify.
                         <br/><br/>
                         <Link className="hoverHighlit" href='https://github.com/conormccormack/datastructs'>
                             <i className="fab fa-github"></i> View this project on <strong>Github</strong>

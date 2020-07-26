@@ -54,6 +54,19 @@ const Pages = [
         ]
     },
     {
+        category: "Heaps",
+        queries: [
+            {
+                name: 'Binary Heap',
+                url: 'heap/binheap'
+            },
+            {
+                name: 'Fibonacci Heap',
+                url: 'heap/fibonacci'
+            },
+        ],
+    },
+    {
         category: "Basics",
         queries: [
             {

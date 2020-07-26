@@ -28,8 +28,8 @@ function Navbar(){
             <NavLayout>
                 <HomeButton className="homeLink"/>
                 <NavigationButton nextPage="about"/>
-                <NavigationButton nextPage="explore"/>
-                <NavigationButton nextPage="everything else"/>
+                {/* <NavigationButton nextPage="explore"/> */}
+                <NavigationButton nextPage="everything"/>
                 <NavigationButton nextPage="premium"/>
                 <SearchbarContainer>
                     <Searchbar/>
