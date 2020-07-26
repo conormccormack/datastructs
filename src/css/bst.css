@@ -54,14 +54,15 @@
     height: 100%;
 }
 
+
 .refresh-button {
     margin-left: 10px; 
     border-radius: 4px;
-    width: 70px;
+    width: 100px;
     min-width: 20px;
     text-align: center;
     margin-top: 2px;
-    height: 28px;
+    height: 100px;
     border-style: none;
     background-color: #3C5B6F;
     color: white;

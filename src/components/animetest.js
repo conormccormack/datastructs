@@ -16,6 +16,7 @@
 import React, { Component } from 'react';
 import anime from 'animejs';
 import '../css/bst.css';
+import '../resources/fonts/fontawesome/css/all.css';
 import styled from 'styled-components';
 
 const PageWrapper = styled.div`
@@ -385,7 +386,7 @@ class AnimeTest extends Component {
             bst: new BinarySearchTree(),
             multiInput: '',
             count: 0,
-            formatting: false,
+            formatting: true,
             numActiveNodes: 0,
             treeHeight: 0,
         };
@@ -518,7 +519,7 @@ class AnimeTest extends Component {
     }
 
 
-    componentDidMount(){
+    async componentDidMount(){
         window.addEventListener('resize', this.onResize);
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
         this.toggleTraverseOn();
@@ -537,10 +538,11 @@ class AnimeTest extends Component {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        formatBinaryTree(this.state.bst);
+        await formatBinaryTree(this.state.bst);
         this.setState({count: this.state.count + randomTree.length, 
             numActiveNodes: this.state.bst.numActiveNodes, 
             treeHeight: this.state.bst.getTreeHeight(),
+            formatting: false,
         });
         this.toggleTraverseOn();
     }
@@ -553,7 +555,7 @@ class AnimeTest extends Component {
         if (this.state.bst.root === null || this.state.formatting === true) return;
         clearTimeout(resizeTimer);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        resizeTimer = setTimeout(formatBinaryTree(this.state.bst), 3000);
+        resizeTimer = setTimeout(formatBinaryTree(this.state.bst), 4000);
     }
 
     render(){ 
@@ -596,7 +598,8 @@ class AnimeTest extends Component {
                     <button disabled={this.state.formatting} onClick={() => {
                         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
                         formatBinaryTree(this.state.bst);
-                    }} className='refresh-button'><i class="fa fa-refresh" style={{color: '#fff'}} aria-hidden="true"></i>
+                    }} className='refresh-button'>
+                        Something wrong? <i class="fas fa-sync-alt"></i>
                     </button>
                     <div className='tree-info' id='logs'/>
                     <div className='tree-info' id='error-message'/>

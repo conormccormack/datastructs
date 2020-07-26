@@ -12,7 +12,7 @@ const NavLayout = styled.div`
     padding-right: 100px;
     display: flex;
     justify-content: flex-start;
-    background-color: #EAE7DC;
+    background-color: #ece7e3;
     grid-template-columns: repeat(5,200px);
     height: 50px;
 `

@@ -8,7 +8,7 @@ import copy from 'copy-to-clipboard';
 
 const AboutContainer = styled.div`
     height: 100vh;
-    background-color: #EAE7DC;
+    background-color: #ece7e3;
 `
 const AboutHeadline = styled.div`
     font-family: Ramaraja;
