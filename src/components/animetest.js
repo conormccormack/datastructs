@@ -45,8 +45,7 @@ let traverseCount = 0;
 let traverseOn = true;
 
 let formatTimeline = anime.timeline({
-    autoplay: false,
-    
+    autoplay: false, 
 });
 
 class Node {
@@ -189,7 +188,7 @@ class BinarySearchTree {
         this.buildTearDownAnimation(this.root);
         formatTimeline.play();
         await formatTimeline.finished;
-        formatTimeline = anime.timeline({});
+        formatTimeline = anime.timeline({ autoplay: false });
         return;
     }
 
@@ -197,25 +196,31 @@ class BinarySearchTree {
         formatTimeline.add({
             targets: `#node${node.id}`,
             opacity: 0,
-            duration: 1500,
+            scale: .9,
+            translateX: `+=60`,
+            translateY: `-=20`,
+            duration: 1000,
             complete: () => {
                 document.getElementById(`node${node.id}`).remove();
             }
-        }, node.level * 100)
+        }, node.level * 50)
         if (node !== this.root) {
             formatTimeline.add({
                 targets: `#path${node.id}`,
                 opacity: 0,
-                duration: 1500,
+                scale: .9,
+                translateX: `+=60`,
+                translateY: `-=20`,
+                duration: 1000,
                 complete: () => {
                     document.getElementById(`path${node.id}`).remove();
                 }
-            }, node.level * 70)
+            }, node.level * 50)
         }
         if (node.left !== null) this.buildTearDownAnimation(node.left);
         if (node.right !== null) this.buildTearDownAnimation(node.right);
     }
-    
+
     findLeftmost(root){
         return root.left === null ? root : this.findLeftmost(root.left);
     }
@@ -327,7 +332,6 @@ async function formatBinaryTree(tree){
     buildEdgeTimeline(tree.root, tree);
     formatTimeline.play();
     await formatTimeline.finished;
-    formatTimeline = anime.timeline({});
     return;
 }
 
@@ -419,9 +423,10 @@ class AnimeTest extends Component {
             bst: new BinarySearchTree(),
             multiInput: '',
             count: 0,
-            formatting: true,
+            disable: true,
             numActiveNodes: 0,
             treeHeight: 0,
+            formatting: true,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -433,9 +438,38 @@ class AnimeTest extends Component {
         this.handleMultiChange = this.handleMultiChange.bind(this);
         this.parseMulti = this.parseMulti.bind(this);
         this.tearDownTree = this.tearDownTree.bind(this);
-        this.resyncFormatting = this.resyncFormatting.bind(this);
+        this.resyncFormat = this.resyncFormat.bind(this);
+        this.playPause = this.playPause.bind(this);
     }
 
+    async componentDidMount(){
+        window.addEventListener('resize', this.onResize);
+        shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
+        this.toggleTraverseOn();
+        const randomTree = [];
+        while(randomTree.length < NUM_STARTING_NODE){
+            const s = Math.floor(Math.random() * 999 + 1);
+            if (randomTree.indexOf(s) === -1) randomTree.push(s);
+        }
+        const sortedTree = Array.from(randomTree).sort();
+        const median = sortedTree[Math.floor(sortedTree.length/2)];
+        const medianIndex = randomTree.indexOf(median);
+        randomTree[medianIndex] = randomTree[0];
+        randomTree[0] = median;
+        randomTree.forEach( (value, index) => {
+            this.state.bst.insert(parseFloat(value), this.state.count + index);
+            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        });
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        this.setState({count: this.state.count + randomTree.length, 
+            numActiveNodes: this.state.bst.numActiveNodes, 
+            treeHeight: this.state.bst.getTreeHeight(),
+        });
+        await formatBinaryTree(this.state.bst);
+        this.setState({ disable: false });
+        this.toggleTraverseOn();
+    }
+    
     handleInputChange(event) {
         this.setState({ inputValue: parseFloat(event.target.value) });
     }
@@ -450,7 +484,8 @@ class AnimeTest extends Component {
 
     async handleInputSubmit(event) {
         event.preventDefault();
-        this.setState({formatting: true, inputValue: ''});
+        formatTimeline = anime.timeline({ autoplay: false });
+        this.setState({disable: true, inputValue: ''});
         if (this.state.inputValue === '' || isNaN(this.state.inputValue)) {
             setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>')
             return;
@@ -461,7 +496,7 @@ class AnimeTest extends Component {
         await formatBinaryTree(this.state.bst);
         traverseCount = 0;
         this.setState({ count: this.state.count + 1, inputValue: '', 
-            formatting: false, 
+            disable: false, 
             numActiveNodes: this.state.bst.numActiveNodes,
             treeHeight: this.state.bst.getTreeHeight(), 
         });
@@ -470,7 +505,8 @@ class AnimeTest extends Component {
 
     async handleRemoveSubmit(event) {
         event.preventDefault();
-        this.setState({formatting: true, removeValue: ''});
+        this.setState({disable: true, removeValue: ''});
+        formatTimeline = anime.timeline({ autoplay: false });
         if (this.state.removeValue === '' || isNaN(this.state.removeValue)) {
             setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>');
             return;
@@ -481,7 +517,7 @@ class AnimeTest extends Component {
             await formatBinaryTree(this.state.bst);
         };
         this.setState({removeValue: '',
-            formatting : false, 
+            disable : false, 
             numActiveNodes: this.state.bst.numActiveNodes,
             treeHeight: this.state.bst.getTreeHeight(),
         });
@@ -516,20 +552,19 @@ class AnimeTest extends Component {
                 }
                 idx = close_brack;
             }
-            
         }
         return instructions;
     }
 
     async handleMultiSubmit(event){
         event.preventDefault();
-        this.setState({formatting: true})
+        formatTimeline = anime.timeline({ autoplay: false });
+        this.setState({disable: true})
         var newNodes;
         try { newNodes = this.parseMulti();
         } catch (error){
             console.error(error)
         }
-        
         for (const value of newNodes){
             if (value.toString().includes('d')) {
                 const success = this.state.bst.removeRecurse(this.state.bst.root, parseFloat(value.toString().substring(1)));
@@ -545,70 +580,55 @@ class AnimeTest extends Component {
             await formatBinaryTree(this.state.bst);
             traverseCount = 0;
         }
-        this.setState({multiInput: '', formatting: false});
+        this.setState({multiInput: '', disable: false});
         document.getElementById('multi-field').focus();
     }
 
-    async tearDownTree(){
-        this.setState({formatting: true});
-        await this.state.bst.tearDownTree();
-        this.setState({formatting: false, bst: new BinarySearchTree(), numActiveNodes: 0, treeHeight: 0});
-    }
-
+    
     calculateShiftX(nodeContainer) {
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
         return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
     }
-
-
-    async componentDidMount(){
-        window.addEventListener('resize', this.onResize);
-        shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
-        this.toggleTraverseOn();
-        const randomTree = [];
-        while(randomTree.length < NUM_STARTING_NODE){
-            const s = Math.floor(Math.random() * 999 + 1);
-            if (randomTree.indexOf(s) === -1) randomTree.push(s);
-        }
-        const sortedTree = Array.from(randomTree).sort();
-        const median = sortedTree[Math.floor(sortedTree.length/2)];
-        const medianIndex = randomTree.indexOf(median);
-        randomTree[medianIndex] = randomTree[0];
-        randomTree[0] = median;
-        randomTree.forEach( (value, index) => {
-            this.state.bst.insert(parseFloat(value), this.state.count + index);
-            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        });
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        await formatBinaryTree(this.state.bst);
-        this.setState({count: this.state.count + randomTree.length, 
-            numActiveNodes: this.state.bst.numActiveNodes, 
-            treeHeight: this.state.bst.getTreeHeight(),
-            formatting: false,
-        });
-        this.toggleTraverseOn();
-    }
     
     toggleTraverseOn(){ traverseOn = !traverseOn; }
-
+    
     handleIntervalChange(event){ TRAVERSE_DURATION = 1500 - event.target.value; }
-
+    
     onResize(){
-        if (this.state.bst.root === null || this.state.formatting === true) return;
+        if (this.state.bst.root === null || this.state.disable === true) return;
         clearTimeout(resizeTimer);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         resizeTimer = setTimeout(async () => {
-            this.setState({formatting : true});
+            this.setState({disable : true});
+            formatTimeline = anime.timeline({ autoplay: false });
             await formatBinaryTree(this.state.bst);
-            this.setState({formatting : false});
+            this.setState({disable : false});
         }, 500);
     }
+    
+    async tearDownTree(){
+        this.setState({disable: true, numActiveNodes: 0, treeHeight: 0 });
+        formatTimeline = anime.timeline({ autoplay: false });
+        await this.state.bst.tearDownTree();
+        this.setState({disable: false, bst: new BinarySearchTree()});
+    }
 
-    async resyncFormatting(){
-        this.setState({formatting: true });
+    async resyncFormat(){
+        this.setState({disable: true });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        formatTimeline = anime.timeline({ autoplay: false });
         await formatBinaryTree(this.state.bst);
-        this.setState({formatting: false });
+        this.setState({disable: false });
+    }
+
+    playPause(){
+        if (this.state.disable){
+            formatTimeline.pause();
+            this.setState({ disable: false });
+        } else {
+            formatTimeline.play()
+            this.setState({ disable: true });
+        }
     }
 
     render(){ 
@@ -625,19 +645,20 @@ class AnimeTest extends Component {
                         <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
                         <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
                             <label>
-                                <input disabled={this.state.formatting} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
-                                <button disabled={this.state.formatting} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Input</button>
+                                <input disabled={this.state.disable} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
+                                <button disabled={this.state.disable} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Input</button>
                             </label>
                         </form>
                         <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
                             <label>
-                                <input disabled={this.state.formatting} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
-                                <button disabled={this.state.formatting} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
+                                <input disabled={this.state.disable} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
+                                <button disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
                             </label>
                         </form>
+                        <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
                         {/* <form id='multi-input' onSubmit={this.handleMultiSubmit}>
-                            <textarea disabled={this.state.formatting} className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
-                            <button disabled={this.state.formatting} id='multi-button' type='submit' />
+                            <textarea disabled={this.state.disable} className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
+                            <button disabled={this.state.disable} id='multi-button' type='submit' />
                         </form>  */}
                     </div>
                     <div className='tree-info'> 
@@ -652,10 +673,10 @@ class AnimeTest extends Component {
                             <input style={{width: '120px'}} className='slider' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
                         </label>
                     </div>
-                    <button disabled={this.state.formatting} onClick={() => this.resyncFormatting()} className='refresh-button'>
+                    <button disabled={this.state.disable} onClick={() => this.resyncFormat()} className='refresh-button'>
                         Something wrong? <i className="fas fa-sync-alt"/>
                     </button>
-                    <button className='refresh-button' onClick={() => this.tearDownTree()} disabled={this.state.formatting}>
+                    <button className='clear-button' onClick={() => this.tearDownTree()} disabled={this.state.disable}>
                         Clear Tree
                     </button>
                     <div className='tree-info' id='logs'/>

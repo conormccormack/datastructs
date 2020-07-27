@@ -66,7 +66,6 @@
     height: 100%;
 }
 
-
 .refresh-button {
     border-radius: 4px;
     height: 28px;
@@ -75,6 +74,20 @@
     margin: 8px 0px;
     border-style: none;
     background-color: #3C5B6F;
+    color: white;
+    padding: 4px;
+    font-family: Raleway, sans-serif;
+    font-weight: 500;
+}
+
+.clear-button {
+    border-radius: 4px;
+    height: 28px;
+    width: 80px;
+    text-align: center;
+    margin: 8px 20px;
+    border-style: none;
+    background-color: #C80000;
     color: white;
     padding: 4px;
     font-family: Raleway, sans-serif;
