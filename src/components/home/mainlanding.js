@@ -34,8 +34,8 @@ function Mainlanding(){
                 <WelcomeBody>
                     DataStructs is a platform for interactive visualizations of data structures and algorithms.
                     <br/><br/>
-                    Each page includes animations of common data structures that you can build and use <strong>without
-                    writing a single line of code.</strong><br/><br/>
+                    Each page includes animations of common data structures that you can build and use without
+                    writing a single line of code.<br/><br/>
                     On top of that, DataStructs provides explanations and automated notes for every animation, so anyone can
                     build an intuition each subject's motivating ideas and asymptotic behavior. <br/><br/>
                     Click everything to view the 💯 catalog, or search for a specific data structure or concept in the search bar.

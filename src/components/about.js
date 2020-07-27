@@ -57,7 +57,7 @@ function About (props){
                         data science & deep learning research and its applications in autonomous machines. Feel free to connect with me on <Link style={{textDecoration: 'underline'}} href="https://www.linkedin.com/in/conorxmccormack">LinkedIn</Link> if
                         that's your sort of thing.
                         <br/><br/>
-                        As of August 2020, DataStructs is built with <Link style={{textDecoration: 'underline'}} href="https://reactjs.org">React</Link>, 
+                        As of August 2020, DataStructs is built with <Link style={{ textDecoration: 'underline' }} href="https://reactjs.org">React</Link>, 
                         animated with <Link style={{textDecoration: 'underline'}} href="https://animejs.com/">Anime.js</Link>, 
                         and continuously deployed via Netlify.
                         <br/><br/>
