@@ -184,6 +184,38 @@ class BinarySearchTree {
         if (this.root) this.updateLevels(this.root, 0);
     }
 
+    async tearDownTree(){
+        if (this.root === null) return;
+        this.buildTearDownAnimation(this.root);
+        formatTimeline.play();
+        await formatTimeline.finished;
+        formatTimeline = anime.timeline({});
+        return;
+    }
+
+    buildTearDownAnimation(node){
+        formatTimeline.add({
+            targets: `#node${node.id}`,
+            opacity: 0,
+            duration: 1500,
+            complete: () => {
+                document.getElementById(`node${node.id}`).remove();
+            }
+        }, node.level * 100)
+        if (node !== this.root) {
+            formatTimeline.add({
+                targets: `#path${node.id}`,
+                opacity: 0,
+                duration: 1500,
+                complete: () => {
+                    document.getElementById(`path${node.id}`).remove();
+                }
+            }, node.level * 70)
+        }
+        if (node.left !== null) this.buildTearDownAnimation(node.left);
+        if (node.right !== null) this.buildTearDownAnimation(node.right);
+    }
+    
     findLeftmost(root){
         return root.left === null ? root : this.findLeftmost(root.left);
     }
@@ -400,6 +432,8 @@ class AnimeTest extends Component {
         this.handleMultiSubmit = this.handleMultiSubmit.bind(this);
         this.handleMultiChange = this.handleMultiChange.bind(this);
         this.parseMulti = this.parseMulti.bind(this);
+        this.tearDownTree = this.tearDownTree.bind(this);
+        this.resyncFormatting = this.resyncFormatting.bind(this);
     }
 
     handleInputChange(event) {
@@ -515,6 +549,12 @@ class AnimeTest extends Component {
         document.getElementById('multi-field').focus();
     }
 
+    async tearDownTree(){
+        this.setState({formatting: true});
+        await this.state.bst.tearDownTree();
+        this.setState({formatting: false, bst: new BinarySearchTree(), numActiveNodes: 0, treeHeight: 0});
+    }
+
     calculateShiftX(nodeContainer) {
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
         return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
@@ -564,6 +604,13 @@ class AnimeTest extends Component {
         }, 500);
     }
 
+    async resyncFormatting(){
+        this.setState({formatting: true });
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        await formatBinaryTree(this.state.bst);
+        this.setState({formatting: false });
+    }
+
     render(){ 
         return(
             <PageWrapper id="pagewrapper">
@@ -605,13 +652,11 @@ class AnimeTest extends Component {
                             <input style={{width: '120px'}} className='slider' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
                         </label>
                     </div>
-                    <button disabled={this.state.formatting} onClick={async () => {
-                        this.setState({formatting: true });
-                        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-                        await formatBinaryTree(this.state.bst);
-                        this.setState({formatting: false });
-                    }} className='refresh-button'>
+                    <button disabled={this.state.formatting} onClick={() => this.resyncFormatting()} className='refresh-button'>
                         Something wrong? <i className="fas fa-sync-alt"/>
+                    </button>
+                    <button className='refresh-button' onClick={() => this.tearDownTree()} disabled={this.state.formatting}>
+                        Clear Tree
                     </button>
                     <div className='tree-info' id='logs'/>
                     <div className='tree-info' id='error-message'/>
