@@ -5,5 +5,7 @@
 
 Each page provides straight-forward explanations and a powerful UI for manipulating data structures without writing a single line of code.
 
+As of July 2020, DataStructs is still under development. We're expecting to fully launch by Fall 2020!
+
 ## The Stack
 DataStructs is built on `React` and `Node.js`, animated with [anime.js](https://animejs.com/) & [Framer Motion](https://www.framer.com/motion/), and continuosly deployed via Netlify.
