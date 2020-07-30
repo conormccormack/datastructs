@@ -37,7 +37,7 @@ const Pages = [
         queries: [
             {
                 name: 'AVL Tree',
-                url: 'tree/avl'
+                url: 'avl'
             },
             {
                 name: 'Binary Search Tree',

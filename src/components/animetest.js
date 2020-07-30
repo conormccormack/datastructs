@@ -34,11 +34,12 @@ const NodeContainer = styled.div`
     width: 100%
 `
 
-const HORIZONTAL_SPACING = 40;
+const HORIZONTAL_SPACING = 45;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
 const NUM_STARTING_NODE = 11;
 let TRAVERSE_DURATION = 500;
+let formatting_steps = [];
 let shift_x;
 let resizeTimer;
 let traverseCount = 0;
@@ -230,8 +231,8 @@ function addTraverseStep(node, shift_order){
     formatTimeline.add({
         targets: `#node${node.id}`,
         keyframes: [
-            { scale: 1.05, translateX: `-=${NODE_RADIUS}`, translateY: `-=${NODE_RADIUS*.05}`},
-            { scale: 1, translateX: `+=${NODE_RADIUS}`, translateY: `+=${NODE_RADIUS*.05}`},
+            { scale: 1 },
+            { scale:1 },
         ],
         easing: 'easeInOutBack',
         duration: TRAVERSE_DURATION,
@@ -427,6 +428,7 @@ class AnimeTest extends Component {
             numActiveNodes: 0,
             treeHeight: 0,
             formatting: true,
+            seekValue: TRAVERSE_DURATION/2,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -448,7 +450,7 @@ class AnimeTest extends Component {
         this.toggleTraverseOn();
         const randomTree = [];
         while(randomTree.length < NUM_STARTING_NODE){
-            const s = Math.floor(Math.random() * 999 + 1);
+            const s = Math.floor(Math.random() * 100 + 1);
             if (randomTree.indexOf(s) === -1) randomTree.push(s);
         }
         const sortedTree = Array.from(randomTree).sort();
@@ -655,7 +657,9 @@ class AnimeTest extends Component {
                                 <button disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
                             </label>
                         </form>
+                        <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={formatTimeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
                         <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
+                        <button onClick={() => formatTimeline.seek(this.state.seekValue)}></button>
                         {/* <form id='multi-input' onSubmit={this.handleMultiSubmit}>
                             <textarea disabled={this.state.disable} className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
                             <button disabled={this.state.disable} id='multi-button' type='submit' />
@@ -679,6 +683,7 @@ class AnimeTest extends Component {
                     <button className='clear-button' onClick={() => this.tearDownTree()} disabled={this.state.disable}>
                         Clear Tree
                     </button>
+                    {formatTimeline.duration}
                     <div className='tree-info' id='logs'/>
                     <div className='tree-info' id='error-message'/>
                 </div>
