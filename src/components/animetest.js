@@ -39,7 +39,6 @@ const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
 const NUM_STARTING_NODE = 11;
 let TRAVERSE_DURATION = 500;
-let formatting_steps = [];
 let shift_x;
 let resizeTimer;
 let traverseCount = 0;

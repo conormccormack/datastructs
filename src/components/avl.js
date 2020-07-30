@@ -1,5 +1,4 @@
 import React from 'react';
-import AnimeTest from './animetest';
 import Navbar from './navigation/navbar';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
