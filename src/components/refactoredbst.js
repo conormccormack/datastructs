@@ -1,24 +1,10 @@
-/* Summary:
-*  The following is a React component that will never update after it has mounted.
-*  This allows for the use of vanilla JavaScript to directly manipulate the DOM.
-*  The binary tree is initialized as part of the component state so that the component
-*  can readily access the tree data. The tree is maintained with vanilla JavaScript, however,
-*  and is animated using Anime.js.
-*
-*  The animation is implemented as an Anime timeline, which is built with an
-*  in-order traversal of the nodes of the tree followed by its edges. The X position
-*  of each node and its edges is based on size of the container and the immediate 
-*  successors of each node. There is a fixed distance between each node and its pecessor,
-*  defined by HORIZONTAL_SPACING. Somewhat similarly, each level of the tree is seperated
-*  by the VERTICAL_SPACING constant. 
-*/
-
 import React, { Component } from 'react';
 import anime from 'animejs';
 import '../css/bst.css';
 import '../css/input-range.css';
 import '../resources/fonts/fontawesome/css/all.css';
 import styled from 'styled-components';
+import ClosedCodeCaptions from './closedcodecaptions';
 
 const PageWrapper = styled.div`
     padding-left: 6rem;
@@ -39,20 +25,14 @@ const UI_CONTAINER = styled.div`
     border-radius: 10px;
 `
 
-
 const HORIZONTAL_SPACING = 45;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
-const NUM_STARTING_NODE = 11;
 let TRAVERSE_DURATION = 500;
 let shift_x;
 let resizeTimer;
 let traverseCount = 0;
 let traverseOn = true;
-
-let formatTimeline = anime.timeline({
-    autoplay: false, 
-});
 
 class Node {
     constructor (value, level, id){
@@ -67,12 +47,11 @@ class Node {
 }
 
 class BinarySearchTree {
-    constructor() {
+    constructor(animator) {
         this.root = null;
         this.numActiveNodes = 0;
-        /* Map which stores the next x position of each node. Used to calculate
-        ** where points of edges should move before the animation is executed */
         this.x_distances = new Map();
+        this.animator = animator;
     }
 
     updateLevels(root, level){
@@ -94,68 +73,59 @@ class BinarySearchTree {
     // Insert node into tree and update heights map.
     insert(value, count) {
         var newNode = new Node (value, 0, count);
+        var success = true;
         if (this.root === null) {
             this.root = newNode;
-            addMessageToLog(`Tree empty: inserting ${value} as root.`, 'end');
             addNodeToDOM(value, count);
             this.numActiveNodes += 1;
         }
         else { 
             newNode.level += 1;
-            this.insertNode(this.root, newNode, count);
+            success = this.insertNode(this.root, newNode, count);
         }
-        return newNode;
+        return success;
     }
 
     insertNode(root, newNode, count){  
-        if (traverseOn) addTraverseStep(root, 0);
+        if (traverseOn) this.addTraverseStep(root, 0);
         if (newNode.value === root.value) {
-            setErrorMessage(`${newNode.value} already exists in the tree. Please enter an unique value.`)
-            return;
+            return false;
         } else if (newNode.value < root.value){
             if (root.left !== null) {
                 newNode.level = newNode.level + 1;
-                addMessageToLog(`${newNode.value} < ${root.value}, search left.`);
-                this.insertNode(root.left, newNode, count);
+                return this.insertNode(root.left, newNode, count);
             } else { 
                 root.left = newNode; 
                 newNode.parent = root;
-                addMessageToLog(`${newNode.value} < ${root.value}, insert as left leaf.`, 'end');
                 this.numActiveNodes += 1;
                 addNodeToDOM(newNode.value, count);
+                return true;
             }
         } else if (newNode.value > root.value){
             if (root.right !== null) {
                 newNode.level = newNode.level + 1;
-                addMessageToLog(`${newNode.value} > ${root.value}, search right.`);
-                this.insertNode(root.right, newNode, count);
+                return this.insertNode(root.right, newNode, count);
             } else { 
                 root.right = newNode; 
                 newNode.parent = root;
-                addMessageToLog(`${newNode.value} > ${root.value}, insert as right leaf.`, 'end');
                 this.numActiveNodes += 1;
                 addNodeToDOM(newNode.value, count);
+                return true;
             }
         }
     }
 
     removeRecurse(root, value){
-        if (root !== null && traverseOn) addTraverseStep(root, 0);
+        if (root !== null && traverseOn) this.addTraverseStep(root, 0);
         if (root === null) {
-            addMessageToLog(`${value} not found.`, 'end');
-            setErrorMessage(`${value} is not in the tree!`);
             return false;
         } else if (value < root.value) {
-            addMessageToLog(`${value} < ${root.value}, search left.`);
             return this.removeRecurse(root.left, value);
         } else if (value > root.value) {
-            addMessageToLog(`${value} >= ${root.value}, search right.`);
             return this.removeRecurse(root.right, value);
         } else {
             this.deleteNode(root);
             this.numActiveNodes -= 1;
-            addMessageToLog(`Found ${value}: removing ${value} from tree.`, 'end');
-            setErrorMessage('');
             return true;
         }  
     }
@@ -165,9 +135,9 @@ class BinarySearchTree {
         let replacement = (node.left === null && node.right === null) ? null : (node.left === null) ? node.right : node.left;
         if (node.left !== null && node.right !== null){
             const swap = this.findLeftmost(node.right);
-            addTraverseStep(swap, -1);
+            this.addTraverseStep(swap, -1);
             node.value = swap.value;
-            formatTimeline.add({
+            this.animator.timeline.add({
                 targets: document.getElementById(`frontnode${node.id}`),
                 innerHTML: node.value,
                 easing: 'easeOutCubic',
@@ -176,14 +146,13 @@ class BinarySearchTree {
             }, (traverseCount - 1) * TRAVERSE_DURATION)
             this.deleteNode(swap);
         } else {
-            if (child_of_type !== 'root') removeElementFromDOM(`path${node.id}`);
-            else if (replacement) removeElementFromDOM(`path${replacement.id}`);
-
+            if (child_of_type !== 'root') this.animator.removeElementFromDOM(`path${node.id}`);
+            else if (replacement) this.animator.removeElementFromDOM(`path${replacement.id}`);
             if (child_of_type === 'right') node.parent.right = replacement;
             else if (child_of_type === 'left') node.parent.left = replacement;
             else this.root = replacement;
             if (replacement) replacement.parent = node.parent;
-            removeElementFromDOM(`node${node.id}`);
+            this.animator.removeElementFromDOM(`node${node.id}`);
         }
 
         if (this.root) this.updateLevels(this.root, 0);
@@ -191,93 +160,57 @@ class BinarySearchTree {
 
     async tearDownTree(){
         if (this.root === null) return;
-        this.buildTearDownAnimation(this.root);
-        formatTimeline.play();
-        await formatTimeline.finished;
-        formatTimeline = anime.timeline({ autoplay: false });
+        this.animator.buildTearDownAnimation(this.root);
+        this.animator.timeline.play();
+        await this.animator.timeline.finished;
+        this.animator.timeline = anime.timeline({ autoplay: false });
         return;
     }
 
-    buildTearDownAnimation(node){
-        formatTimeline.add({
-            targets: `#node${node.id}`,
-            opacity: 0,
-            scale: .9,
-            translateX: `+=60`,
-            translateY: `-=20`,
-            duration: 1000,
-            complete: () => {
-                document.getElementById(`node${node.id}`).remove();
-            }
-        }, node.level * 50)
-        if (node !== this.root) {
-            formatTimeline.add({
-                targets: `#path${node.id}`,
-                opacity: 0,
-                scale: .9,
-                translateX: `+=60`,
-                translateY: `-=20`,
-                duration: 1000,
-                complete: () => {
-                    document.getElementById(`path${node.id}`).remove();
-                }
-            }, node.level * 50)
-        }
-        if (node.left !== null) this.buildTearDownAnimation(node.left);
-        if (node.right !== null) this.buildTearDownAnimation(node.right);
+    static sizeOfSubtree(root){
+        if (root === null) return 0;     
+        const left = root.left ? this.sizeOfSubtree(root.left) : 0;
+        const right = root.right ? this.sizeOfSubtree(root.right) : 0;
+        return left + right + 1;
     }
 
     findLeftmost(root){
         return root.left === null ? root : this.findLeftmost(root.left);
     }
-}
-
-function addTraverseStep(node, shift_order){
-    formatTimeline.add({
-        targets: `#node${node.id}`,
-        keyframes: [
-            { scale: 1 },
-            { scale:1 },
-        ],
-        easing: 'easeInOutBack',
-        duration: TRAVERSE_DURATION,
-    }, (traverseCount + shift_order) * TRAVERSE_DURATION);
-    formatTimeline.add({
-        targets: `#frontnode${node.id}`,
-        keyframes: [
-            { background: '#3C5B6F' },
-            { background: ' ' },
-        ],
-        easing: 'easeInOutBack',
-        duration: TRAVERSE_DURATION,
-    }, (traverseCount + shift_order) * TRAVERSE_DURATION);
-    if (node.parent !== null && shift_order === 0) {
-        formatTimeline.add({
-            targets: `#path${node.id}`,
+    
+    addTraverseStep(node, shift_order){
+        this.animator.timeline.add({
+            targets: `#node${node.id}`,
             keyframes: [
-                { stroke: '#3C5B6F' },
-                { stroke: '#DEAAFF' },
+                { scale: 1 },
+                { scale:1 },
             ],
-            duration: TRAVERSE_DURATION,
             easing: 'easeInOutBack',
-        }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION/2));
+            duration: TRAVERSE_DURATION,
+        }, (traverseCount + shift_order) * TRAVERSE_DURATION);
+        this.animator.timeline.add({
+            targets: `#frontnode${node.id}`,
+            keyframes: [
+                { background: '#3C5B6F' },
+                { background: ' ' },
+            ],
+            easing: 'easeInOutBack',
+            duration: TRAVERSE_DURATION,
+        }, (traverseCount + shift_order) * TRAVERSE_DURATION);
+        if (node.parent !== null && shift_order === 0) {
+            this.animator.timeline.add({
+                targets: `#path${node.id}`,
+                keyframes: [
+                    { stroke: '#3C5B6F' },
+                    { stroke: '#DEAAFF' },
+                ],
+                duration: TRAVERSE_DURATION,
+                easing: 'easeInOutBack',
+            }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION/2));
+        }
+        traverseCount += 1;
     }
-    traverseCount += 1;
-}
-
-function removeElementFromDOM(id) {    
-    var toRemove = document.getElementById(id);
-    if (id === null) return;
-    formatTimeline.add({
-        targets: toRemove,
-        opacity: 0,
-        duration: 600,
-        easing: 'easeOutExpo',
-        delay: id.includes('line') ? 150 : 0,
-        complete: function(anim){
-            toRemove.remove();
-        },
-    }, traverseCount * TRAVERSE_DURATION);
+    
 }
 
 function addNodeToDOM(value, count) {
@@ -297,105 +230,6 @@ function addNodeToDOM(value, count) {
 // Given an element selector, return the pixel midpoint of its width dimension.
 function getWidthMidpoint(selector) {
     return (selector.getBoundingClientRect().width / 2);
-}
-
-// Returns length of in-order traversal from smallest element to root.
-function size(root){
-    if (root === null) return 0;     
-    const left = root.left ? size(root.left) : 0;
-    const right = root.right ? size(root.right) : 0;
-    return left + right + 1;
-}
-
-function addMessageToLog(message, options){
-    formatTimeline.add({
-        duration: TRAVERSE_DURATION,
-        begin: function (){
-            let p = document.createElement('div');
-            p.setAttribute('className', 'log');
-            p.classList.add('log');
-            if (options) {
-                if (options === 'end') p.classList.add('log-border-bottom');
-            }
-            p.appendChild(document.createTextNode(message));
-            let logs = document.getElementById('logs');
-            logs.appendChild(p);
-            logs.scrollTop = logs.scrollHeight;
-        }
-    }, traverseOn ? (traverseCount - 1) * TRAVERSE_DURATION : 0);
-    formatTimeline.add({
-        duration: TRAVERSE_DURATION,
-
-    }, traverseOn ? (traverseCount - 1) * TRAVERSE_DURATION : 0);
-}
-
-function setErrorMessage(message){
-    document.getElementById('error-message').innerHTML = message;
-}
-
-async function formatBinaryTree(tree){
-    buildNodeTimeline(tree.root, tree);
-    buildEdgeTimeline(tree.root, tree);
-    formatTimeline.play();
-    await formatTimeline.finished;
-    return;
-}
-
-function buildEdgeTimeline(root, tree){
-    if (root.left !== null) buildEdgeTimeline(root.left, tree);
-    if (root.parent !== null){
-        const x1 = tree.x_distances.get(`node${root.parent.id}`); 
-        const y1 = root.parent.level * VERTICAL_SPACING + NODE_RADIUS;
-        const x2 = tree.x_distances.get(`node${root.id}`);
-        const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
-        const curr_opacity = parseFloat(document.getElementById(`path${root.id}`).getAttribute('opacity'));
-        const isNew = curr_opacity > 0.7 ? false : true;
-        formatTimeline.add({
-            targets: `#path${root.id}`,
-            d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
-            opacity: { value: '1.0', easing: 'easeInSine', delay: isNew ? 600: 0, duration: isNew ? 200 : 0 },
-            stroke: { value: '#DEAAFF', delay: isNew ? 800 : 0 },
-            easing: 'easeInOutExpo',
-        }, traverseCount * TRAVERSE_DURATION);
-    }
-    if (root.right !== null) buildEdgeTimeline(root.right, tree);
-}
-
-function buildNodeTimeline(root, tree){
-    if (root.left !== null) buildNodeTimeline(root.left, tree);
-    const node = document.getElementById(`node${root.id}`);
-    const x = shift_x - NODE_RADIUS;
-    const isNew = root.parent !== null && root.line === null ? true : false;
-    tree.x_distances.set(`node${root.id}`, x );
-    root.parent !== null && root.line === null && addPathToDom(root);
-    root.line = root.line === null && `line${root.id}`;
-    if (isNew){
-        formatTimeline.add({
-            targets: `#node${root.id}`,
-            marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
-            keyframes: [
-                { scale: isNew ? 0 : 1, duration: 0 },
-                { translateX: isNew ? 0 : shift_x, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
-                { translateX: shift_x, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
-            ],
-            easing: 'easeInOutExpo',
-        }, traverseCount * TRAVERSE_DURATION);
-    } else {
-        formatTimeline.add({
-            targets: `#node${root.id}`,
-            marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
-            keyframes: [
-                { scale: isNew ? 0 : 1, duration: 0 },
-                { translateX: isNew ? 0 : shift_x, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
-                { translateX: shift_x, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
-            ],
-            easing: 'easeInOutExpo',
-        }, traverseCount * TRAVERSE_DURATION);
-    }
-
-    shift_x += HORIZONTAL_SPACING;
-
-    if (root.right !== null) buildNodeTimeline(root.right, tree);
 }
 
 // Given child node, create path from child to parent, add to DOM.
@@ -420,13 +254,159 @@ function addPathToDom(child){
     svg.appendChild(path);
 }
 
-class AnimeTest extends Component {
+class Animator {
+    constructor(props){
+        this.timeline = anime.timeline({ autoplay: false })
+    }
+
+    removeElementFromDOM(id) {    
+        var toRemove = document.getElementById(id);
+        if (id === null) return;
+        this.timeline.add({
+            targets: toRemove,
+            opacity: 0,
+            duration: 600,
+            easing: 'easeOutExpo',
+            delay: id.includes('line') ? 150 : 0,
+            complete: function(anim){
+                toRemove.remove();
+            },
+        }, traverseCount * TRAVERSE_DURATION);
+    }    
+
+    addNodeToDOM(value, count) {
+        let node = document.createElement("div");
+        node.classList.add('bstnode')
+        node.setAttribute('id', `node${count}`);
+        node.setAttribute('style', `float: left;`);
+        let frontHighlight = document.createElement('div');
+        frontHighlight.classList.add('front-node');
+        frontHighlight.setAttribute('id', `frontnode${count}`);
+        let text = document.createTextNode(value);
+        frontHighlight.appendChild(text);
+        node.appendChild(frontHighlight);
+        document.getElementById("nodecontainer").appendChild(node);
+    }
+
+    buildEdgeTimeline(root, tree){
+        if (root.left !== null) this.buildEdgeTimeline(root.left, tree);
+        if (root.parent !== null){
+            const x1 = tree.x_distances.get(`node${root.parent.id}`); 
+            const y1 = root.parent.level * VERTICAL_SPACING + NODE_RADIUS;
+            const x2 = tree.x_distances.get(`node${root.id}`);
+            const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
+            const curr_opacity = parseFloat(document.getElementById(`path${root.id}`).getAttribute('opacity'));
+            const isNew = curr_opacity > 0.7 ? false : true;
+            this.timeline.add({
+                targets: `#path${root.id}`,
+                d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
+                opacity: { value: '1.0', easing: 'easeInSine', delay: isNew ? 600: 0, duration: isNew ? 200 : 0 },
+                stroke: { value: '#DEAAFF', delay: isNew ? 800 : 0 },
+                easing: 'easeInOutExpo',
+            }, traverseCount * TRAVERSE_DURATION);
+        }
+        if (root.right !== null) this.buildEdgeTimeline(root.right, tree);
+    }
+    
+    buildNodeTimeline(root, tree){
+        if (root.left !== null) this.buildNodeTimeline(root.left, tree);
+        const node = document.getElementById(`node${root.id}`);
+        const x = shift_x - NODE_RADIUS;
+        const isNew = root.parent !== null && root.line === null ? true : false;
+        tree.x_distances.set(`node${root.id}`, x );
+        root.parent !== null && root.line === null && addPathToDom(root);
+        root.line = root.line === null && `line${root.id}`;
+        if (isNew){
+            this.timeline.add({
+                targets: `#node${root.id}`,
+                marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
+                keyframes: [
+                    { scale: isNew ? 0 : 1, duration: 0 },
+                    { translateX: isNew ? 0 : shift_x, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
+                    { translateX: shift_x, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
+                ],
+                easing: 'easeInOutExpo',
+            }, traverseCount * TRAVERSE_DURATION);
+        } else {
+            this.timeline.add({
+                targets: `#node${root.id}`,
+                marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
+                keyframes: [
+                    { scale: isNew ? 0 : 1, duration: 0 },
+                    { translateX: isNew ? 0 : shift_x, translateY: root.level * VERTICAL_SPACING,  scale: 1, duration: 800 },
+                    { translateX: shift_x, translateY: root.level * VERTICAL_SPACING, delay: 200, duration: 800 }
+                ],
+                easing: 'easeInOutExpo',
+            }, traverseCount * TRAVERSE_DURATION);
+        }
+    
+        shift_x += HORIZONTAL_SPACING;
+    
+        if (root.right !== null) this.buildNodeTimeline(root.right, tree);
+    }
+
+    buildTearDownAnimation(node){
+        this.timeline.add({
+            targets: `#node${node.id}`,
+            opacity: 0,
+            scale: .9,
+            translateX: `+=60`,
+            translateY: `-=20`,
+            duration: 1000,
+            complete: () => {
+                document.getElementById(`node${node.id}`).remove();
+            }
+        }, node.level * 50)
+        if (node !== this.root) {
+            this.timeline.add({
+                targets: `#path${node.id}`,
+                opacity: 0,
+                scale: .9,
+                translateX: `+=60`,
+                translateY: `-=20`,
+                duration: 1000,
+                complete: () => {
+                    document.getElementById(`path${node.id}`).remove();
+                }
+            }, node.level * 50)
+        }
+        if (node.left !== null) this.buildTearDownAnimation(node.left);
+        if (node.right !== null) this.buildTearDownAnimation(node.right);
+    }
+
+    async formatBinaryTree(tree){
+        this.buildNodeTimeline(tree.root, tree);
+        this.buildEdgeTimeline(tree.root, tree);
+        this.timeline.play();
+        await this.timeline.finished;
+        this.timeline = anime.timeline({});
+        return;
+    }
+
+}
+
+
+
+class RefactoredBST extends Component {
+    inputLines = ['def insert(root,node):', 'if root is None:', 'root = node', 
+        'else:', 'if root.val < node.val:', 'if root.right is None:', 
+        'root.right = node', 'else:', 'insert(root.right, node)', 'else:', 
+        'if root.left is None:', 'root.left = node ', 'else:', 'insert(root.left, node)'];
+
+    removeLines = ['def deleteNode(root, key):', 'if root is None: ', 'return root',  
+        'if key < root.key: ', 'root.left = deleteNode(root.left, key) ','elif(key > root.key): ',
+        'root.right = deleteNode(root.right, key)', 'else:', 'if root.left is None : ',
+        'temp = root.right ', 'root = None ', 'return temp  ', 'elif root.right is None : ',
+        'temp = root.left', 'root = None', 'return temp',  'temp = minValueNode(root.right)',
+        'root.key = temp.key ', 'root.right = deleteNode(root.right , temp.key)', 'return root'];
+    
     constructor (props) {
         super(props);
+        this.animator = new Animator();
         this.state = {
             inputValue: '',
             removeValue: '',
-            bst: new BinarySearchTree(TRAVERSE_DURATION),
+            bst: new BinarySearchTree(this.animator),
             multiInput: '',
             count: 0,
             disable: true,
@@ -434,6 +414,9 @@ class AnimeTest extends Component {
             treeHeight: 0,
             formatting: true,
             seekValue: TRAVERSE_DURATION/2,
+            NUM_STARTING_NODE: 11,
+            errorMessage: '',
+            currentOperation: 'input',
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -454,8 +437,8 @@ class AnimeTest extends Component {
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
         this.toggleTraverseOn();
         const randomTree = [];
-        while(randomTree.length < NUM_STARTING_NODE){
-            const s = Math.floor(Math.random() * 100 + 1);
+        while(randomTree.length < this.state.NUM_STARTING_NODE){
+            const s = Math.floor(Math.random() * 420 + 1);
             if (randomTree.indexOf(s) === -1) randomTree.push(s);
         }
         const sortedTree = Array.from(randomTree).sort();
@@ -468,21 +451,22 @@ class AnimeTest extends Component {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        this.setState({count: this.state.count + randomTree.length, 
+        this.setState({
+            count: this.state.count + randomTree.length, 
             numActiveNodes: this.state.bst.numActiveNodes, 
             treeHeight: this.state.bst.getTreeHeight(),
         });
-        await formatBinaryTree(this.state.bst);
+        await this.animator.formatBinaryTree(this.state.bst);
         this.setState({ disable: false });
         this.toggleTraverseOn();
     }
     
     handleInputChange(event) {
-        this.setState({ inputValue: parseFloat(event.target.value) });
+        this.setState({ inputValue: isNaN(event.target.value) ? '' : parseFloat(event.target.value)});
     }
 
     handleRemoveChange(event) {
-        this.setState({ removeValue: parseFloat(event.target.value) });
+        this.setState({ removeValue: isNaN(event.target.value) ? '' : parseFloat(event.target.value)});
     }
     
     handleMultiChange(event){
@@ -491,42 +475,55 @@ class AnimeTest extends Component {
 
     async handleInputSubmit(event) {
         event.preventDefault();
-        formatTimeline = anime.timeline({ autoplay: false });
-        this.setState({disable: true, inputValue: ''});
+        this.setState({ currentOperation: 'input' });
+        this.animator.timeline = anime.timeline({ autoplay: false });
+        this.setState({ disable: true });
         if (this.state.inputValue === '' || isNaN(this.state.inputValue)) {
-            setErrorMessage('<p>Please enter an number (e.g. 32, 2.7).<p>')
+            this.setState({ errorMessage: 'Please enter an number (e.g. 32, 2.7).', inputValue: '', disable: false});
             return;
         }
-        setErrorMessage('');
-        this.state.bst.insert(this.state.inputValue, this.state.count);
+        const success = this.state.bst.insert(this.state.inputValue, this.state.count);
+        if (!success) {
+            this.setState({ errorMessage: `${this.state.inputValue} already exists in the tree.`, inputValue: '', disable: false })
+            return;
+        }
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        await formatBinaryTree(this.state.bst);
-        traverseCount = 0;
-        this.setState({ count: this.state.count + 1, inputValue: '', 
+        this.setState({errorMessage: '', inputValue : '',})
+        await this.animator.formatBinaryTree(this.state.bst);
+        this.setState({ count: this.state.count + 1,
             disable: false, 
             numActiveNodes: this.state.bst.numActiveNodes,
             treeHeight: this.state.bst.getTreeHeight(), 
         });
+        traverseCount = 0;
         document.getElementById('input-field').focus();
     }
 
     async handleRemoveSubmit(event) {
         event.preventDefault();
-        this.setState({disable: true, removeValue: ''});
-        formatTimeline = anime.timeline({ autoplay: false });
+        this.setState({ currentOperation: 'remove' });
         if (this.state.removeValue === '' || isNaN(this.state.removeValue)) {
-            this.setState({ errorMessage: 'Please enter a number (e.g. 32, 2.7)' })
+            this.setState({ errorMessage: 'Please enter an number (e.g. 32, 2.7).', removeValue: '' }); 
             return;
         }
-        this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
+        if (this.state.bst.root == null){
+            this.setState({ errorMessage: 'Could not remove: tree is empty.', removeValue: '' });
+            return;
+        }
+        this.setState({ disable: true });
+        this.animator.timeline = anime.timeline({ autoplay: false });
+        const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
+        this.setState({ removeValue: '', errorMessage: '' });
         if (this.state.bst.root !== null) {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            await formatBinaryTree(this.state.bst);
+            await this.animator.formatBinaryTree(this.state.bst);
         };
-        this.setState({removeValue: '',
+        this.setState({
             disable : false, 
             numActiveNodes: this.state.bst.numActiveNodes,
             treeHeight: this.state.bst.getTreeHeight(),
+            errorMessage: success ? '' : `${this.state.removeValue} does not exist in the tree.`,
+            removeValue: '',
         });
         document.getElementById('remove-field').focus();
         traverseCount = 0;
@@ -565,7 +562,7 @@ class AnimeTest extends Component {
 
     async handleMultiSubmit(event){
         event.preventDefault();
-        formatTimeline = anime.timeline({ autoplay: false });
+        this.animator.timeline = anime.timeline({ autoplay: false });
         this.setState({disable: true})
         var newNodes;
         try { newNodes = this.parseMulti();
@@ -584,17 +581,16 @@ class AnimeTest extends Component {
                 this.setState({count: this.state.count + 1});
             }
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            await formatBinaryTree(this.state.bst);
+            await this.animator.formatBinaryTree(this.state.bst);
             traverseCount = 0;
         }
         this.setState({multiInput: '', disable: false});
         document.getElementById('multi-field').focus();
     }
 
-    
     calculateShiftX(nodeContainer) {
-        const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
-        return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - size(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
+        const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
+        return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
     }
     
     toggleTraverseOn(){ traverseOn = !traverseOn; }
@@ -607,15 +603,15 @@ class AnimeTest extends Component {
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         resizeTimer = setTimeout(async () => {
             this.setState({disable : true});
-            formatTimeline = anime.timeline({ autoplay: false });
-            await formatBinaryTree(this.state.bst);
+            this.animator.timeline = anime.timeline({ autoplay: false });
+            await this.animator.formatBinaryTree(this.state.bst);
             this.setState({disable : false});
         }, 500);
     }
     
     async tearDownTree(){
         this.setState({disable: true, numActiveNodes: 0, treeHeight: 0 });
-        formatTimeline = anime.timeline({ autoplay: false });
+        this.animator.timeline = anime.timeline({ autoplay: false });
         await this.state.bst.tearDownTree();
         this.setState({disable: false, bst: new BinarySearchTree()});
     }
@@ -623,24 +619,24 @@ class AnimeTest extends Component {
     async resyncFormat(){
         this.setState({disable: true });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        formatTimeline = anime.timeline({ autoplay: false });
-        await formatBinaryTree(this.state.bst);
+        this.animator.timeline = anime.timeline({ autoplay: false });
+        await this.animator.formatBinaryTree(this.state.bst);
         this.setState({disable: false });
     }
 
     playPause(){
         if (this.state.disable){
-            formatTimeline.pause();
+            this.animator.timeline.pause();
             this.setState({ disable: false });
         } else {
-            formatTimeline.play()
+            this.animator.timeline.play();
             this.setState({ disable: true });
         }
     }
 
     render(){ 
         return(
-            <PageWrapper id="pagewrapper">
+            <PageWrapper>
                 <NodeContainer id="nodecontainer" >
                     <svg className="linecontainer" id="svg-line" />                    
                 </NodeContainer>
@@ -660,13 +656,9 @@ class AnimeTest extends Component {
                                 <button disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
                             </label>
                         </form>
-                        <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={formatTimeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
+                        <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={this.animator.timeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
                         <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
-                        <button onClick={() => formatTimeline.seek(this.state.seekValue)}></button>
-                        {/* <form id='multi-input' onSubmit={this.handleMultiSubmit}>
-                            <textarea disabled={this.state.disable} className='multi-input tree-info' rows='5' value={this.state.multiInput} id='multi-field' onChange={this.handleMultiChange}/>
-                            <button disabled={this.state.disable} id='multi-button' type='submit' />
-                        </form>  */}
+                        <button onClick={() => this.animator.timeline.seek(this.state.seekValue)}></button>
                     </div>
                     <div className='tree-info'> 
                         <label>
@@ -686,13 +678,13 @@ class AnimeTest extends Component {
                     <button className='clear-button' onClick={() => this.tearDownTree()} disabled={this.state.disable}>
                         Clear Tree
                     </button>
-                    {formatTimeline.duration}
-                    <div className='tree-info' id='logs'/>
-                    <div className='tree-info' id='error-message'/>
+                    {this.animator.timeline.duration}
+                    <div className='tree-info' id='error-message'>{this.state.errorMessage}</div>
+                    <ClosedCodeCaptions lines={ this.state.currentOperation === 'input' ? this.inputLines : this.removeLines }/>
                 </UI_CONTAINER>
             </PageWrapper>
         );
     }
 }
 
-export default AnimeTest;
+export default RefactoredBST;

@@ -15,7 +15,7 @@ const Headline = styled.div`
     background-color: #ece7e3;
 `
 
-function BST (props){
+function AVL (props){
     return (
         <Wrapper>
             <Navbar/>
@@ -28,4 +28,4 @@ function BST (props){
     );
 }
 
-export default BST;
+export default AVL;

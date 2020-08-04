@@ -6,7 +6,7 @@ import Catalog from './components/catalog'
 import Premium from './components/premium'
 import { BrowserRouter as Switch, Route, useLocation } from 'react-router-dom';
 import {AnimatePresence} from "framer-motion";
-import Reftree from './components/reftest';
+import RefactoredBST from './components/refactoredbst';
 import BST from './components/bst';
 import AVL from './components/avl';
 
@@ -38,12 +38,12 @@ function App() {
           <AnimatePresence exitBeforeEnter>
               <Switch location={location} key={location.pathname}>
                   <Route path='/' exact render={(props) => <Home {...props} transition={PageTransition} variants={PageVariants}/>} />
-                  <Route path='/test' exact render={(props) => <Reftree {...props} transition={PageTransition} variants={PageVariants}/>} />
                   <Route path='/bst' exact render={(props) => <BST {...props} transition={PageTransition} variants={PageVariants}/> } />
                   <Route path='/avl' exact render={(props) => <AVL {...props} transition={PageTransition} variants={PageVariants}/> } />
                   <Route path='/about' render={(props) => <About {...props} transition={PageTransition} variants={PageVariants}/>}/>
                   <Route path='/catalog' exact render={(props) => <Catalog {...props} transition={PageTransition} variants={PageVariants}/>}/>
                   <Route path='/premium' exact render={(props) => <Premium {...props} transition={PageTransition} variants={PageVariants}/>}/>
+                  <Route path='/test' exact render={(props) => <RefactoredBST {...props} transition={PageTransition} variants={PageVariants}/>}/>
               </Switch>
           </AnimatePresence>
   );
