@@ -5,12 +5,12 @@ const ClosedCodeCaptions = (props) => {
 
     useEffect(() => {
         setLines(props.lines);
-    }, [props.lines] )
+    }, [props] )
 
     return (
         <div>
         {lines.map((line, index) =>
-            <div style={{ backgroundColor: `${index === props.current ? 'white' : 'black'}`, color: `${index === props.current ? 'black' : 'white'}` }}>{line}</div>
+            <div key={index} style={{ backgroundColor: `${index === props.current ? 'white' : 'black'}`, color: `${index === props.current ? 'black' : 'white'}` }}>{line}</div>
         )}
         </div>
     )

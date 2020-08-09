@@ -47,11 +47,12 @@ class Node {
 }
 
 class BinarySearchTree {
-    constructor(animator) {
+    constructor(animator, setCaptionLine) {
         this.root = null;
         this.numActiveNodes = 0;
         this.x_distances = new Map();
         this.animator = animator;
+        this.setCaptionLine = setCaptionLine;
     }
 
     updateLevels(root, level){
@@ -72,9 +73,12 @@ class BinarySearchTree {
 
     // Insert node into tree and update heights map.
     insert(value, count) {
+        this.setCaptionLine(0);
         var newNode = new Node (value, 0, count);
         var success = true;
         if (this.root === null) {
+            this.animator.addCaptionStep(1, 2, this.setCaptionLine);
+            this.animator.addCaptionStep(2, 1, this.setCaptionLine);
             this.root = newNode;
             addNodeToDOM(value, count);
             this.numActiveNodes += 1;
@@ -87,7 +91,7 @@ class BinarySearchTree {
     }
 
     insertNode(root, newNode, count){  
-        if (traverseOn) this.addTraverseStep(root, 0);
+        if (traverseOn) this.animator.addTraverseStep(root, 0);
         if (newNode.value === root.value) {
             return false;
         } else if (newNode.value < root.value){
@@ -116,7 +120,8 @@ class BinarySearchTree {
     }
 
     removeRecurse(root, value){
-        if (root !== null && traverseOn) this.addTraverseStep(root, 0);
+        this.setCaptionLine(4);
+        if (root !== null && traverseOn) this.animator.addTraverseStep(root, 0);
         if (root === null) {
             return false;
         } else if (value < root.value) {
@@ -135,7 +140,7 @@ class BinarySearchTree {
         let replacement = (node.left === null && node.right === null) ? null : (node.left === null) ? node.right : node.left;
         if (node.left !== null && node.right !== null){
             const swap = this.findLeftmost(node.right);
-            this.addTraverseStep(swap, -1);
+            this.animator.addTraverseStep(swap, -1);
             node.value = swap.value;
             this.animator.timeline.add({
                 targets: document.getElementById(`frontnode${node.id}`),
@@ -146,11 +151,15 @@ class BinarySearchTree {
             }, (traverseCount - 1) * TRAVERSE_DURATION)
             this.deleteNode(swap);
         } else {
-            if (child_of_type !== 'root') this.animator.removeElementFromDOM(`path${node.id}`);
-            else if (replacement) this.animator.removeElementFromDOM(`path${replacement.id}`);
-            if (child_of_type === 'right') node.parent.right = replacement;
-            else if (child_of_type === 'left') node.parent.left = replacement;
-            else this.root = replacement;
+            if (child_of_type !== 'root') {
+                this.animator.removeElementFromDOM(`path${node.id}`);  
+                if (child_of_type === 'right') node.parent.right = replacement;
+                else if (child_of_type === 'left') node.parent.left = replacement;
+            } 
+            else {
+                if (replacement) this.animator.removeElementFromDOM(`path${replacement.id}`);
+                this.root = replacement;
+            }
             if (replacement) replacement.parent = node.parent;
             this.animator.removeElementFromDOM(`node${node.id}`);
         }
@@ -160,7 +169,7 @@ class BinarySearchTree {
 
     async tearDownTree(){
         if (this.root === null) return;
-        this.animator.buildTearDownAnimation(this.root);
+        this.animator.buildTearDownAnimation(this.root, this.root);
         this.animator.timeline.play();
         await this.animator.timeline.finished;
         this.animator.timeline = anime.timeline({ autoplay: false });
@@ -177,40 +186,7 @@ class BinarySearchTree {
     findLeftmost(root){
         return root.left === null ? root : this.findLeftmost(root.left);
     }
-    
-    addTraverseStep(node, shift_order){
-        this.animator.timeline.add({
-            targets: `#node${node.id}`,
-            keyframes: [
-                { scale: 1 },
-                { scale:1 },
-            ],
-            easing: 'easeInOutBack',
-            duration: TRAVERSE_DURATION,
-        }, (traverseCount + shift_order) * TRAVERSE_DURATION);
-        this.animator.timeline.add({
-            targets: `#frontnode${node.id}`,
-            keyframes: [
-                { background: '#3C5B6F' },
-                { background: ' ' },
-            ],
-            easing: 'easeInOutBack',
-            duration: TRAVERSE_DURATION,
-        }, (traverseCount + shift_order) * TRAVERSE_DURATION);
-        if (node.parent !== null && shift_order === 0) {
-            this.animator.timeline.add({
-                targets: `#path${node.id}`,
-                keyframes: [
-                    { stroke: '#3C5B6F' },
-                    { stroke: '#DEAAFF' },
-                ],
-                duration: TRAVERSE_DURATION,
-                easing: 'easeInOutBack',
-            }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION/2));
-        }
-        traverseCount += 1;
-    }
-    
+        
 }
 
 function addNodeToDOM(value, count) {
@@ -307,7 +283,7 @@ class Animator {
         }
         if (root.right !== null) this.buildEdgeTimeline(root.right, tree);
     }
-    
+
     buildNodeTimeline(root, tree){
         if (root.left !== null) this.buildNodeTimeline(root.left, tree);
         const node = document.getElementById(`node${root.id}`);
@@ -345,7 +321,7 @@ class Animator {
         if (root.right !== null) this.buildNodeTimeline(root.right, tree);
     }
 
-    buildTearDownAnimation(node){
+    buildTearDownAnimation(node, root){
         this.timeline.add({
             targets: `#node${node.id}`,
             opacity: 0,
@@ -357,7 +333,7 @@ class Animator {
                 document.getElementById(`node${node.id}`).remove();
             }
         }, node.level * 50)
-        if (node !== this.root) {
+        if (node !== root) {
             this.timeline.add({
                 targets: `#path${node.id}`,
                 opacity: 0,
@@ -370,25 +346,67 @@ class Animator {
                 }
             }, node.level * 50)
         }
-        if (node.left !== null) this.buildTearDownAnimation(node.left);
-        if (node.right !== null) this.buildTearDownAnimation(node.right);
+        if (node.left !== null) this.buildTearDownAnimation(node.left, root);
+        if (node.right !== null) this.buildTearDownAnimation(node.right, root);
     }
 
     async formatBinaryTree(tree){
-        this.buildNodeTimeline(tree.root, tree);
-        this.buildEdgeTimeline(tree.root, tree);
+        if (tree.root !== null){
+            this.buildNodeTimeline(tree.root, tree);
+            this.buildEdgeTimeline(tree.root, tree);
+        }
         this.timeline.play();
         await this.timeline.finished;
         this.timeline = anime.timeline({});
         return;
     }
 
+    addTraverseStep(node, shift_order){
+        this.timeline.add({
+            targets: `#node${node.id}`,
+            keyframes: [
+                { scale: 1 },
+                { scale:1 },
+            ],
+            easing: 'easeInOutBack',
+            duration: TRAVERSE_DURATION,
+        }, (traverseCount + shift_order) * TRAVERSE_DURATION);
+        this.timeline.add({
+            targets: `#frontnode${node.id}`,
+            keyframes: [
+                { background: '#3C5B6F' },
+                { background: ' ' },
+            ],
+            easing: 'easeInOutBack',
+            duration: TRAVERSE_DURATION,
+        }, (traverseCount + shift_order) * TRAVERSE_DURATION);
+        if (node.parent !== null && shift_order === 0) {
+            this.timeline.add({
+                targets: `#path${node.id}`,
+                keyframes: [
+                    { stroke: '#3C5B6F' },
+                    { stroke: '#DEAAFF' },
+                ],
+                duration: TRAVERSE_DURATION,
+                easing: 'easeInOutBack',
+            }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION/2));
+        }
+        traverseCount += 1;
+    }
+
+    addCaptionStep(lineNumber, delay_factor, setCaptionLine){
+        this.timeline.add({
+            duration: TRAVERSE_DURATION,
+            complete: () => {
+                console.log(`Caption step ${lineNumber} ${delay_factor}`)
+                setCaptionLine(lineNumber)
+            }
+        }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION / delay_factor))
+    }
 }
 
-
-
 class RefactoredBST extends Component {
-    inputLines = ['def insert(root,node):', 'if root is None:', 'root = node', 
+    inputLines = ['if root is None:', 'root = node', 
         'else:', 'if root.val < node.val:', 'if root.right is None:', 
         'root.right = node', 'else:', 'insert(root.right, node)', 'else:', 
         'if root.left is None:', 'root.left = node ', 'else:', 'insert(root.left, node)'];
@@ -406,8 +424,7 @@ class RefactoredBST extends Component {
         this.state = {
             inputValue: '',
             removeValue: '',
-            bst: new BinarySearchTree(this.animator),
-            multiInput: '',
+            bst: new BinarySearchTree(this.animator, (x) => this.setState({ currentLine: x })),
             count: 0,
             disable: true,
             numActiveNodes: 0,
@@ -417,6 +434,7 @@ class RefactoredBST extends Component {
             NUM_STARTING_NODE: 11,
             errorMessage: '',
             currentOperation: 'input',
+            currentLine: 3,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -424,9 +442,6 @@ class RefactoredBST extends Component {
         this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this); 
         this.calculateShiftX = this.calculateShiftX.bind(this);
         this.onResize = this.onResize.bind(this);
-        this.handleMultiSubmit = this.handleMultiSubmit.bind(this);
-        this.handleMultiChange = this.handleMultiChange.bind(this);
-        this.parseMulti = this.parseMulti.bind(this);
         this.tearDownTree = this.tearDownTree.bind(this);
         this.resyncFormat = this.resyncFormat.bind(this);
         this.playPause = this.playPause.bind(this);
@@ -469,9 +484,6 @@ class RefactoredBST extends Component {
         this.setState({ removeValue: isNaN(event.target.value) ? '' : parseFloat(event.target.value)});
     }
     
-    handleMultiChange(event){
-        this.setState({ multiInput: event.target.value});
-    }
 
     async handleInputSubmit(event) {
         event.preventDefault();
@@ -501,6 +513,7 @@ class RefactoredBST extends Component {
 
     async handleRemoveSubmit(event) {
         event.preventDefault();
+        const removeValue = this.state.removeValue;
         this.setState({ currentOperation: 'remove' });
         if (this.state.removeValue === '' || isNaN(this.state.removeValue)) {
             this.setState({ errorMessage: 'Please enter an number (e.g. 32, 2.7).', removeValue: '' }); 
@@ -511,81 +524,22 @@ class RefactoredBST extends Component {
             return;
         }
         this.setState({ disable: true });
-        this.animator.timeline = anime.timeline({ autoplay: false });
-        const success = this.state.bst.removeRecurse(this.state.bst.root, this.state.removeValue);
+        this.animator.timeline = anime.timeline({ });
+        const success = this.state.bst.removeRecurse(this.state.bst.root, removeValue);
         this.setState({ removeValue: '', errorMessage: '' });
         if (this.state.bst.root !== null) {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            await this.animator.formatBinaryTree(this.state.bst);
         };
+        await this.animator.formatBinaryTree(this.state.bst);
         this.setState({
             disable : false, 
             numActiveNodes: this.state.bst.numActiveNodes,
             treeHeight: this.state.bst.getTreeHeight(),
-            errorMessage: success ? '' : `${this.state.removeValue} does not exist in the tree.`,
+            errorMessage: success ? '' : `${removeValue} s not exist in the tree.`,
             removeValue: '',
         });
         document.getElementById('remove-field').focus();
         traverseCount = 0;
-    }
-
-    parseMulti(){
-        const multiInput = this.state.multiInput.toLowerCase();
-        let instructions = [];
-        for (let idx = 0; idx < multiInput.length; idx++){
-            if (!isNaN(multiInput[idx]) && multiInput[idx] !== ' ' && multiInput[idx] !== '') {
-                
-            } else if (multiInput[idx] === 'r'){
-
-            }  else if (multiInput[idx] === 'a' || (multiInput[idx] === 'd')){
-                const open_brack = multiInput.substring(idx).indexOf('[') + idx;
-                const close_brack = multiInput.substring(idx).indexOf(']') + idx;
-
-                console.log(multiInput.substring(idx + 1, idx + 3));
-                if (open_brack !== -1 && close_brack === -1) throw Error('Expected ]');
-                else if (open_brack === -1 && close_brack !== -1) throw Error('Expected ['); 
-                else if (open_brack === -1 && close_brack === -1) throw Error('Expected [...]');
-                else if (multiInput.substring(idx + 1, idx + 3) !== 'dd' && multiInput.substring(idx + 1, idx + 3) !== 'el') 
-                    throw Error('Unknown command');
-                
-                if (open_brack !== -1 && close_brack !== -1){
-                    let add_group = multiInput.substring(open_brack + 1, close_brack).split(/\s*(\s|,)\s*/)
-                            .filter(el => !isNaN(parseFloat(el)))
-                                .map(el => multiInput[idx] === 'a' ? `${el}` : `d${el}`);
-                    instructions = instructions.concat(add_group);
-                }
-                idx = close_brack;
-            }
-        }
-        return instructions;
-    }
-
-    async handleMultiSubmit(event){
-        event.preventDefault();
-        this.animator.timeline = anime.timeline({ autoplay: false });
-        this.setState({disable: true})
-        var newNodes;
-        try { newNodes = this.parseMulti();
-        } catch (error){
-            console.error(error)
-        }
-        for (const value of newNodes){
-            if (value.toString().includes('d')) {
-                const success = this.state.bst.removeRecurse(this.state.bst.root, parseFloat(value.toString().substring(1)));
-                if (success) this.state.bst.numActiveNodes -= 1;
-            }
-            else {
-                this.state.bst.insert(parseFloat(value), this.state.count);
-                addNodeToDOM(value, this.state.count);
-                this.state.bst.numActiveNodes += 1;
-                this.setState({count: this.state.count + 1});
-            }
-            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            await this.animator.formatBinaryTree(this.state.bst);
-            traverseCount = 0;
-        }
-        this.setState({multiInput: '', disable: false});
-        document.getElementById('multi-field').focus();
     }
 
     calculateShiftX(nodeContainer) {
@@ -613,7 +567,7 @@ class RefactoredBST extends Component {
         this.setState({disable: true, numActiveNodes: 0, treeHeight: 0 });
         this.animator.timeline = anime.timeline({ autoplay: false });
         await this.state.bst.tearDownTree();
-        this.setState({disable: false, bst: new BinarySearchTree()});
+        this.setState({disable: false, bst: new BinarySearchTree(this.animator, (x) => this.setState({ currentLine: x }))});
     }
 
     async resyncFormat(){
@@ -680,7 +634,7 @@ class RefactoredBST extends Component {
                     </button>
                     {this.animator.timeline.duration}
                     <div className='tree-info' id='error-message'>{this.state.errorMessage}</div>
-                    <ClosedCodeCaptions lines={ this.state.currentOperation === 'input' ? this.inputLines : this.removeLines }/>
+                    <ClosedCodeCaptions current={this.state.currentLine} lines={ this.state.currentOperation === 'input' ? this.inputLines : this.removeLines }/>
                 </UI_CONTAINER>
             </PageWrapper>
         );
