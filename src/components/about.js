@@ -8,7 +8,6 @@ import copy from 'copy-to-clipboard';
 
 const AboutContainer = styled.div`
     height: 100vh;
-    background-color: #ece7e3;
 `
 const AboutHeadline = styled.div`
     font-family: Ramaraja;
@@ -41,7 +40,7 @@ const Link = styled.a`
 
 function About (props){
     return(
-        <AboutContainer>
+        <AboutContainer className='landing'>
             <Navbar/>
             <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
             <MainWrapper>

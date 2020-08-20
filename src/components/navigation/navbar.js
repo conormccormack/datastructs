@@ -5,7 +5,6 @@ import HomeButton from "../homebutton";
 import NavItem from './navitem.js'
 import Searchbar from "../searchbar";
 import Dropdown from './dropdown';
-// import LoginRegister from "../login_register_button";
 
 const NavLayout = styled.div`
     padding-top: 10px;
@@ -13,7 +12,6 @@ const NavLayout = styled.div`
     padding-right: 100px;
     display: flex;
     justify-content: flex-start;
-    background-color: #ece7e3;
     grid-template-columns: repeat(5,200px);
     height: 50px;
 `
@@ -25,20 +23,17 @@ const SearchbarContainer = styled.div`
 
 function Navbar(){
     return (
-        <nav role='navigation'>
-            <NavLayout>
-                <HomeButton className="homeLink"/>
-                <NavItem link={'about'} text='about'/>
-                <NavItem link={'#'} text='explore'>
-                    <Dropdown/>
-                </NavItem>
-                
-                <SearchbarContainer>
-                    <Searchbar/>
-                </SearchbarContainer>
-                {/* <LoginRegister/> */}
-            </NavLayout>
-        </nav>
+        <NavLayout className='nav-container'>
+            <HomeButton className="homeLink"/>
+            <NavItem link={'about'} text='about'/>
+            <NavItem link={'#'} text='explore'>
+                <Dropdown/>
+            </NavItem>
+            
+            <SearchbarContainer>
+                <Searchbar/>
+            </SearchbarContainer>
+        </NavLayout>
     );
 }
 

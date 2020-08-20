@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {Link} from 'react-router-dom';
 import styled from 'styled-components';
 import '../../resources/fonts/fontawesome/css/all.css';
+import '../../css/navbar.css'
 
 const Button = styled.div`
     font-size: 16px;
@@ -18,10 +19,10 @@ function NavItem(props){
     return (
         <Button>
             {props.link !== '#' ?
-                <Link style={{textDecoration:'None' , color:'black'}} to={props.link}> 
+                <Link className='link' to={props.link}> 
                     {props.text}
                 </Link> :
-                <Link style={{textDecoration:'None' , color:'black'}} onClick={() => { setOpen(!open) } }>
+                <Link className='link' onClick={() => { setOpen(!open) } }>
                     {props.text}
                 </Link>
             }

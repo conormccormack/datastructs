@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components'
-import HomeMainGraphic from "./homemaingraphic";
+// import HomeMainGraphic from "./homemaingraphic";
 
 const WelcomeHeadline = styled.div`
     font-family: Ramaraja;
@@ -27,8 +27,8 @@ const WelcomeMessage =styled.div`
 
 function Mainlanding(){
     return (
-        <MainWrapper>
-            <HomeMainGraphic/>
+        <MainWrapper className='landing'>
+            {/* <HomeMainGraphic/> */}
             <WelcomeMessage>
                 <WelcomeHeadline>Welcome to DataStructs.</WelcomeHeadline>
                 <WelcomeBody>
@@ -38,7 +38,7 @@ function Mainlanding(){
                     writing a single line of code.<br/><br/>
                     On top of that, DataStructs provides explanations and automated notes for every animation, so anyone can
                     build an intuition each subject's motivating ideas and asymptotic behavior. <br/><br/>
-                    Click everything to view the 💯 catalog, or search for a specific data structure or concept in the search bar.
+                    Click <strong>explore</strong> or search for a specific data structure or concept in the search bar.
                 </WelcomeBody>
             </WelcomeMessage>
 

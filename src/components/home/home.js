@@ -6,12 +6,11 @@ import {motion} from 'framer-motion';
 
 const HomeContainer = styled.div`
     height: 100vh;
-    background-color: #ece7e3;
 `
 
 function Home(props) {
     return (
-        <HomeContainer>
+        <HomeContainer className='landing'>
             <Navbar/>
             <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
                 <Mainlanding/>

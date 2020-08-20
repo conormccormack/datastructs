@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../../css/navbar.css';
 import { CSSTransition } from 'react-transition-group';
+import { ReactComponent as BackArrow } from  '../../resources/icons/arrow.svg';
 
 function Dropdown (props) {
     const [activeMenu, setActiveMenu] = useState('main');
@@ -26,6 +27,14 @@ function Dropdown (props) {
         )
     }
 
+    function DropdownSectionTitle(props){
+        return(
+            <Link className='section-title'> 
+                <span className='icon-button' onClick={() => props.goToMenu && setActiveMenu(props.goToMenu)}>{props.icon}</span>
+                <span style={{marginLeft: '10px', fontFamily: 'Raleway'}}>{props.children}</span>
+            </Link>
+        )
+    }
 
     return (
         <div className='dropdown' style={{height: menuHeight}} ref={dropdownRef}>
@@ -37,8 +46,8 @@ function Dropdown (props) {
                 onEnter={calcHeight}
             >
                 <div className="menu">
-                    <DropdownItem link={'/'}>Home</DropdownItem>
-                    <DropdownItem goToMenu='trees'>Trees</DropdownItem>
+                    <DropdownItem link={'/'}>home</DropdownItem>
+                    <DropdownItem goToMenu='trees'>trees</DropdownItem>
                     <DropdownItem link={'about'}>about</DropdownItem>
                 </div>
             </CSSTransition>
@@ -51,6 +60,7 @@ function Dropdown (props) {
                 onEnter={calcHeight}
             >
                 <div className="menu">
+                    <DropdownSectionTitle icon={<BackArrow/>} goToMenu='main'>Trees</DropdownSectionTitle>
                     <DropdownItem link={'bst'}>Binary Search Tree</DropdownItem>
                 </div>
             </CSSTransition>
