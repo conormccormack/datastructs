@@ -35,8 +35,6 @@ const NodeContainer = styled.div`
 `
 
 const UI_CONTAINER = styled.div`
-    background-color: #577590;
-    border-radius: 10px;
 `
 
 

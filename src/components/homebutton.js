@@ -1,9 +1,9 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 
-function HomeButton(){
+function HomeButton(props){
     return (
-        <Link style={{ fontFamily: 'Ramaraja' }} className="homeLink" to='/'>
+        <Link style={{ fontFamily: 'Ramaraja'}} className="homeLink" to='/'>
             <img className="logoImage" alt="datastructs logo" src={require("../resources/images/darklogo.png")}/>
         </Link>
     );

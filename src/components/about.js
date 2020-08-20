@@ -34,7 +34,7 @@ const AboutBody = styled.div`
 `
 
 const Link = styled.a`
-    text-decoration: none;
+    
     color: black;
     hover: 
 `
@@ -53,7 +53,7 @@ function About (props){
                         DataStructs is a platform for interactive vizualizations of data structures and algorithms built by Conor McCormack
                         to replace existing sites that offer little in the way of explaining how data structures and algorithms work or why we use them.<br/>
                         <br/>
-                        I am a third-year student of Computer Science & Math at the University of Southern California concurrently working towards an M.S. in Applied Data Science. My primary interests lie in
+                        I am a third-year student of Computer Science & Math at the University of Southern California concurrently working towards an M.S. in Electrical Engineering with a focus in Machine Learning. My primary interests lie in
                         data science & deep learning research and its applications in autonomous machines. Feel free to connect with me on <Link style={{textDecoration: 'underline'}} href="https://www.linkedin.com/in/conorxmccormack">LinkedIn</Link> if
                         that's your sort of thing.
                         <br/><br/>

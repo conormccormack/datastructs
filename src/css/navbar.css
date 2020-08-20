@@ -1,18 +1,22 @@
 :root {
-    --bg:  #242526;
-    --bg-accent: #484a4d;
-    --text-color: #dadce1;
+    --bg:  #f2ede9;
+    --bg-accent: #ece7e3;
+    --text-color: #222;
     --nav-size: 60px;
-    --border: 1px solid #474a4d;
-    --border-radius: 8px;
+    --border: 1px solid #eee;
+    --border-radius: 10px;
     --speed: 500ms; 
 }
 
 .link {
     color: var(--text-color);
     text-decoration: none;
+    font-size: 18px;
 }
 
+.link:hover {
+    text-decoration: none;
+}
 
 .logoImage {
     height: 103%;
@@ -22,6 +26,7 @@
 
 .homeLink {
     height: 40px;
+    padding: 5px 5px 10px 0px;
 }
 
 .caret {
@@ -34,7 +39,7 @@
 }
 
 .menu-item {
-    height: 50px;
+    height: 35px;
     display: flex;
     align-items: center;
     border-radius: var(--border-radius);
@@ -43,21 +48,22 @@
 }
 
 .menu-item:hover {
-    background-color: #525357;
+    background-color: var(--bg-accent);
 }
 
 .dropdown {
     position: absolute;
     z-index: 1;
     top: 58px;
-    width: 300px;
-    transform: translateX(-45%);
+    width: 250px;
+    transform: translateX(-60%);
     background-color: var(--bg);
     border: var(--border);
     border-radius: var(--border-radius);
     padding: 1rem;
     overflow: hidden;
     transition: height var(--speed) ease;
+    box-shadow: 0px 0px 10px #eee;
   }
 
 
