@@ -77,13 +77,18 @@ class BinarySearchTree {
         var newNode = new Node (value, 0, count);
         var success = true;
         if (this.root === null) {
-            this.animator.addCaptionStep(1, 2, this.setCaptionLine);
-            this.animator.addCaptionStep(2, 1, this.setCaptionLine);
+            if (traverseOn) {
+                this.animator.addCaptionStep(0, 1, this.setCaptionLine);
+                this.animator.addCaptionStep(1, 0, this.setCaptionLine);
+            }
             this.root = newNode;
             addNodeToDOM(value, count);
             this.numActiveNodes += 1;
         }
-        else { 
+        else {
+            if(traverseOn) {
+                this.animator.addCaptionStep(2, 1, this.setCaptionLine);
+            }
             newNode.level += 1;
             success = this.insertNode(this.root, newNode, count);
         }
@@ -401,7 +406,7 @@ class Animator {
                 console.log(`Caption step ${lineNumber} ${delay_factor}`)
                 setCaptionLine(lineNumber)
             }
-        }, traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION / delay_factor))
+        }, delay_factor === 0 ? traverseCount * TRAVERSE_DURATION : traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION / delay_factor))
     }
 }
 

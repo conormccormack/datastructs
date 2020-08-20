@@ -1,3 +1,19 @@
+:root {
+    --bg:  #242526;
+    --bg-accent: #484a4d;
+    --text-color: #dadce1;
+    --nav-size: 60px;
+    --border: 1px solid #474a4d;
+    --border-radius: 8px;
+    --speed: 500ms; 
+}
+
+.link {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+
 .logoImage {
     height: 103%;
     width: auto;
@@ -8,18 +24,72 @@
     height: 40px;
 }
 
-.dropdown {
-    font-size: 16px;
-    vertical-align: text-bottom;
-    font-family: Raleway, sans-serif;
-    font-weight: 500;
-    padding-top: 8px;
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
 .caret {
     font-size: 18px;
     color: #3C5B6F;
 }
 
+.menu {
+    width: 100%;
+}
+
+.menu-item {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    border-radius: var(--border-radius);
+    transition: background var(--speed);
+    padding: 0.5rem;
+}
+
+.menu-item:hover {
+    background-color: #525357;
+}
+
+.dropdown {
+    position: absolute;
+    z-index: 1;
+    top: 58px;
+    width: 300px;
+    transform: translateX(-45%);
+    background-color: var(--bg);
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    overflow: hidden;
+    transition: height var(--speed) ease;
+  }
+
+
+
+/* CSSTransition classes  */
+.menu-primary-enter {
+    position: absolute;
+    transform: translateX(-110%);
+}
+.menu-primary-enter-active {
+    transform: translateX(0%);
+    transition: all var(--speed) ease;
+}
+.menu-primary-exit {
+    position: absolute;
+}
+.menu-primary-exit-active {
+    transform: translateX(-110%);
+    transition: all var(--speed) ease;
+}
+  
+.menu-secondary-enter {
+    transform: translateX(110%);
+}
+.menu-secondary-enter-active {
+    transform: translateX(0%);
+    transition: all var(--speed) ease;
+}
+.menu-secondary-exit {
+
+}
+.menu-secondary-exit-active {
+    transform: translateX(110%);
+    transition: all var(--speed) ease;
+}

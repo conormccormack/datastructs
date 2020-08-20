@@ -2,9 +2,10 @@ import React from "react";
 import '../../css/navbar.css';
 import styled from 'styled-components';
 import HomeButton from "../homebutton";
-import NavigationButton from './navigationbutton';
+import NavItem from './navitem.js'
 import Searchbar from "../searchbar";
-import LoginRegister from "../login_register_button";
+import Dropdown from './dropdown';
+// import LoginRegister from "../login_register_button";
 
 const NavLayout = styled.div`
     padding-top: 10px;
@@ -27,14 +28,15 @@ function Navbar(){
         <nav role='navigation'>
             <NavLayout>
                 <HomeButton className="homeLink"/>
-                <NavigationButton nextPage="about"/>
-                {/* <NavigationButton nextPage="explore"/> */}
-                <NavigationButton nextPage="everything"/>
-                {/* <NavigationButton nextPage="premium"/> */}
+                <NavItem link={'about'} text='about'/>
+                <NavItem link={'#'} text='explore'>
+                    <Dropdown/>
+                </NavItem>
+                
                 <SearchbarContainer>
                     <Searchbar/>
                 </SearchbarContainer>
-                <LoginRegister/>
+                {/* <LoginRegister/> */}
             </NavLayout>
         </nav>
     );
