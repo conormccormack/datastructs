@@ -20,11 +20,6 @@ const NodeContainer = styled.div`
     width: 100%
 `
 
-const UI_CONTAINER = styled.div`
-    background-color: #577590;
-    border-radius: 10px;
-`
-
 const HORIZONTAL_SPACING = 45;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
@@ -73,22 +68,18 @@ class BinarySearchTree {
 
     // Insert node into tree and update heights map.
     insert(value, count) {
-        this.setCaptionLine(0);
         var newNode = new Node (value, 0, count);
         var success = true;
         if (this.root === null) {
             if (traverseOn) {
-                this.animator.addCaptionStep(0, 1, this.setCaptionLine);
-                this.animator.addCaptionStep(1, 0, this.setCaptionLine);
+                this.animator.addCaptionStep(0, 0, 2, this.setCaptionLine);
+                this.animator.addCaptionStep(1, 1, 2, this.setCaptionLine);
             }
             this.root = newNode;
             addNodeToDOM(value, count);
             this.numActiveNodes += 1;
         }
         else {
-            if(traverseOn) {
-                this.animator.addCaptionStep(2, 1, this.setCaptionLine);
-            }
             newNode.level += 1;
             success = this.insertNode(this.root, newNode, count);
         }
@@ -98,12 +89,19 @@ class BinarySearchTree {
     insertNode(root, newNode, count){  
         if (traverseOn) this.animator.addTraverseStep(root, 0);
         if (newNode.value === root.value) {
+            if (traverseOn) this.animator.addCaptionStep(12, 0, 2, this.setCaptionLine);
+            if (traverseOn) this.animator.addCaptionStep(13, 1, 2, this.setCaptionLine);
             return false;
         } else if (newNode.value < root.value){
+            if (traverseOn) this.animator.addCaptionStep(2, 0, 3, this.setCaptionLine);
             if (root.left !== null) {
+                if (traverseOn) this.animator.addCaptionStep(5, 1, 3, this.setCaptionLine);
+                if (traverseOn) this.animator.addCaptionStep(6, 2, 3, this.setCaptionLine);
                 newNode.level = newNode.level + 1;
                 return this.insertNode(root.left, newNode, count);
-            } else { 
+            } else {
+                if (traverseOn) this.animator.addCaptionStep(3, 1, 3, this.setCaptionLine);
+                if (traverseOn) this.animator.addCaptionStep(4, 2, 3, this.setCaptionLine);
                 root.left = newNode; 
                 newNode.parent = root;
                 this.numActiveNodes += 1;
@@ -111,10 +109,15 @@ class BinarySearchTree {
                 return true;
             }
         } else if (newNode.value > root.value){
+            if (traverseOn) this.animator.addCaptionStep(7, 0, 3, this.setCaptionLine);
             if (root.right !== null) {
                 newNode.level = newNode.level + 1;
+                if (traverseOn) this.animator.addCaptionStep(8, 1, 3, this.setCaptionLine);
+                if (traverseOn) this.animator.addCaptionStep(9, 2, 3, this.setCaptionLine);
                 return this.insertNode(root.right, newNode, count);
             } else { 
+                if (traverseOn) this.animator.addCaptionStep(10, 1, 3, this.setCaptionLine);
+                if (traverseOn) this.animator.addCaptionStep(11, 2, 3, this.setCaptionLine);
                 root.right = newNode; 
                 newNode.parent = root;
                 this.numActiveNodes += 1;
@@ -399,29 +402,34 @@ class Animator {
         traverseCount += 1;
     }
 
-    addCaptionStep(lineNumber, delay_factor, setCaptionLine){
+    addCaptionStep(lineNumber, delay, divisor, setCaptionLine){
         this.timeline.add({
             duration: TRAVERSE_DURATION,
             complete: () => {
-                console.log(`Caption step ${lineNumber} ${delay_factor}`)
                 setCaptionLine(lineNumber)
             }
-        }, delay_factor === 0 ? traverseCount * TRAVERSE_DURATION : traverseCount * TRAVERSE_DURATION - (TRAVERSE_DURATION / delay_factor))
+        }, (traverseCount-1) * TRAVERSE_DURATION + delay * (TRAVERSE_DURATION/divisor))
     }
 }
 
 class RefactoredBST extends Component {
-    inputLines = ['if root is None:', 'root = node', 
-        'else:', 'if root.val < node.val:', 'if root.right is None:', 
-        'root.right = node', 'else:', 'insert(root.right, node)', 'else:', 
-        'if root.left is None:', 'root.left = node ', 'else:', 'insert(root.left, node)'];
+    inputLines = [{value: 'if root is NULL:' , indent: 0}, {value: 'insert at root' , indent: 1},
+        {value: 'if input < curr:' , indent: 0}, {value: 'if curr.left is NULL:' , indent: 1},
+        {value: 'insert input at curr.left' , indent: 2}, {value: 'else:' , indent: 1}, 
+        {value: 'look left' , indent: 2}, {value: 'else if input > curr:' , indent: 0}, 
+        {value: 'if curr.right is NULL:' , indent: 1}, {value: 'insert input at curr.right' , indent: 2},
+        {value: 'else:' , indent: 1}, {value: 'look right' , indent: 2}, {value: 'else:' , indent: 0},
+        {value: 'reject duplicate' , indent: 1}
+    ]
 
-    removeLines = ['def deleteNode(root, key):', 'if root is None: ', 'return root',  
-        'if key < root.key: ', 'root.left = deleteNode(root.left, key) ','elif(key > root.key): ',
-        'root.right = deleteNode(root.right, key)', 'else:', 'if root.left is None : ',
-        'temp = root.right ', 'root = None ', 'return temp  ', 'elif root.right is None : ',
-        'temp = root.left', 'root = None', 'return temp',  'temp = minValueNode(root.right)',
-        'root.key = temp.key ', 'root.right = deleteNode(root.right , temp.key)', 'return root'];
+    removeLines = [{value: 'if remove < curr:' , indent: 0}, {value: 'look left' , indent: 1}, 
+        {value: 'else if remove > curr:' , indent: 0}, {value: 'look right' , indent: 1},  
+        {value: 'else:' , indent: 0}, {value: 'if curr has no children' , indent: 1}, 
+        {value: 'delete curr' , indent: 2}, 
+        {value: 'else if curr has only one child:' , indent: 1}, {value: 'connect child to curr\'s parent' , indent: 2}, 
+        {value: 'else if curr has two children:' , indent: 1}, 
+        {value: 'replace curr with its succcessor' , indent: 0},
+    ]
     
     constructor (props) {
         super(props);
@@ -502,7 +510,7 @@ class RefactoredBST extends Component {
         const success = this.state.bst.insert(this.state.inputValue, this.state.count);
         if (!success) {
             this.setState({ errorMessage: `${this.state.inputValue} already exists in the tree.`, inputValue: '', disable: false })
-            return;
+            if (!traverseOn) return;
         }
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         this.setState({errorMessage: '', inputValue : '',})
@@ -599,26 +607,24 @@ class RefactoredBST extends Component {
                 <NodeContainer id="nodecontainer" >
                     <svg className="linecontainer" id="svg-line" />                    
                 </NodeContainer>
-                <UI_CONTAINER>    
-                    <div>
-                        <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
-                        <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
-                        <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
-                            <label>
-                                <input disabled={this.state.disable} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
-                                <button disabled={this.state.disable} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Input</button>
-                            </label>
-                        </form>
-                        <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
-                            <label>
-                                <input disabled={this.state.disable} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
-                                <button disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
-                            </label>
-                        </form>
-                        <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={this.animator.timeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
-                        <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
-                        <button onClick={() => this.animator.timeline.seek(this.state.seekValue)}></button>
-                    </div>
+                <div>
+                    <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
+                    <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
+                    <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
+                        <label>
+                            <input disabled={this.state.disable} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
+                            <button disabled={this.state.disable} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Input</button>
+                        </label>
+                    </form>
+                    <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
+                        <label>
+                            <input disabled={this.state.disable} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
+                            <button disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
+                        </label>
+                    </form>
+                    <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={this.animator.timeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
+                    <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
+                    <button onClick={() => this.animator.timeline.seek(this.state.seekValue)}></button>
                     <div className='tree-info'> 
                         <label>
                             Animate traversal
@@ -640,7 +646,7 @@ class RefactoredBST extends Component {
                     {this.animator.timeline.duration}
                     <div className='tree-info' id='error-message'>{this.state.errorMessage}</div>
                     <ClosedCodeCaptions current={this.state.currentLine} lines={ this.state.currentOperation === 'input' ? this.inputLines : this.removeLines }/>
-                </UI_CONTAINER>
+                </div>
             </PageWrapper>
         );
     }

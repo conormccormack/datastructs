@@ -1,5 +1,5 @@
 import React from 'react';
-import AnimeTest from './animetest';
+import RefactoredBST from './refactoredbst';
 import Navbar from './navigation/navbar';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
@@ -20,7 +20,7 @@ function BST (props){
             <Navbar/>
             <Headline>Binary Search Tree</Headline>
             <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
-                <AnimeTest/>
+                <RefactoredBST/>
             </motion.div>
         </Wrapper>
         

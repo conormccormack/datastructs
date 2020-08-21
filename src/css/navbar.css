@@ -148,7 +148,7 @@
 }
 
 .icon-button {
-    --button-size: calc(var(--nav-size) * 0.5);
+    --button-size: calc(var(--nav-size) * 0.45);
     width: var(--button-size);
     height: var(--button-size);
     background-color: #ddd;

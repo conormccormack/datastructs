@@ -8,9 +8,14 @@ const ClosedCodeCaptions = (props) => {
     }, [props] )
 
     return (
-        <div>
+        <div style={{backgroundColor: '#F2F3F5' }}>
         {lines.map((line, index) =>
-            <div key={index} style={{ backgroundColor: `${index === props.current ? 'white' : 'black'}`, color: `${index === props.current ? 'black' : 'white'}` }}>{line}</div>
+            <div key={index} style={{ 
+                backgroundColor: `${index === props.current ? 'black' : 'transparent'}`,
+                color: `${index === props.current ? 'white' : 'black'}`,
+                marginLeft: `${line.indent * 20}px`,
+                }}>{line.value}
+            </div>
         )}
         </div>
     )
