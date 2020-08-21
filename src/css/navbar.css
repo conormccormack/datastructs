@@ -148,7 +148,7 @@
 }
 
 .icon-button {
-    --button-size: calc(var(--nav-size) * 0.4);
+    --button-size: calc(var(--nav-size) * 0.5);
     width: var(--button-size);
     height: var(--button-size);
     background-color: #ddd;
@@ -162,12 +162,32 @@
     cursor: pointer;
 }
   
-.icon-button:hover {
+.back-button:hover {
     filter: brightness(.9);
 }
   
 .icon-button svg { 
     fill: var(--text-color);
-    width: calc(var(--nav-size) * 0.3);
-    height: calc(var(--nav-size) * 0.3);
+    width: calc(var(--nav-size) * 0.4);
+    height: calc(var(--nav-size) * 0.4);
+}
+
+.icon-right {
+    --button-size: calc(var(--nav-size) * 0.5);
+    width: var(--button-size);
+    height: var(--button-size);
+    border-radius: 50%;
+    padding: 5px;
+    margin-right: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.icon-right svg { 
+    fill: var(--text-color);
+    width: calc(var(--nav-size) * 0.4);
+    height: calc(var(--nav-size) * 0.4);
 }

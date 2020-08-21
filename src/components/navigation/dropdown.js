@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 import '../../css/navbar.css';
 import { CSSTransition } from 'react-transition-group';
 import { ReactComponent as BackArrow } from  '../../resources/icons/arrow.svg';
-
+import { ReactComponent as TreeIcon } from  '../../resources/icons/treeicon.svg';
+import { ReactComponent as HomeIcon } from  '../../resources/icons/house.svg';
+import { ReactComponent as AboutIcon } from '../../resources/icons/question.svg';
+import { ReactComponent as RightChevron } from '../../resources/icons/chevron.svg';
+ 
 function Dropdown (props) {
     const [activeMenu, setActiveMenu] = useState('main');
     const [menuHeight, setMenuHeight] = useState(null);
@@ -21,8 +25,10 @@ function Dropdown (props) {
         return(
             <Link className='link menu-item' 
                 to={props.link} onClick={() => props.goToMenu && setActiveMenu(props.goToMenu)}
-            > 
-                    {props.children}
+            >
+                {props.leftIcon && <span className='icon-button'>{props.leftIcon}</span>}
+                {props.children}
+                {props.rightIcon && <span className='icon-right'>{props.rightIcon}</span>}
             </Link>
         )
     }
@@ -30,7 +36,7 @@ function Dropdown (props) {
     function DropdownSectionTitle(props){
         return(
             <Link className='section-title'> 
-                {props.leftIcon && <span className='icon-button' onClick={() => props.goToMenu && setActiveMenu(props.goToMenu)}>{props.leftIcon}</span>}
+                {props.leftIcon && <span className='back-button icon-button' onClick={() => props.goToMenu && setActiveMenu(props.goToMenu)}>{props.leftIcon}</span>}
                 <span style={{fontFamily: 'Raleway'}}>{props.children}</span>
             </Link>
         )
@@ -47,9 +53,9 @@ function Dropdown (props) {
             >
                 <div className="menu">
                     <DropdownSectionTitle>Explore</DropdownSectionTitle>
-                    <DropdownItem link={'/'}>home</DropdownItem>
-                    <DropdownItem goToMenu='trees'>trees</DropdownItem>
-                    <DropdownItem link={'about'}>about</DropdownItem>
+                    <DropdownItem leftIcon={<HomeIcon/>} link={'/'}>home</DropdownItem>
+                    <DropdownItem leftIcon={<TreeIcon/>} rightIcon={<RightChevron/>} goToMenu='trees'>trees</DropdownItem>
+                    <DropdownItem leftIcon={<AboutIcon/>} link={'about'}>about</DropdownItem>
                 </div>
             </CSSTransition>
 
