@@ -124,7 +124,7 @@ class Searchbar extends PureComponent {
         const enterDown = this.state.enterDown;
 
         return(
-            <div>
+            <div style={{marginLeft: 'auto', marginRight: '10px'}}>
                 <Autosuggest
                     multiSection={true}
                     suggestions={suggestions}

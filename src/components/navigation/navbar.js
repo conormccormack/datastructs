@@ -13,13 +13,7 @@ const NavLayout = styled.div`
     display: flex;
     justify-content: flex-start;
     grid-template-columns: repeat(5,200px);
-    height: 50px;
 `
-const SearchbarContainer = styled.div`
-    margin-left: auto;
-    margin-right: 10px;
-`
-
 
 function Navbar(){
     return (
@@ -29,10 +23,7 @@ function Navbar(){
             <NavItem link={'#'} text='explore'>
                 <Dropdown/>
             </NavItem>
-            
-            <SearchbarContainer>
-                <Searchbar/>
-            </SearchbarContainer>
+            <Searchbar/>
         </NavLayout>
     );
 }
