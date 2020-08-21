@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components'
-// import HomeMainGraphic from "./homemaingraphic";
+import HomeMainGraphic from "./homemaingraphic";
 
 const WelcomeHeadline = styled.div`
     font-family: Ramaraja;
@@ -9,7 +9,7 @@ const WelcomeHeadline = styled.div`
 
 const WelcomeBody = styled.div`
     font-family: Lato;
-    font-size: 18px;
+    font-size: 20px;
 `
 
 const MainWrapper = styled.div`
@@ -28,7 +28,7 @@ const WelcomeMessage =styled.div`
 function Mainlanding(){
     return (
         <MainWrapper className='landing'>
-            {/* <HomeMainGraphic/> */}
+            <HomeMainGraphic/>
             <WelcomeMessage>
                 <WelcomeHeadline>Welcome to DataStructs.</WelcomeHeadline>
                 <WelcomeBody>

@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from "styled-components";
+// import MainGraphic from '../../resources/images/logo_waves.png'
 
 const ResponsiveGraphic = styled.div`
     width: 100%;
@@ -9,9 +10,10 @@ const ResponsiveGraphic = styled.div`
 function HomeMainGraphic() {
     return(
         <ResponsiveGraphic>
-            <img style={{width: '100%'}} src={require("../../resources/images/logo_waves.svg")} alt="logo on waves"/>
+            
+            <img style={{ marginLeft: 'auto', marginRight: 'auto', width: '100%'}} src={require("../../resources/images/bst_sc.png")} alt="logo on waves"/>
         </ResponsiveGraphic>
     )
-}
+}  
 
 export default HomeMainGraphic; 
