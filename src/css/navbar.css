@@ -8,7 +8,6 @@
     --speed: 500ms; 
 }
 
-
 .link {
     color: var(--text-color);
     text-decoration: none;
@@ -20,19 +19,47 @@
     text-decoration: none;
 }
 
-.logoImage {
-    height: 103%;
+.logo {
+    height: 100%;
     width: auto;
-    padding-right: 15px;
 }
 
-.homeLink {
+.home-button {
     height: 40px;
+    padding: 5px;
+    padding-right: 8px;
+    margin-top: -5px;
+    border-radius: var(--border-radius);
+    transition: background var(--speed);
+}
+
+.home-button:hover {
+    background-color: var(--bg-accent);
 }
 
 .caret {
     font-size: 18px;
     color: #3C5B6F;
+}
+
+.nav-button {
+    font-size: 16px;
+    vertical-align: text-bottom;
+    font-family: Raleway, sans-serif;
+    font-weight: 500;
+    transition: background var(--speed);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 10px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.nav-button:hover {
+    background-color: var(--bg-accent);
 }
 
 .nav-container {
@@ -50,10 +77,10 @@
     height: 35px;
     display: flex;
     align-items: center;
-    border-radius: var(--border-radius);
     transition: background var(--speed);
     padding: 0.5rem;
     cursor: default;
+    border-bottom: 1px solid #ddd;
 }
 
 .section-title:hover {
@@ -86,9 +113,7 @@
     overflow: hidden;
     transition: height var(--speed) ease;
     box-shadow: 0px 0px 10px #eee;
-  }
-
-
+}
 
 /* CSSTransition classes  */
 .menu-primary-enter {
@@ -123,13 +148,13 @@
 }
 
 .icon-button {
-    --button-size: calc(var(--nav-size) * 0.5);
+    --button-size: calc(var(--nav-size) * 0.4);
     width: var(--button-size);
     height: var(--button-size);
     background-color: #ddd;
     border-radius: 50%;
     padding: 5px;
-    margin: 2px;
+    margin-right: 7px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,6 +168,6 @@
   
 .icon-button svg { 
     fill: var(--text-color);
-    width: 20px;
-    height: 20px;
+    width: calc(var(--nav-size) * 0.3);
+    height: calc(var(--nav-size) * 0.3);
 }

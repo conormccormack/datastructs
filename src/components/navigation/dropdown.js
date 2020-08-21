@@ -30,8 +30,8 @@ function Dropdown (props) {
     function DropdownSectionTitle(props){
         return(
             <Link className='section-title'> 
-                <span className='icon-button' onClick={() => props.goToMenu && setActiveMenu(props.goToMenu)}>{props.icon}</span>
-                <span style={{marginLeft: '10px', fontFamily: 'Raleway'}}>{props.children}</span>
+                {props.leftIcon && <span className='icon-button' onClick={() => props.goToMenu && setActiveMenu(props.goToMenu)}>{props.leftIcon}</span>}
+                <span style={{fontFamily: 'Raleway'}}>{props.children}</span>
             </Link>
         )
     }
@@ -46,6 +46,7 @@ function Dropdown (props) {
                 onEnter={calcHeight}
             >
                 <div className="menu">
+                    <DropdownSectionTitle>Explore</DropdownSectionTitle>
                     <DropdownItem link={'/'}>home</DropdownItem>
                     <DropdownItem goToMenu='trees'>trees</DropdownItem>
                     <DropdownItem link={'about'}>about</DropdownItem>
@@ -60,7 +61,7 @@ function Dropdown (props) {
                 onEnter={calcHeight}
             >
                 <div className="menu">
-                    <DropdownSectionTitle icon={<BackArrow/>} goToMenu='main'>Trees</DropdownSectionTitle>
+                    <DropdownSectionTitle leftIcon={<BackArrow/>} goToMenu='main'>Trees</DropdownSectionTitle>
                     <DropdownItem link={'bst'}>Binary Search Tree</DropdownItem>
                 </div>
             </CSSTransition>

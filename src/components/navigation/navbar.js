@@ -8,8 +8,8 @@ import Dropdown from './dropdown';
 
 const NavLayout = styled.div`
     padding-top: 10px;
-    padding-left: 100px;
-    padding-right: 100px;
+    padding-left: 90px;
+    padding-right: 90px;
     display: flex;
     justify-content: flex-start;
     grid-template-columns: repeat(5,200px);
@@ -24,7 +24,7 @@ const SearchbarContainer = styled.div`
 function Navbar(){
     return (
         <NavLayout className='nav-container'>
-            <HomeButton className="homeLink"/>
+            <HomeButton/>
             <NavItem link={'about'} text='about'/>
             <NavItem link={'#'} text='explore'>
                 <Dropdown/>
