@@ -8,7 +8,7 @@ const WelcomeHeadline = styled.div`
 `
 
 const WelcomeBody = styled.div`
-    font-family: Raleway;
+    font-family: Lato;
     font-size: 18px;
 `
 

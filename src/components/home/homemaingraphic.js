@@ -7,7 +7,6 @@ const ResponsiveGraphic = styled.div`
 `
 
 function HomeMainGraphic() {
-
     return(
         <ResponsiveGraphic>
             <img style={{width: '100%'}} src={require("../../resources/images/logo_waves.svg")} alt="logo on waves"/>
@@ -15,4 +14,4 @@ function HomeMainGraphic() {
     )
 }
 
-export default HomeMainGraphic;
+export default HomeMainGraphic; 
