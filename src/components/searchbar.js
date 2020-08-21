@@ -8,80 +8,27 @@ const dataStructures = [
         category: "Trees",
         queries: [
             {
-                name: 'AVL Tree'
-            },
-            {
-                name: 'Binary Search Tree'
-            },
-            {
-                name: 'Red-Black Tree'
-            },
-            {
-                name: 'Splay Tree'
+                name: 'Binary Search Tree',
+                url: '/bst'
             },
         ]
     },
     {
         category: "Basics",
         queries: [
-            {
-                name: 'Linked List'
-            },
-            {
-                name: 'Stack'
-            },
-            {
-                name: 'Queue'
-            },
+
         ],
     },
     {
         category: "Sorting Algorithms",
         queries: [
-            {
-                name: 'Bubble Sort'
-            },
-            {
-                name: 'Selection Sort'
-            },
-            {
-                name: 'Insert Sort'
-            },
-            {
-                name: 'Merge Sort'
-            },
-            {
-                name: 'Quick Sort'
-            },
-            {
-                name: 'Radix Sort'
-            },
-            {
-                name: 'Heap Sort'
-            },
+
         ],
     },
     {
         category: "Graph Algorithms",
         queries: [
-            {
-                name: 'Breadth-First Search'
-            },
-            {
-                name: 'Depth-First Search'
-            },
-            {
-                name: 'Dijkstra\'s Algorithm'
-            },
-            {
-                name: 'Prim\'s Algorithm'
-            },
-            {
-                name: 'Topological Sort'
-            },
-            {
-                name: 'Kruskal\'s Sort'
-            },
+
         ]
     },
 
@@ -147,7 +94,7 @@ class Searchbar extends PureComponent {
     onKeyDown = (event) => {
         if (event.key === 'Enter'){
             this.setState({
-                enterDown: true,
+                enterDown: this.state.suggestions.length > 0 ? true: false,
             });
         }
     };
@@ -159,16 +106,14 @@ class Searchbar extends PureComponent {
         });
     };
 
-    // Clean up function
-    onSuggestionsClearRequested = () => {
-        this.setState({
-            suggestions: []
-        });
-    };
-
     render(){
         const { value, suggestions } = this.state;
 
+        const topSuggestionURL = (suggestions) => {
+            return suggestions.flatMap(category => category.queries.filter(structure => structure.name.toLowerCase() === value.toLowerCase()));
+        }
+
+        topSuggestionURL(suggestions);
         const inputProps = {
             placeholder: 'Search (e.g. "AVL Tree")',
             value,
@@ -191,7 +136,7 @@ class Searchbar extends PureComponent {
                     renderSectionTitle={renderSectionTitle}
                     inputProps={inputProps}
                 />
-                {enterDown ? <Redirect to={`/catalog/?view=all&term=${this.state.value}`}/> : ''}
+                {enterDown && topSuggestionURL(suggestions).length > 0 &&  <Redirect to={`${topSuggestionURL(suggestions)[0].url}`}/>}
             </div>
         );
     }
