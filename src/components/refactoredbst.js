@@ -41,6 +41,35 @@ class Node {
     }
 }
 
+class UndoController {
+    constructor(){
+        this.performed = [];
+        this.recall = []
+    }
+    
+    newState(state, action, value){
+        this.performed.push({ state: state, action: action, value: value });
+    }
+
+    undo(){
+        if (this.performed.length === 0) return -1;
+        this.recall.push(this.performed.pop());
+        const newState = this.performed[this.performed.length - 1];
+        return newState !== undefined ? newState : [];
+    }
+    
+    redo(){
+        if (this.recall.length === 0) return -1;
+        this.performed.push(this.recall.pop());
+        const newState = this.performed[this.performed.length - 1];
+        return newState !== undefined ? newState : [];
+    }
+
+    getCurrentState(){
+        return this.performed[this.performed.length - 1];
+    }
+}
+
 class BinarySearchTree {
     constructor(animator, setCaptionLine) {
         this.root = null;
@@ -54,6 +83,20 @@ class BinarySearchTree {
         root.level = level;
         if (root.right !== null) this.updateLevels(root.right, level + 1);
         if (root.left !== null) this.updateLevels(root.left, level + 1 );
+    }
+
+    getValuesAsArray(){
+        if (!this.root) return;
+        let arr = []
+        let queue = []
+        queue.push(this.root)
+        while (queue.length > 0) {
+            const node = queue.shift();
+            arr.push(node.value);
+            if (node.left !== null) queue.push(node.left);
+            if (node.right !== null) queue.push(node.right);
+        }
+        return arr;
     }
 
     getTreeHeight(){
@@ -373,12 +416,13 @@ class Animator {
     }
 
     async formatBinaryTree(tree){
+        console.log(tree);
         if (tree.root !== null){
             this.buildNodeTimeline(tree.root, tree);
             this.buildEdgeTimeline(tree.root, tree);
         }
         this.timeline.play();
-        await this.timeline.finished;
+        await this.timeline.complete;
         this.timeline = anime.timeline({});
         return;
     }
@@ -462,6 +506,7 @@ class RefactoredBST extends Component {
             errorMessage: '',
             currentOperation: 'mounting',
             currentLine: -1,
+            undoController: new UndoController(),
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -490,6 +535,7 @@ class RefactoredBST extends Component {
         randomTree[0] = median;
         randomTree.forEach( (value, index) => {
             this.state.bst.insert(parseFloat(value), this.state.count + index);
+            this.state.undoController.newState(this.state.bst.getValuesAsArray(), 'INSERT', value);
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         });
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
@@ -511,7 +557,6 @@ class RefactoredBST extends Component {
         this.setState({ removeValue: isNaN(event.target.value) ? '' : parseFloat(event.target.value)});
     }
     
-
     async handleInputSubmit(event) {
         event.preventDefault();
         this.setState({ currentOperation: 'input', currentLine: `${traverseOn ? 0 : -1}` });
@@ -528,6 +573,7 @@ class RefactoredBST extends Component {
         }
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         if (success) this.setState({ errorMessage: '' });
+        this.state.undoController.newState(this.state.bst.getValuesAsArray(), 'INSERT', this.state.inputValue);
         this.setState({ inputValue : '',});
         await this.animator.formatBinaryTree(this.state.bst);
         this.setState({ count: this.state.count + 1,
@@ -554,6 +600,7 @@ class RefactoredBST extends Component {
         this.setState({ disable: true });
         this.animator.timeline = anime.timeline({ });
         const success = this.state.bst.removeRecurse(this.state.bst.root, removeValue);
+        success && this.state.undoController.newState(this.state.bst.getValuesAsArray(), 'REMOVE', removeValue);
         this.setState({ removeValue: '', errorMessage: '' });
         if (this.state.bst.root !== null) {
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
@@ -573,6 +620,36 @@ class RefactoredBST extends Component {
     calculateShiftX(nodeContainer) {
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
         return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
+    }
+
+    async handleUndoRedo(action){
+        this.setState({ disable: true });
+        const prev_trav = traverseOn;
+        traverseOn = false; 
+        const currState = this.state.undoController.getCurrentState();
+        const newState = action === 'Undo' ? this.state.undoController.undo(): this.state.undoController.redo();
+        if (newState !== -1) {
+            this.setState({ errorMessage: `${action}ing ${action === 'Undo' ? currState.action : newState.action} 
+                ${action === 'Undo' ? currState.value : newState.value}...` 
+            });
+            await this.tearDownTree();
+            newState.state.forEach( (value, index) => {
+                this.state.bst.insert(parseFloat(value), this.state.count + index);
+                shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+            });
+            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+            this.setState({
+                count: this.state.count + newState.state.length, 
+                numActiveNodes: this.state.bst.numActiveNodes, 
+                treeHeight: this.state.bst.getTreeHeight(),
+                errorMessage: `${action} ${action === 'Undo' ? currState.action : newState.action} 
+                ${action === 'Undo' ? currState.value : newState.value} complete.`,
+            });
+            await this.animator.formatBinaryTree(this.state.bst);
+        }
+        else this.setState({ errorMessage: `Nothing to ${action}.`});
+        this.setState({ disable: false });
+        traverseOn = prev_trav;
     }
     
     toggleTraverseOn(){ traverseOn = !traverseOn; }
@@ -596,6 +673,7 @@ class RefactoredBST extends Component {
         this.animator.timeline = anime.timeline({ autoplay: false });
         await this.state.bst.tearDownTree();
         this.setState({disable: false, bst: new BinarySearchTree(this.animator, (x) => this.setState({ currentLine: x }))});
+        return;
     }
 
     async resyncFormat(){
@@ -628,7 +706,7 @@ class RefactoredBST extends Component {
                     <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
                         <label>
                             <input disabled={this.state.disable} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
-                            <button disabled={this.state.disable} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Input</button>
+                            <button disabled={this.state.disable} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Insert</button>
                         </label>
                     </form>
                     <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
@@ -657,6 +735,12 @@ class RefactoredBST extends Component {
                     </button>
                     <button className='clear-button' onClick={() => this.tearDownTree()} disabled={this.state.disable}>
                         Clear Tree
+                    </button>
+                    <button className='clear-button' onClick={() => this.handleUndoRedo('Undo')} disabled={this.state.disable}>
+                        Undo
+                    </button>
+                    <button className='clear-button' onClick={() => this.handleUndoRedo('Redo')} disabled={this.state.disable}>
+                        Redo
                     </button>
                     {this.animator.timeline.duration}
                     <div className='tree-info' id='error-message'>{this.state.errorMessage}</div>
