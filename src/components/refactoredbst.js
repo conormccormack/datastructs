@@ -3,22 +3,7 @@ import anime from 'animejs';
 import '../css/bst.css';
 import '../css/input-range.css';
 import '../resources/fonts/fontawesome/css/all.css';
-import styled from 'styled-components';
 import ClosedCodeCaptions from './closedcodecaptions';
-
-const PageWrapper = styled.div`
-    padding-left: 6rem;
-    padding-right: 6rem;
-    padding-top: 2rem;
-    height: 80vh;
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-`
-
-const NodeContainer = styled.div`
-    height: 100%;
-    width: 100%
-`
 
 const HORIZONTAL_SPACING = 45;
 const NODE_RADIUS = 30;
@@ -416,7 +401,6 @@ class Animator {
     }
 
     async formatBinaryTree(tree){
-        console.log(tree);
         if (tree.root !== null){
             this.buildNodeTimeline(tree.root, tree);
             this.buildEdgeTimeline(tree.root, tree);
@@ -502,9 +486,8 @@ class RefactoredBST extends Component {
             treeHeight: 0,
             formatting: true,
             seekValue: TRAVERSE_DURATION/2,
-            NUM_STARTING_NODE: 11,
             errorMessage: '',
-            currentOperation: 'mounting',
+            currentOperation: 'input',
             currentLine: -1,
             undoController: new UndoController(),
         };
@@ -524,7 +507,7 @@ class RefactoredBST extends Component {
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
         this.toggleTraverseOn();
         const randomTree = [];
-        while(randomTree.length < this.state.NUM_STARTING_NODE){
+        while(randomTree.length < Math.min(10, shift_x / NODE_RADIUS - 1)){
             const s = Math.floor(Math.random() * 420 + 1);
             if (randomTree.indexOf(s) === -1) randomTree.push(s);
         }
@@ -669,7 +652,7 @@ class RefactoredBST extends Component {
     }
     
     async tearDownTree(){
-        this.setState({disable: true, numActiveNodes: 0, treeHeight: 0 });
+        this.setState({disable: true});
         this.animator.timeline = anime.timeline({ autoplay: false });
         await this.state.bst.tearDownTree();
         this.setState({disable: false, bst: new BinarySearchTree(this.animator, (x) => this.setState({ currentLine: x }))});
@@ -696,11 +679,11 @@ class RefactoredBST extends Component {
 
     render(){ 
         return(
-            <PageWrapper>
-                <NodeContainer id="nodecontainer" >
+            <div className='page-wrapper'>
+                <div id="nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
                     <svg className="linecontainer" id="svg-line" />                    
-                </NodeContainer>
-                <div>
+                </div>
+                <div className='ui-container'>
                     <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
                     <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
                     <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
@@ -733,8 +716,11 @@ class RefactoredBST extends Component {
                     <button disabled={this.state.disable} onClick={() => this.resyncFormat()} className='refresh-button'>
                         Something wrong? <i className="fas fa-sync-alt"/>
                     </button>
-                    <button className='clear-button' onClick={() => this.tearDownTree()} disabled={this.state.disable}>
-                        Clear Tree
+                    <button className='clear-button' onClick={() => { 
+                        this.tearDownTree(); 
+                        this.setState({ numActiveNodes: 0, treeHeight: 0 });
+                        }} disabled={this.state.disable}>
+                            Clear Tree
                     </button>
                     <button className='clear-button' onClick={() => this.handleUndoRedo('Undo')} disabled={this.state.disable}>
                         Undo
@@ -750,7 +736,7 @@ class RefactoredBST extends Component {
                             []
                         }/>
                 </div>
-            </PageWrapper>
+            </div>
         );
     }
 }

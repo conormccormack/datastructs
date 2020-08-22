@@ -131,9 +131,24 @@ textarea {
     background: #eee;
 }
 
+.page-wrapper {
+    padding-top: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
 
 #nodecontainer {
-    height: 100vh;
+    
+}
+
+@media screen {
+    #nodecontainer {
+        grid-column: span 3;
+    }
+
+    .ui-container {
+        grid-column: span 1;
+    }
 }
 
 .linecontainer {
