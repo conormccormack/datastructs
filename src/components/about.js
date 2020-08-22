@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from './navigation/navbar';
 import styled from 'styled-components';
 import '../css/about.css';
@@ -39,6 +39,10 @@ const Link = styled.a`
 `
 
 function About (props){
+    useEffect(()=>{
+        document.title = 'DataStructs - about';
+    }, []);
+
     return(
         <AboutContainer className='landing'>
             <Navbar/>
@@ -53,8 +57,7 @@ function About (props){
                         to replace existing sites that offer little in the way of explaining how data structures and algorithms work or why we use them.<br/>
                         <br/>
                         I am a third-year student of Computer Science & Math at the University of Southern California concurrently working towards an M.S. in Electrical Engineering with a focus in Machine Learning. My primary interests lie in
-                        data science & deep learning research and its applications in autonomous machines. Feel free to connect with me on <Link style={{textDecoration: 'underline'}} href="https://www.linkedin.com/in/conorxmccormack">LinkedIn</Link> if
-                        that's your sort of thing.
+                        data science & deep learning research and its applications in autonomous machines. Feel free to connect with me on <Link style={{textDecoration: 'underline'}} href="https://www.linkedin.com/in/conorxmccormack">LinkedIn</Link>.
                         <br/><br/>
                         As of August 2020, DataStructs is built with <Link style={{ textDecoration: 'underline' }} href="https://reactjs.org">React</Link>, 
                         animated with <Link style={{textDecoration: 'underline'}} href="https://animejs.com/">Anime.js</Link>, 

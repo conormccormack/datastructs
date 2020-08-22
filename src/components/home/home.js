@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from "../navigation/navbar";
 import styled from 'styled-components';
 import Mainlanding from "./mainlanding";
@@ -9,6 +9,9 @@ const HomeContainer = styled.div`
 `
 
 function Home(props) {
+    useEffect(()=>{
+        document.title = 'DataStructs';
+    }, []);
     return (
         <HomeContainer className='landing'>
             <Navbar/>

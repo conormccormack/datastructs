@@ -112,12 +112,12 @@ class BinarySearchTree {
             if (traverseOn) this.animator.addCaptionStep(7, 0, 3, this.setCaptionLine);
             if (root.right !== null) {
                 newNode.level = newNode.level + 1;
-                if (traverseOn) this.animator.addCaptionStep(8, 1, 3, this.setCaptionLine);
-                if (traverseOn) this.animator.addCaptionStep(9, 2, 3, this.setCaptionLine);
-                return this.insertNode(root.right, newNode, count);
-            } else { 
                 if (traverseOn) this.animator.addCaptionStep(10, 1, 3, this.setCaptionLine);
                 if (traverseOn) this.animator.addCaptionStep(11, 2, 3, this.setCaptionLine);
+                return this.insertNode(root.right, newNode, count);
+            } else { 
+                if (traverseOn) this.animator.addCaptionStep(8, 1, 3, this.setCaptionLine);
+                if (traverseOn) this.animator.addCaptionStep(9, 2, 3, this.setCaptionLine);
                 root.right = newNode; 
                 newNode.parent = root;
                 this.numActiveNodes += 1;
@@ -446,8 +446,8 @@ class RefactoredBST extends Component {
             seekValue: TRAVERSE_DURATION/2,
             NUM_STARTING_NODE: 11,
             errorMessage: '',
-            currentOperation: 'input',
-            currentLine: 3,
+            currentOperation: 'mounting',
+            currentLine: -1,
         };
         this.handleInputSubmit = this.handleInputSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -513,7 +513,8 @@ class RefactoredBST extends Component {
             if (!traverseOn) return;
         }
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        this.setState({errorMessage: '', inputValue : '',})
+        if (success) this.setState({ errorMessage: '' });
+        this.setState({ inputValue : '',});
         await this.animator.formatBinaryTree(this.state.bst);
         this.setState({ count: this.state.count + 1,
             disable: false, 
@@ -622,9 +623,9 @@ class RefactoredBST extends Component {
                             <button disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
                         </label>
                     </form>
-                    <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={this.animator.timeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
+                    {/* <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={this.animator.timeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
                     <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
-                    <button onClick={() => this.animator.timeline.seek(this.state.seekValue)}></button>
+                    <button onClick={() => this.animator.timeline.seek(this.state.seekValue)}></button> */}
                     <div className='tree-info'> 
                         <label>
                             Animate traversal
@@ -645,7 +646,11 @@ class RefactoredBST extends Component {
                     </button>
                     {this.animator.timeline.duration}
                     <div className='tree-info' id='error-message'>{this.state.errorMessage}</div>
-                    <ClosedCodeCaptions current={this.state.currentLine} lines={ this.state.currentOperation === 'input' ? this.inputLines : this.removeLines }/>
+                    <ClosedCodeCaptions current={this.state.currentLine} lines={ 
+                            this.state.currentOperation === 'input' ? this.inputLines : 
+                            this.state.currentOperation === 'remove' ? this.removeLines :
+                            []
+                        }/>
                 </div>
             </PageWrapper>
         );

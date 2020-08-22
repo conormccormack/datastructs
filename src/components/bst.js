@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import RefactoredBST from './refactoredbst';
 import Navbar from './navigation/navbar';
 import { motion } from 'framer-motion';
@@ -15,6 +15,9 @@ const Headline = styled.div`
 `
 
 function BST (props){
+    useEffect(()=>{
+        document.title = 'Binary Search Tree';
+    }, [])
     return (
         <Wrapper className='landing'>
             <Navbar/>

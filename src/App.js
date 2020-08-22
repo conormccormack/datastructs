@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import Home from './components/home/home'
 import About from './components/about'
-import { BrowserRouter as Switch, Route, useLocation } from 'react-router-dom';
+import { Switch, Route, useLocation } from 'react-router-dom';
 import {AnimatePresence} from "framer-motion";
 import BST from './components/bst';
 import AVL from './components/avl';
@@ -21,7 +21,6 @@ const PageVariants = {
     },
     pageOut : {
         opacity: 0,
-        y: -50,
     }
 };
 
@@ -34,12 +33,15 @@ function App() {
     let location = useLocation();
     return (
           <AnimatePresence exitBeforeEnter>
-              <Switch location={location} key={location.pathname}>
-                  <Route path='/' exact render={(props) => <Home {...props} transition={PageTransition} variants={PageVariants}/>} />
-                  <Route path='/bst' exact render={(props) => <BST {...props} transition={PageTransition} variants={PageVariants}/> } />
-                  <Route path='/avl' exact render={(props) => <AVL {...props} transition={PageTransition} variants={PageVariants}/> } />
-                  <Route path='/about' render={(props) => <About {...props} transition={PageTransition} variants={PageVariants}/>}/>
-                  <Route render={(props) => <FourOhFour {...props} transition={PageTransition} variants={PageVariants}/>}/>
+              <Switch key={location.pathname} location={location}>
+                  <Route exact path='/' render={(props) => <Home {...props} transition={PageTransition} variants={PageVariants}/>} />
+                  {/* <Route exact path='/'>
+                    <Home {...location} transition={PageTransition} variants={PageVariants}/>
+                  </Route> */}
+                  <Route exact path='/bst' render={(props) => <BST {...props} transition={PageTransition} variants={PageVariants}/> } />
+                  <Route exact path='/avl' render={(props) => <AVL {...props} transition={PageTransition} variants={PageVariants}/> } />
+                  <Route exact path='/about' render={(props) => <About {...props} transition={PageTransition} variants={PageVariants}/>}/>
+                  <Route component={FourOhFour}/>
               </Switch>
           </AnimatePresence>
   );

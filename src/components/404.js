@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from './navigation/navbar';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import {motion} from 'framer-motion';
 
 const PageNotFound = styled.div`
     margin-left: auto;
@@ -20,9 +21,9 @@ const LinkHome = styled.div`
     text-align: center;
 `
 
-const FourOhFour = () => {
+const FourOhFour = (props) => {
     return(
-        <div>
+        <motion.div key="fourOhFour" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
             <Navbar/>
             <div className='landing' style={{height: '100vh'}}>
                 <PageNotFound>
@@ -32,7 +33,7 @@ const FourOhFour = () => {
                     interesting. hit explore to find where you're going or consider returning to the <Link to='/'>home page</Link>.
                 </LinkHome>
             </div>
-        </div>
+        </motion.div>
     );
 }
 

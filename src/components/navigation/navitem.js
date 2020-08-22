@@ -11,7 +11,7 @@ function NavItem(props){
                 <Link className='link' to={props.link}> 
                     {props.text}
                 </Link> :
-                <Link className='link' onClick={() => { setOpen(!open) } }>
+                <Link to={'#'} className='link' onClick={() => { setOpen(!open) } }>
                     {props.text}
                 </Link>
             }
