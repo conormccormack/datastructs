@@ -133,20 +133,27 @@ class BinarySearchTree {
         if (root === null) {
             return false;
         } else if (value < root.value) {
+            this.animator.addCaptionStep(0, 0, 2, this.setCaptionLine);
+            this.animator.addCaptionStep(1, 1, 2, this.setCaptionLine);
             return this.removeRecurse(root.left, value);
         } else if (value > root.value) {
+            this.animator.addCaptionStep(2, 0, 2, this.setCaptionLine);
+            this.animator.addCaptionStep(3, 1, 2, this.setCaptionLine);
             return this.removeRecurse(root.right, value);
         } else {
+            this.animator.addCaptionStep(4, 0, 5, this.setCaptionLine);
             this.deleteNode(root);
             this.numActiveNodes -= 1;
             return true;
         }  
     }
 
-    deleteNode(node){
+    deleteNode(node, isSuccessor){
         let child_of_type = (node.parent !== null) ? (node.parent.right === node) ? 'right' : 'left' : 'root';
         let replacement = (node.left === null && node.right === null) ? null : (node.left === null) ? node.right : node.left;
         if (node.left !== null && node.right !== null){
+            this.animator.addCaptionStep(9, 1, 5, this.setCaptionLine);
+            this.animator.addCaptionStep(10, 3, 5, this.setCaptionLine);
             const swap = this.findLeftmost(node.right);
             this.animator.addTraverseStep(swap, -1);
             node.value = swap.value;
@@ -157,7 +164,7 @@ class BinarySearchTree {
                 round: 1,
                 duration: 500,
             }, (traverseCount - 1) * TRAVERSE_DURATION)
-            this.deleteNode(swap);
+            this.deleteNode(swap, true);
         } else {
             if (child_of_type !== 'root') {
                 this.animator.removeElementFromDOM(`path${node.id}`);  
@@ -168,7 +175,14 @@ class BinarySearchTree {
                 if (replacement) this.animator.removeElementFromDOM(`path${replacement.id}`);
                 this.root = replacement;
             }
-            if (replacement) replacement.parent = node.parent;
+            if (replacement) {
+                replacement.parent = node.parent;
+                !isSuccessor && this.animator.addCaptionStep(7, 1, 5, this.setCaptionLine);
+                !isSuccessor && this.animator.addCaptionStep(8, 3, 5, this.setCaptionLine);
+            } else if (!replacement && !isSuccessor) {
+                this.animator.addCaptionStep(5, 1, 5, this.setCaptionLine);
+                this.animator.addCaptionStep(6, 3, 5, this.setCaptionLine);
+            }
             this.animator.removeElementFromDOM(`node${node.id}`);
         }
 
@@ -424,11 +438,11 @@ class RefactoredBST extends Component {
 
     removeLines = [{value: 'if remove < curr:' , indent: 0}, {value: 'look left' , indent: 1}, 
         {value: 'else if remove > curr:' , indent: 0}, {value: 'look right' , indent: 1},  
-        {value: 'else:' , indent: 0}, {value: 'if curr has no children' , indent: 1}, 
+        {value: 'else:' , indent: 0}, {value: 'if curr has no children:' , indent: 1}, 
         {value: 'delete curr' , indent: 2}, 
         {value: 'else if curr has only one child:' , indent: 1}, {value: 'connect child to curr\'s parent' , indent: 2}, 
         {value: 'else if curr has two children:' , indent: 1}, 
-        {value: 'replace curr with its succcessor' , indent: 0},
+        {value: 'replace curr with its succcessor' , indent: 2},
     ]
     
     constructor (props) {
@@ -500,7 +514,7 @@ class RefactoredBST extends Component {
 
     async handleInputSubmit(event) {
         event.preventDefault();
-        this.setState({ currentOperation: 'input' });
+        this.setState({ currentOperation: 'input', currentLine: `${traverseOn ? 0 : -1}` });
         this.animator.timeline = anime.timeline({ autoplay: false });
         this.setState({ disable: true });
         if (this.state.inputValue === '' || isNaN(this.state.inputValue)) {

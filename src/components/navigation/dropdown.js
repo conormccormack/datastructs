@@ -69,6 +69,7 @@ function Dropdown (props) {
                 <div className="menu">
                     <DropdownSectionTitle leftIcon={<BackArrow/>} goToMenu='main'>Trees</DropdownSectionTitle>
                     <DropdownItem link={'bst'}>Binary Search Tree</DropdownItem>
+                    <DropdownItem link={'avl'}>AVL Trees</DropdownItem>
                 </div>
             </CSSTransition>
 
