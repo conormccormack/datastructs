@@ -19,6 +19,7 @@ const MainWrapper = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(451px, 1fr));
     grid-gap: 2rem;
+    margin-top: 5px;
 `
 
 const WelcomeMessage =styled.div`
@@ -41,7 +42,6 @@ function Mainlanding(){
                     Click <strong>explore</strong> or search for a specific data structure or concept in the search bar.
                 </WelcomeBody>
             </WelcomeMessage>
-
         </MainWrapper>
     )
 }
