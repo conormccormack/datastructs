@@ -1,5 +1,6 @@
 :root {
   --global-bg: #F2F3F5;
+  background-color: var(--global-bg);
 }
 
 body {

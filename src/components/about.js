@@ -6,9 +6,6 @@ import AboutMainGraphic from "./aboutmaingraphic";
 import {motion} from "framer-motion";
 import copy from 'copy-to-clipboard';
 
-const AboutContainer = styled.div`
-    height: 100vh;
-`
 const AboutHeadline = styled.div`
     font-family: Ramaraja;
     font-size: 80px;
@@ -44,7 +41,7 @@ function About (props){
     }, []);
 
     return(
-        <AboutContainer className='landing'>
+        <div>
             <Navbar/>
             <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
             <MainWrapper>
@@ -73,7 +70,7 @@ function About (props){
                 <AboutMainGraphic/>
             </MainWrapper>
             </motion.div>
-        </AboutContainer>
+        </div>
     )
 }
 

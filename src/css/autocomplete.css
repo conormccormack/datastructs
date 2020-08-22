@@ -5,8 +5,8 @@
 
 .react-autosuggest__input {
     width: 200px;
-    height: 10px;
-    margin-top: 2px;
+    height: 13px;
+    margin-top: 5px;
     padding: 8px 10px;
     background-color: #eee;
     font-family: Raleway, sans-serif;
@@ -19,7 +19,6 @@
 .react-autosuggest__input--focused {
     outline: none;
 }
-
 .react-autosuggest__input--open {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;

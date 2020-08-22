@@ -21,12 +21,13 @@ const PageVariants = {
     },
     pageOut : {
         opacity: 0,
+        y: 20,
     }
 };
 
 const PageTransition = {
     type: "tween",
-    ease: "anticipate",
+    ease: "anticipate",  
 };
 
 function App() {
@@ -35,9 +36,6 @@ function App() {
           <AnimatePresence exitBeforeEnter>
               <Switch key={location.pathname} location={location}>
                   <Route exact path='/' render={(props) => <Home {...props} transition={PageTransition} variants={PageVariants}/>} />
-                  {/* <Route exact path='/'>
-                    <Home {...location} transition={PageTransition} variants={PageVariants}/>
-                  </Route> */}
                   <Route exact path='/bst' render={(props) => <BST {...props} transition={PageTransition} variants={PageVariants}/> } />
                   <Route exact path='/avl' render={(props) => <AVL {...props} transition={PageTransition} variants={PageVariants}/> } />
                   <Route exact path='/about' render={(props) => <About {...props} transition={PageTransition} variants={PageVariants}/>}/>

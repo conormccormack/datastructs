@@ -1,24 +1,19 @@
 import React, { useEffect } from 'react';
 import Navbar from "../navigation/navbar";
-import styled from 'styled-components';
 import Mainlanding from "./mainlanding";
-import {motion} from 'framer-motion';
-
-const HomeContainer = styled.div`
-    height: 100vh;
-`
+import { motion } from 'framer-motion';
 
 function Home(props) {
     useEffect(()=>{
         document.title = 'DataStructs';
     }, []);
     return (
-        <HomeContainer className='landing'>
+        <div>
             <Navbar/>
             <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
                 <Mainlanding/>
             </motion.div>
-        </HomeContainer>
+        </div>
     );
 }
 
