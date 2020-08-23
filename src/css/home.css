@@ -1,0 +1,15 @@
+@media screen and (min-width: 450px){
+    .main-wrapper{
+        padding-top: 1rem;
+        padding-left: 6rem;
+        padding-right: 6rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(451px, 1fr));
+        grid-gap: 2rem;
+        margin-top: 5px;
+    }
+}
+
+.main-wrapper {
+    padding: 1rem;
+}

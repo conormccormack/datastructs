@@ -6,7 +6,7 @@ import '../../css/navbar.css'
 function NavItem(props){
     const [ open, setOpen ] = useState(false);
     return (
-        <div className='nav-button'>
+        <div className={`nav-button ${props.text === 'about' && 'about-nav'}`}>
             {props.link !== '#' ?
                 <Link className='link' to={props.link}> 
                     {props.text}
