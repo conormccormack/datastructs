@@ -114,9 +114,12 @@ class Searchbar extends PureComponent {
 
     componentDidMount() { window.addEventListener('resize', this.handleResize); }
     
-    handleResize() { this.setState({ width: window.innerWidth }); }
+    handleResize() { this.setState({ width: window.innerWidth, open: window.innerWidth > 650 }); }
 
-    toggleOpen() { this.setState({ open: !this.state.open }); }
+    toggleOpen() { 
+        this.props.setHideExplore(!this.state.open && this.state.width < 650);
+        this.setState({ open: !this.state.open });
+    }
 
     render(){
         const { value, suggestions } = this.state;
@@ -136,23 +139,26 @@ class Searchbar extends PureComponent {
         const enterDown = this.state.enterDown;
 
         return(
-            <div className="auto-suggest-nav" style={{ marginLeft: 'auto' }}>
+            <div className="auto-suggest-nav">
+                <div className='auto-suggest-container'>
+                    {(this.state.open || this.state.width >= 650) && <Autosuggest
+                        multiSection={true}
+                        suggestions={suggestions}
+                        onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                        onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                        getSuggestionValue={getSuggestionValue}
+                        getSectionSuggestions={getSectionSuggestions}
+                        renderSuggestion={renderSuggestion}
+                        renderSectionTitle={renderSectionTitle}
+                        inputProps={inputProps}
+                    />}
+                </div>
+
                 <div className='search-button' onClick={this.toggleOpen}>
                     {!this.state.open && this.state.width < 650 && <SearchIcon/>}
                     {this.state.open && this.state.width < 650 && <CloseIcon/>}
                 </div>
                 
-                {this.state.width >= 650 && <Autosuggest
-                    multiSection={true}
-                    suggestions={suggestions}
-                    onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                    onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-                    getSuggestionValue={getSuggestionValue}
-                    getSectionSuggestions={getSectionSuggestions}
-                    renderSuggestion={renderSuggestion}
-                    renderSectionTitle={renderSectionTitle}
-                    inputProps={inputProps}
-                />}
                 {enterDown && topSuggestionURL(suggestions).length > 0 &&  <Redirect to={`${topSuggestionURL(suggestions)[0].url}`}/>}
             </div>
         );

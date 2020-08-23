@@ -77,12 +77,23 @@
 
 .search-button {
     margin-top: 5px;
+    float: left;
+    vertical-align: top;
 }
-
+.auto-suggest-container {
+    float: left;
+}
 .search-button svg {
     height: 28px;
     width: 28px
 }
+
+.auto-suggest-nav {
+    margin-left: auto;
+    display: block;
+    z-index: 1;
+}
+
 
 .menu {
     width: 100%;
