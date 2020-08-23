@@ -11,14 +11,6 @@ const AboutHeadline = styled.div`
     font-size: 80px;
 `
 
-const MainWrapper = styled.div`
-    display: grid;
-    grid-gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    padding-left: 6rem;
-    padding-right: 6rem;
-`
-
 const AboutMessage = styled.div`
     grid-column: auto / span 2;
 `
@@ -31,7 +23,6 @@ const AboutBody = styled.div`
 
 const Link = styled.a`
     color: black;
-    hover: 
 `
 
 function About (props){
@@ -43,7 +34,7 @@ function About (props){
         <div>
             <Navbar/>
             <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
-            <MainWrapper>
+            <div className='content-wrapper'>
                 <AboutMessage>
                     <AboutHeadline>
                         About
@@ -73,7 +64,7 @@ function About (props){
                     </AboutBody>
                 </AboutMessage>
                 <AboutMainGraphic/>
-            </MainWrapper>
+            </div>
             </motion.div>
         </div>
     )
