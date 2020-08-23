@@ -69,10 +69,19 @@
     height: var(--nav-size);
     padding-top: 10px;
     padding-left: min(90px, calc(12vw - 30px));
-    padding-right: 90px;
+    padding-right: min(90px, calc(12vw - 30px)); 
     display: flex;
     justify-content: flex-start;
     grid-template-columns: repeat(5,200px);
+}
+
+.search-button {
+    margin-top: 5px;
+}
+
+.search-button svg {
+    height: 28px;
+    width: 28px
 }
 
 .menu {
@@ -130,7 +139,13 @@
     .dropdown {
         transform: translateX(-35%);
     }
-    .auto-suggest-nav {
+    /* .auto-suggest-nav {
+        display: none;
+    } */
+}
+
+@media only screen and (min-width: 650px) {
+    .search-button {
         display: none;
     }
 }

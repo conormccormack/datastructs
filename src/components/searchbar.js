@@ -2,6 +2,8 @@ import React, {PureComponent} from 'react';
 import Autosuggest from 'react-autosuggest';
 import {Redirect} from 'react-router-dom';
 import '../css/autocomplete.css';
+import { ReactComponent as SearchIcon } from '../resources/icons/search.svg';
+import { ReactComponent as CloseIcon } from '../resources/icons/x.svg';
 
 const dataStructures = [
     {
@@ -81,7 +83,11 @@ class Searchbar extends PureComponent {
             value: '',
             suggestions: [],
             enterDown: false,
+            open: false,
+            width: window.innerWidth,
         };
+        this.handleResize = this.handleResize.bind(this);
+        this.toggleOpen = this.toggleOpen.bind(this);
     }
 
     // Update value on change to input box.
@@ -106,6 +112,12 @@ class Searchbar extends PureComponent {
         });
     };
 
+    componentDidMount() { window.addEventListener('resize', this.handleResize); }
+    
+    handleResize() { this.setState({ width: window.innerWidth }); }
+
+    toggleOpen() { this.setState({ open: !this.state.open }); }
+
     render(){
         const { value, suggestions } = this.state;
 
@@ -124,8 +136,13 @@ class Searchbar extends PureComponent {
         const enterDown = this.state.enterDown;
 
         return(
-            <div className="auto-suggest-nav" style={{marginLeft: 'auto', marginRight: '10px'}}>
-                <Autosuggest
+            <div className="auto-suggest-nav" style={{ marginLeft: 'auto' }}>
+                <div className='search-button' onClick={this.toggleOpen}>
+                    {!this.state.open && this.state.width < 650 && <SearchIcon/>}
+                    {this.state.open && this.state.width < 650 && <CloseIcon/>}
+                </div>
+                
+                {this.state.width >= 650 && <Autosuggest
                     multiSection={true}
                     suggestions={suggestions}
                     onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -135,12 +152,11 @@ class Searchbar extends PureComponent {
                     renderSuggestion={renderSuggestion}
                     renderSectionTitle={renderSectionTitle}
                     inputProps={inputProps}
-                />
+                />}
                 {enterDown && topSuggestionURL(suggestions).length > 0 &&  <Redirect to={`${topSuggestionURL(suggestions)[0].url}`}/>}
             </div>
         );
     }
-
 }
 
 export default Searchbar;
