@@ -3,11 +3,12 @@ import anime from 'animejs';
 import '../../css/bst.css';
 import '../../css/input-range.css';
 import '../../resources/fonts/fontawesome/css/all.css';
+import { shuffle } from 'gsap/gsap-core';
 
 const HORIZONTAL_SPACING = 45;
 const NODE_RADIUS = 30;
 const VERTICAL_SPACING = 70;
-let TRAVERSE_DURATION = 500;
+let TRAVERSE_DURATION = 350;
 let shift_x;
 let resizeTimer;
 let traverseCount = 0;
@@ -25,34 +26,6 @@ class Node {
     }
 }
 
-class UndoController {
-    constructor(){
-        this.performed = [];
-        this.recall = []
-    }
-    
-    newState(state, action, value){
-        this.performed.push({ state: state, action: action, value: value });
-    }
-
-    undo(){
-        if (this.performed.length === 0) return -1;
-        this.recall.push(this.performed.pop());
-        const newState = this.performed[this.performed.length - 1];
-        return newState !== undefined ? newState : [];
-    }
-    
-    redo(){
-        if (this.recall.length === 0) return -1;
-        this.performed.push(this.recall.pop());
-        const newState = this.performed[this.performed.length - 1];
-        return newState !== undefined ? newState : [];
-    }
-
-    getCurrentState(){
-        return this.performed[this.performed.length - 1];
-    }
-}
 
 class BinarySearchTree {
     constructor(animator, setCaptionLine) {
@@ -370,42 +343,13 @@ class Animator {
         if (root.right !== null) this.buildNodeTimeline(root.right, tree);
     }
 
-    buildTearDownAnimation(node, root){
-        this.timeline.add({
-            targets: `#node${node.id}`,
-            opacity: 0,
-            scale: .9,
-            translateX: `+=60`,
-            translateY: `-=20`,
-            duration: 1000,
-            complete: () => {
-                document.getElementById(`node${node.id}`).remove();
-            }
-        }, node.level * 50)
-        if (node !== root) {
-            this.timeline.add({
-                targets: `#path${node.id}`,
-                opacity: 0,
-                scale: .9,
-                translateX: `+=60`,
-                translateY: `-=20`,
-                duration: 1000,
-                complete: () => {
-                    document.getElementById(`path${node.id}`).remove();
-                }
-            }, node.level * 50)
-        }
-        if (node.left !== null) this.buildTearDownAnimation(node.left, root);
-        if (node.right !== null) this.buildTearDownAnimation(node.right, root);
-    }
-
     async formatBinaryTree(tree){
         if (tree.root !== null){
             this.buildNodeTimeline(tree.root, tree);
             this.buildEdgeTimeline(tree.root, tree);
         }
         this.timeline.play();
-        await this.timeline.complete;
+        await this.timeline.finished;
         this.timeline = anime.timeline({});
         return;
     }
@@ -453,25 +397,7 @@ class Animator {
     }
 }
 
-class RefactoredBST extends Component {
-    inputLines = [{value: 'if root is NULL:' , indent: 0}, {value: 'insert at root' , indent: 1},
-        {value: 'if input < curr:' , indent: 0}, {value: 'if curr.left is NULL:' , indent: 1},
-        {value: 'insert input at curr.left' , indent: 2}, {value: 'else:' , indent: 1}, 
-        {value: 'look left' , indent: 2}, {value: 'else if input > curr:' , indent: 0}, 
-        {value: 'if curr.right is NULL:' , indent: 1}, {value: 'insert input at curr.right' , indent: 2},
-        {value: 'else:' , indent: 1}, {value: 'look right' , indent: 2}, {value: 'else:' , indent: 0},
-        {value: 'reject duplicate' , indent: 1}
-    ]
-
-    removeLines = [{value: 'if remove < curr:' , indent: 0}, {value: 'look left' , indent: 1}, 
-        {value: 'else if remove > curr:' , indent: 0}, {value: 'look right' , indent: 1},  
-        {value: 'else:' , indent: 0}, {value: 'if curr has no children:' , indent: 1}, 
-        {value: 'delete curr' , indent: 2}, 
-        {value: 'else if curr has only one child:' , indent: 1}, {value: 'connect child to curr\'s parent' , indent: 2}, 
-        {value: 'else if curr has two children:' , indent: 1}, 
-        {value: 'replace curr with its succcessor' , indent: 2},
-    ]
-    
+class RefactoredBST extends Component {    
     constructor (props) {
         super(props);
         this.animator = new Animator();
@@ -487,116 +413,56 @@ class RefactoredBST extends Component {
             seekValue: TRAVERSE_DURATION/2,
             errorMessage: '',
             currentOperation: 'input',
-            currentLine: -1,
-            undoController: new UndoController(),
         };
-        this.handleInputSubmit = this.handleInputSubmit.bind(this);
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleRemoveChange = this.handleRemoveChange.bind(this);
-        this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this); 
         this.calculateShiftX = this.calculateShiftX.bind(this);
         this.onResize = this.onResize.bind(this);
-        this.tearDownTree = this.tearDownTree.bind(this);
-        this.resyncFormat = this.resyncFormat.bind(this);
-        this.playPause = this.playPause.bind(this);
     }
 
     async componentDidMount(){
         window.addEventListener('resize', this.onResize);
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
         this.toggleTraverseOn();
-        const randomTree = [];
-        while(randomTree.length < Math.min(10, shift_x / NODE_RADIUS - 1)){
-            const s = Math.floor(Math.random() * 420 + 1);
-            if (randomTree.indexOf(s) === -1) randomTree.push(s);
+        const nodeValues = [306, 127, 428, 249, 363, 656, 201, 270, 512];
+        var activeNodes = [];
+        var count = 0;
+        while(count < Math.min(10, shift_x / NODE_RADIUS - 1)){
+            this.state.bst.insert(parseFloat(nodeValues[count]), this.state.count + count);
+            activeNodes.push(nodeValues[count]);
+            count++;
         }
-        const sortedTree = Array.from(randomTree).sort();
-        const median = sortedTree[Math.floor(sortedTree.length/2)];
-        const medianIndex = randomTree.indexOf(median);
-        randomTree[medianIndex] = randomTree[0];
-        randomTree[0] = median;
-        randomTree.forEach( (value, index) => {
-            this.state.bst.insert(parseFloat(value), this.state.count + index);
-            this.state.undoController.newState(this.state.bst.getValuesAsArray(), 'INSERT', value);
-            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        });
+        var unusedValues = nodeValues.filter(value => !activeNodes.includes(value));
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         this.setState({
-            count: this.state.count + randomTree.length, 
+            count: this.state.count + count, 
             numActiveNodes: this.state.bst.numActiveNodes, 
             treeHeight: this.state.bst.getTreeHeight(),
         });
         await this.animator.formatBinaryTree(this.state.bst);
         this.setState({ disable: false });
         this.toggleTraverseOn();
-    }
-    
-    handleInputChange(event) {
-        this.setState({ inputValue: isNaN(event.target.value) ? '' : parseFloat(event.target.value)});
-    }
-
-    handleRemoveChange(event) {
-        this.setState({ removeValue: isNaN(event.target.value) ? '' : parseFloat(event.target.value)});
-    }
-    
-    async handleInputSubmit(event) {
-        event.preventDefault();
-        this.setState({ currentOperation: 'input', currentLine: `${traverseOn ? 0 : -1}` });
-        this.animator.timeline = anime.timeline({ autoplay: false });
-        this.setState({ disable: true });
-        if (this.state.inputValue === '' || isNaN(this.state.inputValue)) {
-            this.setState({ errorMessage: 'Please enter an number (e.g. 32, 2.7).', inputValue: '', disable: false});
-            return;
-        }
-        const success = this.state.bst.insert(this.state.inputValue, this.state.count);
-        if (!success) {
-            this.setState({ errorMessage: `${this.state.inputValue} already exists in the tree.`, inputValue: '', disable: false })
-            if (!traverseOn) return;
-        }
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        if (success) this.setState({ errorMessage: '' });
-        this.state.undoController.newState(this.state.bst.getValuesAsArray(), 'INSERT', this.state.inputValue);
-        this.setState({ inputValue : '',});
-        await this.animator.formatBinaryTree(this.state.bst);
-        this.setState({ count: this.state.count + 1,
-            disable: false, 
-            numActiveNodes: this.state.bst.numActiveNodes,
-            treeHeight: this.state.bst.getTreeHeight(), 
-        });
-        traverseCount = 0;
-        document.getElementById('input-field').focus();
-    }
-
-    async handleRemoveSubmit(event) {
-        event.preventDefault();
-        const removeValue = this.state.removeValue;
-        this.setState({ currentOperation: 'remove' });
-        if (this.state.removeValue === '' || isNaN(this.state.removeValue)) {
-            this.setState({ errorMessage: 'Please enter an number (e.g. 32, 2.7).', removeValue: '' }); 
-            return;
-        }
-        if (this.state.bst.root == null){
-            this.setState({ errorMessage: 'Could not remove: tree is empty.', removeValue: '' });
-            return;
-        }
-        this.setState({ disable: true });
-        this.animator.timeline = anime.timeline({ });
-        const success = this.state.bst.removeRecurse(this.state.bst.root, removeValue);
-        success && this.state.undoController.newState(this.state.bst.getValuesAsArray(), 'REMOVE', removeValue);
-        this.setState({ removeValue: '', errorMessage: '' });
-        if (this.state.bst.root !== null) {
+        traverseOn = true;
+        window.addEventListener('insertDone', async () => { 
+            console.log('removing', {activeNodes, unusedValues})
+            traverseCount = 0;
+            shuffle(activeNodes);
+            this.state.bst.removeRecurse(this.state.bst.root, activeNodes[0]);
             shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        };
-        await this.animator.formatBinaryTree(this.state.bst);
-        this.setState({
-            disable : false, 
-            numActiveNodes: this.state.bst.numActiveNodes,
-            treeHeight: this.state.bst.getTreeHeight(),
-            errorMessage: success ? '' : `${removeValue} s not exist in the tree.`,
-            removeValue: '',
+            unusedValues.push(activeNodes.shift());
+            await this.animator.formatBinaryTree(this.state.bst);
+            dispatchEvent(new Event('removeDone'));
         });
-        document.getElementById('remove-field').focus();
-        traverseCount = 0;
+        window.addEventListener('removeDone', async () => {
+            this.setState({ count: this.state.count + 1 });
+            console.log('inserting', {activeNodes, unusedValues});
+            traverseCount = 0;
+            shuffle(unusedValues);
+            this.state.bst.insert(unusedValues[0], this.state.count + 1);
+            activeNodes.push(unusedValues.shift());
+            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+            await this.animator.formatBinaryTree(this.state.bst);
+            dispatchEvent(new Event('insertDone'));
+        });
+        dispatchEvent(new Event('insertDone'));
     }
 
     calculateShiftX(nodeContainer) {
@@ -604,39 +470,7 @@ class RefactoredBST extends Component {
         return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
     }
 
-    async handleUndoRedo(action){
-        this.setState({ disable: true });
-        const prev_trav = traverseOn;
-        traverseOn = false; 
-        const currState = this.state.undoController.getCurrentState();
-        const newState = action === 'Undo' ? this.state.undoController.undo(): this.state.undoController.redo();
-        if (newState !== -1) {
-            this.setState({ errorMessage: `${action}ing ${action === 'Undo' ? currState.action : newState.action} 
-                ${action === 'Undo' ? currState.value : newState.value}...` 
-            });
-            await this.tearDownTree();
-            newState.state.forEach( (value, index) => {
-                this.state.bst.insert(parseFloat(value), this.state.count + index);
-                shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            });
-            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            this.setState({
-                count: this.state.count + newState.state.length, 
-                numActiveNodes: this.state.bst.numActiveNodes, 
-                treeHeight: this.state.bst.getTreeHeight(),
-                errorMessage: `${action} ${action === 'Undo' ? currState.action : newState.action} 
-                ${action === 'Undo' ? currState.value : newState.value} complete.`,
-            });
-            await this.animator.formatBinaryTree(this.state.bst);
-        }
-        else this.setState({ errorMessage: `Nothing to ${action}.`});
-        this.setState({ disable: false });
-        traverseOn = prev_trav;
-    }
-    
     toggleTraverseOn(){ traverseOn = !traverseOn; }
-    
-    handleIntervalChange(event){ TRAVERSE_DURATION = 1500 - event.target.value; }
     
     onResize(){
         if (this.state.bst.root === null || this.state.disable === true) return;
@@ -648,32 +482,6 @@ class RefactoredBST extends Component {
             await this.animator.formatBinaryTree(this.state.bst);
             this.setState({disable : false});
         }, 500);
-    }
-    
-    async tearDownTree(){
-        this.setState({disable: true});
-        this.animator.timeline = anime.timeline({ autoplay: false });
-        await this.state.bst.tearDownTree();
-        this.setState({disable: false, bst: new BinarySearchTree(this.animator, (x) => this.setState({ currentLine: x }))});
-        return;
-    }
-
-    async resyncFormat(){
-        this.setState({disable: true });
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-        this.animator.timeline = anime.timeline({ autoplay: false });
-        await this.animator.formatBinaryTree(this.state.bst);
-        this.setState({disable: false });
-    }
-
-    playPause(){
-        if (this.state.disable){
-            this.animator.timeline.pause();
-            this.setState({ disable: false });
-        } else {
-            this.animator.timeline.play();
-            this.setState({ disable: true });
-        }
     }
 
     render(){ 

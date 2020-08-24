@@ -406,7 +406,7 @@ class Animator {
             this.buildEdgeTimeline(tree.root, tree);
         }
         this.timeline.play();
-        await this.timeline.complete;
+        await this.timeline.finished;
         this.timeline = anime.timeline({});
         return;
     }
