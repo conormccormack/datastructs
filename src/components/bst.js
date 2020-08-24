@@ -6,8 +6,9 @@ import styled from 'styled-components';
 
 const Headline = styled.div`
     font-family: Ramaraja;
-    font-size: 50px;
-    padding-left: 100px;
+    font-size: min(50px, calc(40px + 1vw));
+    padding-left: min(90px, calc(12vw - 30px));
+    padding-right: min(90px, calc(12vw - 30px)); 
 `
 
 function BST (props){

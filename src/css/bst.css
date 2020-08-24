@@ -135,11 +135,10 @@ textarea {
     padding-top: 2rem;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    padding-left: min(90px, calc(12vw - 15px));
+    padding-right: min(90px, calc(12vw - 15px)); 
 }
 
-#nodecontainer {
-    
-}
 
 @media screen {
     #nodecontainer {
