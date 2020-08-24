@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import Navbar from "../navigation/navbar";
 import Mainlanding from "./mainlanding";
 import { motion } from 'framer-motion';
-import RefactoredBST from '../refactoredbst';
 
 function Home(props) {
     useEffect(()=>{

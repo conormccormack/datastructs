@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components'
-import HomeMainGraphic from "./homemaingraphic";
+// import HomeMainGraphic from "./homemaingraphic";
 import BSTDemo from './bstdemo';
 import '../../css/home.css';
 
