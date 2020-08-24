@@ -502,6 +502,8 @@ class RefactoredBST extends Component {
         this.playPause = this.playPause.bind(this);
     }
 
+    componentWillUnmount() { window.removeEventListener('resize'. this.onResize); }
+
     async componentDidMount(){
         window.addEventListener('resize', this.onResize);
         shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));

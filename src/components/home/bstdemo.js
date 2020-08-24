@@ -26,7 +26,6 @@ class Node {
     }
 }
 
-
 class BinarySearchTree {
     constructor(animator, setCaptionLine) {
         this.root = null;
@@ -413,9 +412,13 @@ class RefactoredBST extends Component {
             seekValue: TRAVERSE_DURATION/2,
             errorMessage: '',
             currentOperation: 'input',
+            unusedValues: [],
+            activeValues: [],
         };
         this.calculateShiftX = this.calculateShiftX.bind(this);
         this.onResize = this.onResize.bind(this);
+        this.autoInsert = this.autoInsert.bind(this);
+        this.autoRemove = this.autoRemove.bind(this);
     }
 
     async componentDidMount(){
@@ -431,38 +434,48 @@ class RefactoredBST extends Component {
             count++;
         }
         var unusedValues = nodeValues.filter(value => !activeNodes.includes(value));
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         this.setState({
             count: this.state.count + count, 
             numActiveNodes: this.state.bst.numActiveNodes, 
             treeHeight: this.state.bst.getTreeHeight(),
+            unusedValues: unusedValues, 
+            activeValues: activeNodes,
         });
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         await this.animator.formatBinaryTree(this.state.bst);
         this.setState({ disable: false });
         this.toggleTraverseOn();
         traverseOn = true;
-        window.addEventListener('insertDone', async () => { 
-            console.log('removing', {activeNodes, unusedValues})
-            traverseCount = 0;
-            shuffle(activeNodes);
-            this.state.bst.removeRecurse(this.state.bst.root, activeNodes[0]);
-            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            unusedValues.push(activeNodes.shift());
-            await this.animator.formatBinaryTree(this.state.bst);
-            dispatchEvent(new Event('removeDone'));
-        });
-        window.addEventListener('removeDone', async () => {
-            this.setState({ count: this.state.count + 1 });
-            console.log('inserting', {activeNodes, unusedValues});
-            traverseCount = 0;
-            shuffle(unusedValues);
-            this.state.bst.insert(unusedValues[0], this.state.count + 1);
-            activeNodes.push(unusedValues.shift());
-            shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
-            await this.animator.formatBinaryTree(this.state.bst);
-            dispatchEvent(new Event('insertDone'));
-        });
+        window.addEventListener('insertDone', this.autoRemove);
+        window.addEventListener('removeDone', this.autoInsert);
         dispatchEvent(new Event('insertDone'));
+    }
+
+    async autoInsert(){
+        this.setState({ count: this.state.count + 1 });
+        traverseCount = 0;
+        shuffle(this.state.unusedValues);
+        this.state.bst.insert(this.state.unusedValues[0], this.state.count + 1);
+        this.state.activeValues.push(this.state.unusedValues.shift());
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        await this.animator.formatBinaryTree(this.state.bst);
+        dispatchEvent(new Event('insertDone'));
+    }
+
+    async autoRemove(){
+        traverseCount = 0;
+        shuffle(this.state.activeValues);
+        this.state.bst.removeRecurse(this.state.bst.root, this.state.activeValues[0]);
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        this.state.unusedValues.push(this.state.activeValues.shift());
+        await this.animator.formatBinaryTree(this.state.bst);
+        dispatchEvent(new Event('removeDone'));
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('insertDone', this.autoRemove);
+        window.removeEventListener('removeDone', this.autoInsert);
+        window.removeEventListener('resize', this.onResize);
     }
 
     calculateShiftX(nodeContainer) {
