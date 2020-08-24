@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components'
 import HomeMainGraphic from "./homemaingraphic";
+import BSTDemo from './bstdemo';
 import '../../css/home.css';
 
 const WelcomeHeadline = styled.div`
@@ -20,7 +21,8 @@ const WelcomeMessage =styled.div`
 function Mainlanding(){
     return (
         <div className='main-wrapper'>
-            <HomeMainGraphic/>
+            {/* <HomeMainGraphic/> */}
+            <BSTDemo/>
             <WelcomeMessage>
                 <WelcomeHeadline>Welcome to DataStructs.</WelcomeHeadline>
                 <WelcomeBody>
@@ -34,6 +36,7 @@ function Mainlanding(){
                 </WelcomeBody>
             </WelcomeMessage>
         </div>
+
     )
 }
 

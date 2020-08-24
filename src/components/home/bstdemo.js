@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import anime from 'animejs';
-import '../css/bst.css';
-import '../css/input-range.css';
-import '../resources/fonts/fontawesome/css/all.css';
-import ClosedCodeCaptions from './closedcodecaptions';
+import '../../css/bst.css';
+import '../../css/input-range.css';
+import '../../resources/fonts/fontawesome/css/all.css';
 
 const HORIZONTAL_SPACING = 45;
 const NODE_RADIUS = 30;
@@ -679,64 +678,12 @@ class RefactoredBST extends Component {
 
     render(){ 
         return(
-            <div className='page-wrapper'>
+            <div style={{ marginTop: '2rem' }}>
                 <div id="nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
                     <svg className="linecontainer" id="svg-line" />                    
                 </div>
-                <div style={{ display: `${this.props.hideUI && 'none'}`}} className='ui-container'>
-                    <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
-                    <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
-                    <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
-                        <label>
-                            <input disabled={this.state.disable} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
-                            <button disabled={this.state.disable} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Insert</button>
-                        </label>
-                    </form>
-                    <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
-                        <label>
-                            <input disabled={this.state.disable} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
-                            <button disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
-                        </label>
-                    </form>
-                    {/* <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={this.animator.timeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
-                    <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
-                    <button onClick={() => this.animator.timeline.seek(this.state.seekValue)}></button> */}
-                    <div className='tree-info'> 
-                        <label>
-                            Animate traversal
-                            <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
-                        </label>
-                    </div>
-                    <div className='tree-info slider-wrapper'>
-                        <label>
-                            Traversal Speed 
-                            <input style={{width: '120px'}} className='slider' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
-                        </label>
-                    </div>
-                    <button disabled={this.state.disable} onClick={() => this.resyncFormat()} className='refresh-button'>
-                        Something wrong? <i className="fas fa-sync-alt"/>
-                    </button>
-                    <button className='clear-button' onClick={() => { 
-                        this.tearDownTree(); 
-                        this.setState({ numActiveNodes: 0, treeHeight: 0 });
-                        }} disabled={this.state.disable}>
-                            Clear Tree
-                    </button>
-                    <button className='clear-button' onClick={() => this.handleUndoRedo('Undo')} disabled={this.state.disable}>
-                        Undo
-                    </button>
-                    <button className='clear-button' onClick={() => this.handleUndoRedo('Redo')} disabled={this.state.disable}>
-                        Redo
-                    </button>
-                    {this.animator.timeline.duration}
-                    <div className='tree-info' id='error-message'>{this.state.errorMessage}</div>
-                    <ClosedCodeCaptions current={this.state.currentLine} lines={ 
-                            this.state.currentOperation === 'input' ? this.inputLines : 
-                            this.state.currentOperation === 'remove' ? this.removeLines :
-                            []
-                        }/>
-                </div>
             </div>
+
         );
     }
 }
