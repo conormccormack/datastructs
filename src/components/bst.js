@@ -3,6 +3,7 @@ import RefactoredBST from './refactoredbst';
 import Navbar from './navigation/navbar';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
+import BstExplained from './bst_explained.js';
 
 const Headline = styled.div`
     font-family: Ramaraja;
@@ -21,6 +22,7 @@ function BST (props){
             <Headline>Binary Search Tree</Headline>
             <motion.div key="home" variants={props.variants} transition={props.transition} initial="pageInit" animate="pageIn" exit="pageOut">
                 <RefactoredBST/>
+                <BstExplained/>
             </motion.div>
         </div>
         

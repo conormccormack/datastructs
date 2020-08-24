@@ -1,0 +1,32 @@
+.explanation-title{
+    font-family: Ramaraja;
+    font-size: min(50px, calc(40px + 1vw));
+}
+
+.explanation-content {
+    font-family: Lato;
+    font-size: 18px;
+    padding-left: min(90px, calc(12vw - 30px));
+    padding-right: min(90px, calc(12vw - 30px));
+    padding-top: 1rem;
+    padding-bottom: 4rem;
+}
+
+@media screen and (min-width: 650px){
+    .algorithm-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        column-gap: 2rem;
+        margin: 0px 0px 20px 0px;
+    }
+}
+
+.explanation-subtitle {
+    font-family: Ramaraja;
+    font-size: min(30px, calc(20px + 1vw));
+    margin-bottom: -5px;
+}
+
+.explanation-section {
+    padding-top: 2rem;
+}

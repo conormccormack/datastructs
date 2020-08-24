@@ -1,0 +1,74 @@
+import React from 'react';
+import '../css/explanations.css';
+
+function BstExplained() {
+    return (
+        <div className='explanation-content'>
+            <div>
+                <div className='algorithm-grid'>
+                    <div className='explanation-intro'>
+                        <div className='explanation-title'> 
+                            nice, but why? 
+                        </div>
+                        Binary search trees are the foundation for many more advanced data structures that are used all the time in production environments to organize data in a way that offers quick (often logarithmic) lookup, insertion, and removal.
+                        <br/><br/>
+                        If you’re already familiar with the binary search algorithm for finding elements in a sorted list, understanding how we construct binary search trees should come very naturally. Binary search trees abide by the following simple rules:
+                        <ul>
+                            <li>
+                                any node /v/ has connections to at most two nodes said to be its "left" and "right" children
+                            </li>
+                            <li>
+                                for any given node /v/, any node with a smaller key value lives in the 	/v/’s left subtree and any node with a great key 
+                                value lives in /v/’s right subtree.
+                            </li>
+                        </ul>
+
+                        Given this rule, looking for a key in our tree is as simple as looking to our left if the value is smaller than the key we’re currently looking at and looking to our right if it is bigger than our current key.
+                        The algorithms for insertion and deletion are also naturally simple given the construction of the binary search tree
+                    </div>
+                    <div className='explanation-section'>
+                        <div className='explanation-subtitle'>Summary</div>
+                        Binary Search Trees typical offer the following operations:
+                        <ul>
+                            <li>insert(node): O(n) ? </li>
+                            <li>search(key): O(n)  ? </li>
+                            <li>delete(key): O(n) ? </li>
+                        </ul>   
+                    </div>
+                </div>
+                <div className='algorithm-grid'>
+                    <div className='explanation-section'>
+                        <div className='explanation-subtitle'>Insertion:</div>
+                        Start at the top of the tree (the root). If the key you’re inserting is smaller than the root’s key, look to your left for a new spot. Likewise, if it is larger than the root,’s key look right. If the root has no child in this new spot, simply insert the new node as the appropriate left or right child of the root. Otherwise, keep searching left and right now starting from the node that already exists in the spot you found. 
+                    </div>
+                    <div className='explanation-section'>
+                        <div className='explanation-subtitle'>Deletion:</div>
+                        Start at the top of the tree (the root). If the key you’re deleting is smaller than the root’s key, look to your left. Likewise, if it is larger than the root’s key, look right. If the root has no child in this spot, the key you’re looking for does not exist in the tree. Otherwise, keep searching left and right now starting from the node that already exists in the spot you found. 
+
+                        Once you found the node with the key you’re looking for, you’re ready to remove it from the tree, but there are three cases you must consider:
+                        If the node you’re about to delete has
+                        1. No children, then go ahead and delete it.
+                        2. One child, then connect that child to the parent of the node you’re about to delete
+                        3. Two children, then find the nodes successor by looking right once and recursively looking left. With the successor found, you can
+                        1.  Swap the node you are about to delete with its successor, and delete your node. 
+                        2. OR replace the value of your node with that of its successor and then delete the successor
+                    </div>
+                </div>
+                <div className='explanation-section'>
+
+                <div className='explanation-subtitle'>Limitations:</div>
+                    As great as binary search trees can be, their most basic form is far from perfect. Vanilla BST’s can quickly become degenerate if they have no self-balancing mechanism.
+
+                    Degenerate binary search trees offer little to no advantage over linked lists since any operation might have to traverse every node in the tree in order complete, which gives us O(n) linear complexity. 
+
+                    However, if tress remain balanced and non-degenerate, we can guarantee logarithmic complexity for every operation as the tree height of a complete binary tree of size n is only O(log n). Intuitively, this makes sense, as every time we choose to go search left or right when traversing a binary search tree, we are eliminating half of the possible places in our search space, just as we do in the binary search algorithm.
+
+                    Advanced implementations of binary search trees, as mentioned earlier, include self-balancing in order to guarantee logarithmic runtimes. Examples of this include AVL Trees and Red-Black Tress, which are coming to DataStructs soon.
+                </div>
+
+            </div>
+        </div>
+    )
+}
+
+export default BstExplained;

@@ -5,6 +5,7 @@ import '../css/about.css';
 import AboutMainGraphic from "./aboutmaingraphic";
 import {motion} from "framer-motion";
 import copy from 'copy-to-clipboard';
+import { ReactComponent as Clipboard } from '../resources/icons/copy.svg';
 
 const AboutHeadline = styled.div`
     font-family: Ramaraja;
@@ -56,7 +57,9 @@ function About (props){
                         <br/><br/>
                         Feel free to connect with me on <Link style={{textDecoration: 'underline'}} href="https://www.linkedin.com/in/conorxmccormack">LinkedIn</Link>!
                         <br/><br/>
-                        If you're interested in contributing to the project, reach out at <span style={{textDecoration: 'underline'}} onClick={() => copy('conorxmccormack@gmail.com')}>conorxmccormack@gmail.com</span> <span onClick={() => copy('conorxmccormack@gmail.com')}>[click to copy]</span>.
+                        If you're interested in contributing to the project, reach out at <span style={{textDecoration: 'underline'}} onClick={() => copy('conorxmccormack@gmail.com')}>conorxmccormack@gmail.com</span> <span onClick={() => copy('conorxmccormack@gmail.com')}>
+                            <span><Clipboard style={{ stroke: '#aaa', height: '20px', width: '20px', alignContent: 'bottom' }}/></span>
+                            </span>
                         <br/><br/>
                         <Link className="hoverHighlit" href='https://github.com/conormccormack/datastructs'>
                             <i className="fab fa-github"></i> View this project on <strong>Github</strong> @conormccormack/datastructs

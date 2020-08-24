@@ -503,7 +503,6 @@ class RefactoredBST extends Component {
     }
 
     componentWillUnmount() { 
-        window.removeEventListener('resize', this.onResize); 
     }
 
     async componentDidMount(){
