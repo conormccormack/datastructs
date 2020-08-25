@@ -34,7 +34,7 @@ function BstExplained() {
                         </div>
 
                         Given this rule, looking for a key in our tree is as simple as looking to our left if the value is smaller than the key we’re currently looking at and looking to our right if it is bigger than our current key.
-                        The algorithms for insertion and deletion are also naturally simple given the construction of the binary search tree
+                        The algorithms for insertion and deletion are naturally straightforward given the construction of the binary search tree.
                     </div>
                     <div className='explanation-section'>
                         <div className='explanation-subtitle'>Summary</div>
@@ -69,10 +69,10 @@ function BstExplained() {
                                 Two children, then find the nodes successor by looking right once and recursively looking left. With the successor found, you can:
                                 <ol>    
                                     <li>
-                                        Swap the node you are about to delete with its successor, and delete your node or
+                                        Swap the node you are about to delete with its successor, and delete the node in its swapped position or...
                                     </li>
                                     <li>
-                                        Replace the value of your node with that of its successor and then delete the successor.
+                                        Replace the value of your node with that of its successor and then delete the original successor node.
                                     </li>
                                 </ol>
                             </li>
