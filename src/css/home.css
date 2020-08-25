@@ -1,6 +1,7 @@
 .main-wrapper {
     padding-left: min(90px, calc(12vw - 30px));
     padding-right: min(90px, calc(12vw - 30px));
+    padding-bottom: 4rem;
 }
 
 @media screen and (min-width: 650px){
