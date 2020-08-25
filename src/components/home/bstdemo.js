@@ -156,8 +156,8 @@ class BinarySearchTree {
             const swap = this.findLeftmost(node.right);
             this.animator.addTraverseStep(swap, -1);
             node.value = swap.value;
-            this.animator.timeline.add({
-                targets: document.getElementById(`frontnode${node.id}`),
+            this.animator.demoTimeline.add({
+                targets: document.getElementById(`demo-frontnode${node.id}`),
                 innerHTML: node.value,
                 easing: 'easeOutCubic',
                 round: 1,
@@ -166,12 +166,12 @@ class BinarySearchTree {
             this.deleteNode(swap, true);
         } else {
             if (child_of_type !== 'root') {
-                this.animator.removeElementFromDOM(`path${node.id}`);  
+                this.animator.removeElementFromDOM(`demo-path${node.id}`);  
                 if (child_of_type === 'right') node.parent.right = replacement;
                 else if (child_of_type === 'left') node.parent.left = replacement;
             } 
             else {
-                if (replacement) this.animator.removeElementFromDOM(`path${replacement.id}`);
+                if (replacement) this.animator.removeElementFromDOM(`demo-path${replacement.id}`);
                 this.root = replacement;
             }
             if (replacement) {
@@ -182,7 +182,7 @@ class BinarySearchTree {
                 this.animator.addCaptionStep(5, 1, 5, this.setCaptionLine);
                 this.animator.addCaptionStep(6, 3, 5, this.setCaptionLine);
             }
-            this.animator.removeElementFromDOM(`node${node.id}`);
+            this.animator.removeElementFromDOM(`demo-node${node.id}`);
         }
 
         if (this.root) this.updateLevels(this.root, 0);
@@ -191,9 +191,9 @@ class BinarySearchTree {
     async tearDownTree(){
         if (this.root === null) return;
         this.animator.buildTearDownAnimation(this.root, this.root);
-        this.animator.timeline.play();
-        await this.animator.timeline.finished;
-        this.animator.timeline = anime.timeline({ autoplay: false });
+        this.animator.demoTimeline.play();
+        await this.animator.demoTimeline.finished;
+        this.animator.demoTimeline = anime.timeline({ autoplay: false });
         return;
     }
 
@@ -213,15 +213,15 @@ class BinarySearchTree {
 function addNodeToDOM(value, count) {
     let node = document.createElement("div");
     node.classList.add('bstnode')
-    node.setAttribute('id', `node${count}`);
+    node.setAttribute('id', `demo-node${count}`);
     node.setAttribute('style', `float: left;`);
     let frontHighlight = document.createElement('div');
     frontHighlight.classList.add('front-node');
-    frontHighlight.setAttribute('id', `frontnode${count}`);
+    frontHighlight.setAttribute('id', `demo-frontnode${count}`);
     let text = document.createTextNode(value);
     frontHighlight.appendChild(text);
     node.appendChild(frontHighlight);
-    document.getElementById("nodecontainer").appendChild(node);
+    document.getElementById("demo-nodecontainer").appendChild(node);
 }
 
 // Given an element selector, return the pixel midpoint of its width dimension.
@@ -232,10 +232,10 @@ function getWidthMidpoint(selector) {
 // Given child node, create path from child to parent, add to DOM.
 function addPathToDom(child){
     if (child.parent === null) return;
-    let svg = document.getElementById('svg-line');
-    const parent_selector = document.getElementById(`node${child.parent.id}`);
-    const child_selector = document.getElementById(`node${child.id}`);
-    const container = document.getElementById(`nodecontainer`);
+    let svg = document.getElementById('demo-svg-line');
+    const parent_selector = document.getElementById(`demo-node${child.parent.id}`);
+    const child_selector = document.getElementById(`demo-node${child.id}`);
+    const container = document.getElementById(`demo-nodecontainer`);
 
     const x1 = (parent_selector.getBoundingClientRect().x + parent_selector.getBoundingClientRect().right)/2 - container.getBoundingClientRect().x;
     const y1 =  parent_selector.getBoundingClientRect().bottom - container.getBoundingClientRect().y - NODE_RADIUS;
@@ -243,7 +243,7 @@ function addPathToDom(child){
     const y2 = child_selector.getBoundingClientRect().y - container.getBoundingClientRect().y + NODE_RADIUS;
 
     let path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('id', `path${child.id}`);
+    path.setAttribute('id', `demo-path${child.id}`);
     path.setAttribute('d', `M ${x1}, ${y1} L ${x2}, ${y2} `);
     path.setAttribute('stroke', '#3C5B6F');
     path.setAttribute('stroke-width', '3px');
@@ -253,13 +253,13 @@ function addPathToDom(child){
 
 class Animator {
     constructor(props){
-        this.timeline = anime.timeline({ autoplay: false })
+        this.demoTimeline = anime.timeline({ autoplay: false })
     }
 
     removeElementFromDOM(id) {    
         var toRemove = document.getElementById(id);
         if (id === null) return;
-        this.timeline.add({
+        this.demoTimeline.add({
             targets: toRemove,
             opacity: 0,
             duration: 600,
@@ -274,28 +274,28 @@ class Animator {
     addNodeToDOM(value, count) {
         let node = document.createElement("div");
         node.classList.add('bstnode')
-        node.setAttribute('id', `node${count}`);
+        node.setAttribute('id', `demo-node${count}`);
         node.setAttribute('style', `float: left;`);
         let frontHighlight = document.createElement('div');
         frontHighlight.classList.add('front-node');
-        frontHighlight.setAttribute('id', `frontnode${count}`);
+        frontHighlight.setAttribute('id', `demo-frontnode${count}`);
         let text = document.createTextNode(value);
         frontHighlight.appendChild(text);
         node.appendChild(frontHighlight);
-        document.getElementById("nodecontainer").appendChild(node);
+        document.getElementById("demo-nodecontainer").appendChild(node);
     }
 
     buildEdgeTimeline(root, tree){
         if (root.left !== null) this.buildEdgeTimeline(root.left, tree);
         if (root.parent !== null){
-            const x1 = tree.x_distances.get(`node${root.parent.id}`); 
+            const x1 = tree.x_distances.get(`demo-node${root.parent.id}`); 
             const y1 = root.parent.level * VERTICAL_SPACING + NODE_RADIUS;
-            const x2 = tree.x_distances.get(`node${root.id}`);
+            const x2 = tree.x_distances.get(`demo-node${root.id}`);
             const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
-            const curr_opacity = parseFloat(document.getElementById(`path${root.id}`).getAttribute('opacity'));
+            const curr_opacity = parseFloat(document.getElementById(`demo-path${root.id}`).getAttribute('opacity'));
             const isNew = curr_opacity > 0.7 ? false : true;
-            this.timeline.add({
-                targets: `#path${root.id}`,
+            this.demoTimeline.add({
+                targets: `#demo-path${root.id}`,
                 d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
                 opacity: { value: '1.0', easing: 'easeInSine', delay: isNew ? 600: 0, duration: isNew ? 200 : 0 },
                 stroke: { value: '#DEAAFF', delay: isNew ? 800 : 0 },
@@ -307,15 +307,15 @@ class Animator {
 
     buildNodeTimeline(root, tree){
         if (root.left !== null) this.buildNodeTimeline(root.left, tree);
-        const node = document.getElementById(`node${root.id}`);
+        const node = document.getElementById(`demo-node${root.id}`);
         const x = shift_x - NODE_RADIUS;
         const isNew = root.parent !== null && root.line === null ? true : false;
-        tree.x_distances.set(`node${root.id}`, x );
+        tree.x_distances.set(`demo-node${root.id}`, x );
         root.parent !== null && root.line === null && addPathToDom(root);
-        root.line = root.line === null && `line${root.id}`;
+        root.line = root.line === null && `demo-line${root.id}`;
         if (isNew){
-            this.timeline.add({
-                targets: `#node${root.id}`,
+            this.demoTimeline.add({
+                targets: `#demo-node${root.id}`,
                 marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
                 keyframes: [
                     { scale: isNew ? 0 : 1, duration: 0 },
@@ -325,8 +325,8 @@ class Animator {
                 easing: 'easeInOutExpo',
             }, traverseCount * TRAVERSE_DURATION);
         } else {
-            this.timeline.add({
-                targets: `#node${root.id}`,
+            this.demoTimeline.add({
+                targets: `#demo-node${root.id}`,
                 marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
                 keyframes: [
                     { scale: isNew ? 0 : 1, duration: 0 },
@@ -347,15 +347,15 @@ class Animator {
             this.buildNodeTimeline(tree.root, tree);
             this.buildEdgeTimeline(tree.root, tree);
         }
-        this.timeline.play();
-        await this.timeline.finished;
-        this.timeline = anime.timeline({});
+        this.demoTimeline.play();
+        await this.demoTimeline.finished;
+        this.demoTimeline = anime.timeline({});
         return;
     }
 
     addTraverseStep(node, shift_order){
-        this.timeline.add({
-            targets: `#node${node.id}`,
+        this.demoTimeline.add({
+            targets: `#demo-node${node.id}`,
             keyframes: [
                 { scale: 1 },
                 { scale:1 },
@@ -363,8 +363,8 @@ class Animator {
             easing: 'easeInOutBack',
             duration: TRAVERSE_DURATION,
         }, (traverseCount + shift_order) * TRAVERSE_DURATION);
-        this.timeline.add({
-            targets: `#frontnode${node.id}`,
+        this.demoTimeline.add({
+            targets: `#demo-frontnode${node.id}`,
             keyframes: [
                 { background: '#3C5B6F' },
                 { background: ' ' },
@@ -373,8 +373,8 @@ class Animator {
             duration: TRAVERSE_DURATION,
         }, (traverseCount + shift_order) * TRAVERSE_DURATION);
         if (node.parent !== null && shift_order === 0) {
-            this.timeline.add({
-                targets: `#path${node.id}`,
+            this.demoTimeline.add({
+                targets: `#demo-path${node.id}`,
                 keyframes: [
                     { stroke: '#3C5B6F' },
                     { stroke: '#DEAAFF' },
@@ -387,7 +387,7 @@ class Animator {
     }
 
     addCaptionStep(lineNumber, delay, divisor, setCaptionLine){
-        this.timeline.add({
+        this.demoTimeline.add({
             duration: TRAVERSE_DURATION,
             complete: () => {
                 setCaptionLine(lineNumber)
@@ -422,7 +422,7 @@ class RefactoredBST extends Component {
 
     async componentDidMount(){
         window.addEventListener('resize', this.onResize);
-        shift_x = getWidthMidpoint(document.getElementById('nodecontainer'));
+        shift_x = getWidthMidpoint(document.getElementById('demo-nodecontainer'));
         this.toggleTraverseOn();
         const nodeValues = [306, 127, 428, 249, 363, 656, 201, 270, 512];
         var activeNodes = [];
@@ -440,7 +440,7 @@ class RefactoredBST extends Component {
             unusedValues: unusedValues, 
             activeValues: activeNodes,
         });
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        shift_x = this.calculateShiftX(document.getElementById('demo-nodecontainer'));
         await this.animator.formatBinaryTree(this.state.bst);
         this.setState({ disable: false });
         this.toggleTraverseOn();
@@ -454,7 +454,7 @@ class RefactoredBST extends Component {
         this.setState({ count: this.state.count + 1 });
         traverseCount = 0;
         shuffle(this.state.unusedValues);
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        shift_x = this.calculateShiftX(document.getElementById('demo-nodecontainer'));
         this.state.bst.insert(this.state.unusedValues[0], this.state.count + 1);
         this.state.activeValues.push(this.state.unusedValues.shift());
         setTimeout(() => this.setState({ treeHeight: this.state.bst.getTreeHeight()}), 200);
@@ -466,7 +466,7 @@ class RefactoredBST extends Component {
         traverseCount = 0;
         shuffle(this.state.activeValues);
         this.state.bst.removeRecurse(this.state.bst.root, this.state.activeValues[0]);
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        shift_x = this.calculateShiftX(document.getElementById('demo-nodecontainer'));
         this.state.unusedValues.push(this.state.activeValues.shift());
         setTimeout(() => this.setState({ treeHeight: this.state.bst.getTreeHeight()}), traverseCount * TRAVERSE_DURATION + 500);
         await this.animator.formatBinaryTree(this.state.bst);
@@ -489,10 +489,10 @@ class RefactoredBST extends Component {
     onResize(){
         if (this.state.bst.root === null || this.state.disable === true) return;
         clearTimeout(resizeTimer);
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        shift_x = this.calculateShiftX(document.getElementById('demo-nodecontainer'));
         resizeTimer = setTimeout(async () => {
             this.setState({disable : true});
-            this.animator.timeline = anime.timeline({ autoplay: false });
+            this.animator.demoTimeline = anime.timeline({ autoplay: false });
             await this.animator.formatBinaryTree(this.state.bst);
             this.setState({disable : false});
         }, 500);
@@ -501,8 +501,8 @@ class RefactoredBST extends Component {
     render(){ 
         return(
             <div style={{ marginTop: '2rem' }}>
-                <div id="nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
-                    <svg className="linecontainer" id="svg-line" />                    
+                <div id="demo-nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
+                    <svg className="linecontainer" id="demo-svg-line" />                    
                 </div>
             </div>
 

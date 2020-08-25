@@ -1,7 +1,9 @@
 import React from 'react';
 import '../css/explanations.css';
+import BstDemo from './home/bstdemo.js';
 
 function BstExplained() {
+    
     return (
         <div className='explanation-content'>
             <div>
@@ -13,15 +15,23 @@ function BstExplained() {
                         Binary search trees are the foundation for many more advanced data structures that are used all the time in production environments to organize data in a way that offers quick (often logarithmic) lookup, insertion, and removal.
                         <br/><br/>
                         If you’re already familiar with the binary search algorithm for finding elements in a sorted list, understanding how we construct binary search trees should come very naturally. Binary search trees abide by the following simple rules:
-                        <ul>
-                            <li>
-                                any node <strong>v</strong> has connections to at most two nodes said to be its "left" and "right" children
-                            </li>
-                            <li>
-                                for a given node <strong>v</strong>, any node with a smaller key value lives in the 	<strong>v</strong>’s left subtree and any node with a great key 
-                                value lives in <strong>v</strong>’s right subtree.
-                            </li>
-                        </ul>
+                        <div className='subsection-grid'>
+                            <div id='bst-rules'>
+                                <ul>
+                                    <li>
+                                        any node <strong>v</strong> has connections to at most two nodes said to be its "left" and "right" children
+                                    </li>
+                                    <br/>
+                                    <li>
+                                        for a given node <strong>v</strong>, any node with a smaller key value lives in the 	<strong>v</strong>’s left subtree       and   any node with a great key 
+                                        value lives in <strong>v</strong>’s right subtree.
+                                    </li>
+                                </ul>
+                            </div>
+                            <div style={{width: '100%'}}>
+                                <img id='bst-rules-img' src={require("../resources/images/rule.png")} alt="bst rule"/>
+                            </div>
+                        </div>
 
                         Given this rule, looking for a key in our tree is as simple as looking to our left if the value is smaller than the key we’re currently looking at and looking to our right if it is bigger than our current key.
                         The algorithms for insertion and deletion are also naturally simple given the construction of the binary search tree
@@ -33,7 +43,8 @@ function BstExplained() {
                             <li>insert(node): O(n) ? </li>
                             <li>search(key): O(n)  ? </li>
                             <li>delete(key): O(n) ? </li>
-                        </ul>   
+                        </ul>
+                        <BstDemo/>
                     </div>
                 </div>
                 <div className='algorithm-grid'>

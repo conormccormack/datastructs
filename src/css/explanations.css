@@ -16,7 +16,7 @@
     .algorithm-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        column-gap: 2rem;
+        column-gap: 1.5rem;
         margin: 0px 0px 20px 0px;
     }
 }
@@ -25,6 +25,34 @@
     font-family: Ramaraja;
     font-size: min(30px, calc(20px + 1vw));
     margin-bottom: -5px;
+}
+
+@media screen and (min-width: 1415px){
+    .subsection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }   
+    #bst-rules {
+        grid-column: auto / span 2;
+    }
+}
+
+@media screen and (min-width: 1415px){
+    .subsection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }   
+    #bst-rules {
+        grid-column: auto / span 2;
+    }
+}
+
+#bst-rules-img {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 300px;
+    display: block;
 }
 
 .explanation-section {

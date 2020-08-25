@@ -1,18 +1,11 @@
 import React from 'react';
-import styled from "styled-components";
-
-const MainGraphic = styled.div`
-
-`
 
 function AboutMainGraphic () {
-
     return (
-        <MainGraphic>
+        <div>
             <img src={require('../resources/images/darklogo.svg')} alt='darklogo'/>
-        </MainGraphic>
+        </div>
     )
-
 }
 
 export default AboutMainGraphic;
