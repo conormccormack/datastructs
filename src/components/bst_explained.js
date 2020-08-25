@@ -15,11 +15,11 @@ function BstExplained() {
                         If you’re already familiar with the binary search algorithm for finding elements in a sorted list, understanding how we construct binary search trees should come very naturally. Binary search trees abide by the following simple rules:
                         <ul>
                             <li>
-                                any node /v/ has connections to at most two nodes said to be its "left" and "right" children
+                                any node <strong>v</strong> has connections to at most two nodes said to be its "left" and "right" children
                             </li>
                             <li>
-                                for any given node /v/, any node with a smaller key value lives in the 	/v/’s left subtree and any node with a great key 
-                                value lives in /v/’s right subtree.
+                                for a given node <strong>v</strong>, any node with a smaller key value lives in the 	<strong>v</strong>’s left subtree and any node with a great key 
+                                value lives in <strong>v</strong>’s right subtree.
                             </li>
                         </ul>
 
@@ -47,11 +47,25 @@ function BstExplained() {
 
                         Once you found the node with the key you’re looking for, you’re ready to remove it from the tree, but there are three cases you must consider:
                         If the node you’re about to delete has
-                        1. No children, then go ahead and delete it.
-                        2. One child, then connect that child to the parent of the node you’re about to delete
-                        3. Two children, then find the nodes successor by looking right once and recursively looking left. With the successor found, you can
-                        1.  Swap the node you are about to delete with its successor, and delete your node. 
-                        2. OR replace the value of your node with that of its successor and then delete the successor
+                        <ol>
+                            <li>
+                                No children, then go ahead and delete it.
+                            </li>
+                            <li>
+                                One child, then connect that child to the parent of the node you’re about to delete
+                            </li>
+                            <li>
+                                Two children, then find the nodes successor by looking right once and recursively looking left. With the successor found, you can:
+                                <ol>    
+                                    <li>
+                                        Swap the node you are about to delete with its successor, and delete your node or
+                                    </li>
+                                    <li>
+                                        Replace the value of your node with that of its successor and then delete the successor.
+                                    </li>
+                                </ol>
+                            </li>
+                        </ol>
                     </div>
                 </div>
                 <div className='explanation-section'>

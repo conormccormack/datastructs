@@ -395,7 +395,6 @@ class Animator {
         }, (traverseCount-1) * TRAVERSE_DURATION + delay * (TRAVERSE_DURATION/divisor))
     }
 }
-
 class RefactoredBST extends Component {    
     constructor (props) {
         super(props);
@@ -455,9 +454,10 @@ class RefactoredBST extends Component {
         this.setState({ count: this.state.count + 1 });
         traverseCount = 0;
         shuffle(this.state.unusedValues);
+        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         this.state.bst.insert(this.state.unusedValues[0], this.state.count + 1);
         this.state.activeValues.push(this.state.unusedValues.shift());
-        shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
+        setTimeout(() => this.setState({ treeHeight: this.state.bst.getTreeHeight()}), 200);
         await this.animator.formatBinaryTree(this.state.bst);
         dispatchEvent(new Event('insertDone'));
     }
@@ -468,6 +468,7 @@ class RefactoredBST extends Component {
         this.state.bst.removeRecurse(this.state.bst.root, this.state.activeValues[0]);
         shift_x = this.calculateShiftX(document.getElementById('nodecontainer'));
         this.state.unusedValues.push(this.state.activeValues.shift());
+        setTimeout(() => this.setState({ treeHeight: this.state.bst.getTreeHeight()}), traverseCount * TRAVERSE_DURATION + 500);
         await this.animator.formatBinaryTree(this.state.bst);
         dispatchEvent(new Event('removeDone'));
     }
@@ -480,7 +481,7 @@ class RefactoredBST extends Component {
 
     calculateShiftX(nodeContainer) {
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
-        return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
+        return 20 + Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
     }
 
     toggleTraverseOn(){ traverseOn = !traverseOn; }

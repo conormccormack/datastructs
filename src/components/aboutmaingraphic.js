@@ -9,7 +9,7 @@ function AboutMainGraphic () {
 
     return (
         <MainGraphic>
-            <img src={require('../resources/images/darklogotag.svg')} alt='darklogo'/>
+            <img src={require('../resources/images/darklogo.svg')} alt='darklogo'/>
         </MainGraphic>
     )
 
