@@ -1,6 +1,7 @@
 import React from 'react';
 import '../css/explanations.css';
 import BstDemo from './home/bstdemo.js';
+import BstInsertDemo from './bstinsertdemo';
 
 function BstExplained() {
     
@@ -44,13 +45,14 @@ function BstExplained() {
                             <li>search(key): O(n)  ? </li>
                             <li>delete(key): O(n) ? </li>
                         </ul>
-                        <BstDemo/>
+                        <BstDemo maxNodes={4}/>
                     </div>
                 </div>
                 <div className='algorithm-grid'>
                     <div className='explanation-section'>
                         <div className='explanation-subtitle'>Insertion:</div>
                         Start at the top of the tree (the root). If the key you’re inserting is smaller than the root’s key, look to your left for a new spot. Likewise, if it is larger than the root,’s key look right. If the root has no child in this new spot, simply insert the new node as the appropriate left or right child of the root. Otherwise, keep searching left and right now starting from the node that already exists in the spot you found. 
+                        <BstInsertDemo/>
                     </div>
                     <div className='explanation-section'>
                         <div className='explanation-subtitle'>Deletion:</div>

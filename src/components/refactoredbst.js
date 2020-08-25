@@ -683,7 +683,7 @@ class RefactoredBST extends Component {
     render(){ 
         return(
             <div className='page-wrapper'>
-                <div id="nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
+                <div className="nodecontainer" id="nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
                     <svg className="linecontainer" id="svg-line" />                    
                 </div>
                 <div style={{ display: `${this.props.hideUI && 'none'}`}} className='ui-container'>

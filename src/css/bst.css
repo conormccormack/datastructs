@@ -141,15 +141,17 @@ textarea {
 }
 
 
-@media screen {
-    #nodecontainer {
-        grid-column: span 3;
-        transition: height var(--speed) ease;
-    }
+.nodecontainer {
+    grid-column: span 3;
+    transition: height var(--speed) ease;
+}
 
-    .ui-container {
-        grid-column: span 1;
-    }
+.ui-container {
+    grid-column: span 1;
+}
+
+.demo-nodecontainer {
+    transition: height var(--speed) ease;
 }
 
 .linecontainer {

@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import anime from 'animejs';
-import '../../css/bst.css';
-import '../../css/input-range.css';
-import '../../resources/fonts/fontawesome/css/all.css';
-import { shuffle } from 'gsap/gsap-core';
+import '../css/bst.css';
+import '../css/input-range.css';
+import '../resources/fonts/fontawesome/css/all.css';
 
 const HORIZONTAL_SPACING = 45;
 const NODE_RADIUS = 30;
@@ -156,8 +155,8 @@ class BinarySearchTree {
             const swap = this.findLeftmost(node.right);
             this.animator.addTraverseStep(swap, -1);
             node.value = swap.value;
-            this.animator.demoTimeline.add({
-                targets: document.getElementById(`demo-frontnode${node.id}`),
+            this.animator.insertTimeline.add({
+                targets: document.getElementById(`insert-frontnode${node.id}`),
                 innerHTML: node.value,
                 easing: 'easeOutCubic',
                 round: 1,
@@ -166,12 +165,12 @@ class BinarySearchTree {
             this.deleteNode(swap, true);
         } else {
             if (child_of_type !== 'root') {
-                this.animator.removeElementFromDOM(`demo-path${node.id}`);  
+                this.animator.removeElementFromDOM(`insert-path${node.id}`);  
                 if (child_of_type === 'right') node.parent.right = replacement;
                 else if (child_of_type === 'left') node.parent.left = replacement;
             } 
             else {
-                if (replacement) this.animator.removeElementFromDOM(`demo-path${replacement.id}`);
+                if (replacement) this.animator.removeElementFromDOM(`insert-path${replacement.id}`);
                 this.root = replacement;
             }
             if (replacement) {
@@ -182,7 +181,7 @@ class BinarySearchTree {
                 this.animator.addCaptionStep(5, 1, 5, this.setCaptionLine);
                 this.animator.addCaptionStep(6, 3, 5, this.setCaptionLine);
             }
-            this.animator.removeElementFromDOM(`demo-node${node.id}`);
+            this.animator.removeElementFromDOM(`insert-node${node.id}`);
         }
 
         if (this.root) this.updateLevels(this.root, 0);
@@ -191,9 +190,9 @@ class BinarySearchTree {
     async tearDownTree(){
         if (this.root === null) return;
         this.animator.buildTearDownAnimation(this.root, this.root);
-        this.animator.demoTimeline.play();
-        await this.animator.demoTimeline.finished;
-        this.animator.demoTimeline = anime.timeline({ autoplay: false });
+        this.animator.insertTimeline.play();
+        await this.animator.insertTimeline.finished;
+        this.animator.insertTimeline = anime.timeline({ autoplay: false });
         return;
     }
 
@@ -213,15 +212,15 @@ class BinarySearchTree {
 function addNodeToDOM(value, count) {
     let node = document.createElement("div");
     node.classList.add('bstnode')
-    node.setAttribute('id', `demo-node${count}`);
+    node.setAttribute('id', `insert-node${count}`);
     node.setAttribute('style', `float: left;`);
     let frontHighlight = document.createElement('div');
     frontHighlight.classList.add('front-node');
-    frontHighlight.setAttribute('id', `demo-frontnode${count}`);
+    frontHighlight.setAttribute('id', `insert-frontnode${count}`);
     let text = document.createTextNode(value);
     frontHighlight.appendChild(text);
     node.appendChild(frontHighlight);
-    document.getElementById("demo-nodecontainer").appendChild(node);
+    document.getElementById("insert-nodecontainer").appendChild(node);
 }
 
 // Given an element selector, return the pixel midpoint of its width dimension.
@@ -232,10 +231,10 @@ function getWidthMidpoint(selector) {
 // Given child node, create path from child to parent, add to DOM.
 function addPathToDom(child){
     if (child.parent === null) return;
-    let svg = document.getElementById('demo-svg-line');
-    const parent_selector = document.getElementById(`demo-node${child.parent.id}`);
-    const child_selector = document.getElementById(`demo-node${child.id}`);
-    const container = document.getElementById(`demo-nodecontainer`);
+    let svg = document.getElementById('insert-svg-line');
+    const parent_selector = document.getElementById(`insert-node${child.parent.id}`);
+    const child_selector = document.getElementById(`insert-node${child.id}`);
+    const container = document.getElementById(`insert-nodecontainer`);
 
     const x1 = (parent_selector.getBoundingClientRect().x + parent_selector.getBoundingClientRect().right)/2 - container.getBoundingClientRect().x;
     const y1 =  parent_selector.getBoundingClientRect().bottom - container.getBoundingClientRect().y - NODE_RADIUS;
@@ -243,7 +242,7 @@ function addPathToDom(child){
     const y2 = child_selector.getBoundingClientRect().y - container.getBoundingClientRect().y + NODE_RADIUS;
 
     let path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('id', `demo-path${child.id}`);
+    path.setAttribute('id', `insert-path${child.id}`);
     path.setAttribute('d', `M ${x1}, ${y1} L ${x2}, ${y2} `);
     path.setAttribute('stroke', '#3C5B6F');
     path.setAttribute('stroke-width', '3px');
@@ -253,13 +252,41 @@ function addPathToDom(child){
 
 class Animator {
     constructor(props){
-        this.demoTimeline = anime.timeline({ autoplay: false })
+        this.insertTimeline = anime.timeline({ autoplay: false })
+    }
+    buildTearDownAnimation(node, root){
+        this.insertTimeline.add({
+            targets: `#insert-node${node.id}`,
+            opacity: 0,
+            scale: .9,
+            translateX: `+=60`,
+            translateY: `-=20`,
+            duration: 1000,
+            complete: () => {
+                document.getElementById(`insert-node${node.id}`).remove();
+            }
+        }, node.level * 50)
+        if (node !== root) {
+            this.insertTimeline.add({
+                targets: `#insert-path${node.id}`,
+                opacity: 0,
+                scale: .9,
+                translateX: `+=60`,
+                translateY: `-=20`,
+                duration: 1000,
+                complete: () => {
+                    document.getElementById(`insert-path${node.id}`).remove();
+                }
+            }, node.level * 50)
+        }
+        if (node.left !== null) this.buildTearDownAnimation(node.left, root);
+        if (node.right !== null) this.buildTearDownAnimation(node.right, root);
     }
 
     removeElementFromDOM(id) {    
         var toRemove = document.getElementById(id);
         if (id === null) return;
-        this.demoTimeline.add({
+        this.insertTimeline.add({
             targets: toRemove,
             opacity: 0,
             duration: 600,
@@ -274,28 +301,28 @@ class Animator {
     addNodeToDOM(value, count) {
         let node = document.createElement("div");
         node.classList.add('bstnode')
-        node.setAttribute('id', `demo-node${count}`);
+        node.setAttribute('id', `insert-node${count}`);
         node.setAttribute('style', `float: left;`);
         let frontHighlight = document.createElement('div');
         frontHighlight.classList.add('front-node');
-        frontHighlight.setAttribute('id', `demo-frontnode${count}`);
+        frontHighlight.setAttribute('id', `insert-frontnode${count}`);
         let text = document.createTextNode(value);
         frontHighlight.appendChild(text);
         node.appendChild(frontHighlight);
-        document.getElementById("demo-nodecontainer").appendChild(node);
+        document.getElementById("insert-nodecontainer").appendChild(node);
     }
 
     buildEdgeTimeline(root, tree){
         if (root.left !== null) this.buildEdgeTimeline(root.left, tree);
         if (root.parent !== null){
-            const x1 = tree.x_distances.get(`demo-node${root.parent.id}`); 
+            const x1 = tree.x_distances.get(`insert-node${root.parent.id}`); 
             const y1 = root.parent.level * VERTICAL_SPACING + NODE_RADIUS;
-            const x2 = tree.x_distances.get(`demo-node${root.id}`);
+            const x2 = tree.x_distances.get(`insert-node${root.id}`);
             const y2 = root.level * VERTICAL_SPACING + NODE_RADIUS;
-            const curr_opacity = parseFloat(document.getElementById(`demo-path${root.id}`).getAttribute('opacity'));
+            const curr_opacity = parseFloat(document.getElementById(`insert-path${root.id}`).getAttribute('opacity'));
             const isNew = curr_opacity > 0.7 ? false : true;
-            this.demoTimeline.add({
-                targets: `#demo-path${root.id}`,
+            this.insertTimeline.add({
+                targets: `#insert-path${root.id}`,
                 d: `M ${x1}, ${y1} L ${x2}, ${y2}`,
                 opacity: { value: '1.0', easing: 'easeInSine', delay: isNew ? 600: 0, duration: isNew ? 200 : 0 },
                 stroke: { value: '#DEAAFF', delay: isNew ? 800 : 0 },
@@ -307,15 +334,15 @@ class Animator {
 
     buildNodeTimeline(root, tree){
         if (root.left !== null) this.buildNodeTimeline(root.left, tree);
-        const node = document.getElementById(`demo-node${root.id}`);
+        const node = document.getElementById(`insert-node${root.id}`);
         const x = shift_x - NODE_RADIUS;
         const isNew = root.parent !== null && root.line === null ? true : false;
-        tree.x_distances.set(`demo-node${root.id}`, x );
+        tree.x_distances.set(`insert-node${root.id}`, x );
         root.parent !== null && root.line === null && addPathToDom(root);
-        root.line = root.line === null && `demo-line${root.id}`;
+        root.line = root.line === null && `insert-line${root.id}`;
         if (isNew){
-            this.demoTimeline.add({
-                targets: `#demo-node${root.id}`,
+            this.insertTimeline.add({
+                targets: `#insert-node${root.id}`,
                 marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
                 keyframes: [
                     { scale: isNew ? 0 : 1, duration: 0 },
@@ -325,8 +352,8 @@ class Animator {
                 easing: 'easeInOutExpo',
             }, traverseCount * TRAVERSE_DURATION);
         } else {
-            this.demoTimeline.add({
-                targets: `#demo-node${root.id}`,
+            this.insertTimeline.add({
+                targets: `#insert-node${root.id}`,
                 marginLeft: { value: `${-node.getBoundingClientRect().width}px`, duration: 0 },
                 keyframes: [
                     { scale: isNew ? 0 : 1, duration: 0 },
@@ -347,15 +374,15 @@ class Animator {
             this.buildNodeTimeline(tree.root, tree);
             this.buildEdgeTimeline(tree.root, tree);
         }
-        this.demoTimeline.play();
-        await this.demoTimeline.finished;
-        this.demoTimeline = anime.timeline({});
+        this.insertTimeline.play();
+        await this.insertTimeline.finished;
+        this.insertTimeline = anime.timeline({});
         return;
     }
 
     addTraverseStep(node, shift_order){
-        this.demoTimeline.add({
-            targets: `#demo-node${node.id}`,
+        this.insertTimeline.add({
+            targets: `#insert-node${node.id}`,
             keyframes: [
                 { scale: 1 },
                 { scale:1 },
@@ -363,8 +390,8 @@ class Animator {
             easing: 'easeInOutBack',
             duration: TRAVERSE_DURATION,
         }, (traverseCount + shift_order) * TRAVERSE_DURATION);
-        this.demoTimeline.add({
-            targets: `#demo-frontnode${node.id}`,
+        this.insertTimeline.add({
+            targets: `#insert-frontnode${node.id}`,
             keyframes: [
                 { background: '#3C5B6F' },
                 { background: ' ' },
@@ -373,8 +400,8 @@ class Animator {
             duration: TRAVERSE_DURATION,
         }, (traverseCount + shift_order) * TRAVERSE_DURATION);
         if (node.parent !== null && shift_order === 0) {
-            this.demoTimeline.add({
-                targets: `#demo-path${node.id}`,
+            this.insertTimeline.add({
+                targets: `#insert-path${node.id}`,
                 keyframes: [
                     { stroke: '#3C5B6F' },
                     { stroke: '#DEAAFF' },
@@ -387,7 +414,7 @@ class Animator {
     }
 
     addCaptionStep(lineNumber, delay, divisor, setCaptionLine){
-        this.demoTimeline.add({
+        this.insertTimeline.add({
             duration: TRAVERSE_DURATION,
             complete: () => {
                 setCaptionLine(lineNumber)
@@ -395,88 +422,66 @@ class Animator {
         }, (traverseCount-1) * TRAVERSE_DURATION + delay * (TRAVERSE_DURATION/divisor))
     }
 }
-class RefactoredBST extends Component {    
+class BstInsertDemo extends Component {    
     constructor (props) {
         super(props);
         this.animator = new Animator();
         this.state = {
-            inputValue: '',
-            removeValue: '',
             bst: new BinarySearchTree(this.animator, (x) => this.setState({ currentLine: x })),
             count: 0,
             disable: true,
             numActiveNodes: 0,
             treeHeight: 0,
             formatting: true,
-            seekValue: TRAVERSE_DURATION/2,
-            errorMessage: '',
-            currentOperation: 'input',
-            unusedValues: [],
-            activeValues: [],
+            autoNodes: [],
         };
         this.calculateShiftX = this.calculateShiftX.bind(this);
         this.onResize = this.onResize.bind(this);
         this.autoInsert = this.autoInsert.bind(this);
-        this.autoRemove = this.autoRemove.bind(this);
+        this.autoClear = this.autoClear.bind(this);
     }
 
     async componentDidMount(){
         window.addEventListener('resize', this.onResize);
-        shift_x = getWidthMidpoint(document.getElementById('demo-nodecontainer'));
-        this.toggleTraverseOn();
-        const nodeValues = [306, 127, 428, 249, 363, 656, 201, 270, 512];
-        var activeNodes = [];
-        var count = 0;
-        const maxNodes = this.props.maxNodes ||  Math.min(10, shift_x / NODE_RADIUS - 1);
-        while(count < maxNodes){
-            this.state.bst.insert(parseFloat(nodeValues[count]), this.state.count + count);
-            activeNodes.push(nodeValues[count]);
-            count++;
-        }
-        var unusedValues = nodeValues.filter(value => !activeNodes.includes(value));
+        shift_x = getWidthMidpoint(document.getElementById('insert-nodecontainer'));
+        traverseOn = true;
+        const nodeValues = [306, 427, 217, 371];
+        this.state.bst.insert(nodeValues.shift(), this.state.count);
         this.setState({
-            count: this.state.count + count, 
-            numActiveNodes: this.state.bst.numActiveNodes, 
-            treeHeight: this.state.bst.getTreeHeight(),
-            unusedValues: unusedValues, 
-            activeValues: activeNodes,
+            count: this.state.count + 1, 
+            numActiveNodes: 1, 
+            treeHeight: 1,
+            autoNodes: nodeValues,
         });
-        shift_x = this.calculateShiftX(document.getElementById('demo-nodecontainer'));
+        shift_x = this.calculateShiftX(document.getElementById('insert-nodecontainer'));
         await this.animator.formatBinaryTree(this.state.bst);
         this.setState({ disable: false });
-        this.toggleTraverseOn();
-        traverseOn = true;
-        window.addEventListener('insertDone', this.autoRemove);
-        window.addEventListener('removeDone', this.autoInsert);
-        dispatchEvent(new Event('insertDone'));
+        window.addEventListener('insert-insertReady', this.autoInsert);
+        window.addEventListener('insert-clearReady', this.autoClear);
+        dispatchEvent(new Event('insert-insertReady'));
     }
 
     async autoInsert(){
-        this.setState({ count: this.state.count + 1 });
         traverseCount = 0;
-        shuffle(this.state.unusedValues);
-        shift_x = this.calculateShiftX(document.getElementById('demo-nodecontainer'));
-        this.state.bst.insert(this.state.unusedValues[0], this.state.count + 1);
-        this.state.activeValues.push(this.state.unusedValues.shift());
-        setTimeout(() => this.setState({ treeHeight: this.state.bst.getTreeHeight()}), 200);
+        this.state.bst.insert(this.state.autoNodes.shift(), this.state.count + 1);
+        this.setState({ count: this.state.count + 1 });
+        shift_x = this.calculateShiftX(document.getElementById('insert-nodecontainer'));
+        setTimeout(() => { this.setState({ treeHeight: this.state.bst.getTreeHeight()}) }, 200);
         await this.animator.formatBinaryTree(this.state.bst);
-        dispatchEvent(new Event('insertDone'));
+        this.state.autoNodes.length > 0 ? dispatchEvent(new Event('insert-insertReady')) : dispatchEvent(new Event('insert-clearReady'));
     }
 
-    async autoRemove(){
+    async autoClear(){
         traverseCount = 0;
-        shuffle(this.state.activeValues);
-        this.state.bst.removeRecurse(this.state.bst.root, this.state.activeValues[0]);
-        shift_x = this.calculateShiftX(document.getElementById('demo-nodecontainer'));
-        this.state.unusedValues.push(this.state.activeValues.shift());
-        setTimeout(() => this.setState({ treeHeight: this.state.bst.getTreeHeight()}), traverseCount * TRAVERSE_DURATION + 500);
-        await this.animator.formatBinaryTree(this.state.bst);
-        dispatchEvent(new Event('removeDone'));
+        this.animator.timeline = anime.timeline({ autoplay: false });
+        await this.state.bst.tearDownTree();
+        this.setState({ autoNodes: [306, 427, 217, 371], bst: new BinarySearchTree(this.animator, (x) => this.setState({ currentLine: x }))});
+        dispatchEvent(new Event('insert-insertReady'));
     }
 
     componentWillUnmount() {
-        window.removeEventListener('insertDone', this.autoRemove);
-        window.removeEventListener('removeDone', this.autoInsert);
+        window.removeEventListener('insert-insertReady', this.autoRemove);
+        window.removeEventListener('insert-clearReady', this.autoInsert);
         window.removeEventListener('resize', this.onResize);
     }
 
@@ -488,22 +493,20 @@ class RefactoredBST extends Component {
     toggleTraverseOn(){ traverseOn = !traverseOn; }
     
     onResize(){
-        if (this.state.bst.root === null || this.state.disable === true) return;
+        if (this.state.bst.root === null) return;
         clearTimeout(resizeTimer);
-        shift_x = this.calculateShiftX(document.getElementById('demo-nodecontainer'));
+        shift_x = this.calculateShiftX(document.getElementById('insert-nodecontainer'));
         resizeTimer = setTimeout(async () => {
-            this.setState({disable : true});
-            this.animator.demoTimeline = anime.timeline({ autoplay: false });
+            this.animator.insertTimeline = anime.timeline({ autoplay: false });
             await this.animator.formatBinaryTree(this.state.bst);
-            this.setState({disable : false});
         }, 500);
     }
 
     render(){ 
         return(
             <div style={{ marginTop: '2rem' }}>
-                <div className="demo-nodecontainer" id="demo-nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
-                    <svg className="linecontainer" id="demo-svg-line" />                    
+                <div className="demo-nodecontainer" id="insert-nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
+                    <svg className="linecontainer" id="insert-svg-line" />                    
                 </div>
             </div>
 
@@ -511,4 +514,4 @@ class RefactoredBST extends Component {
     }
 }
 
-export default RefactoredBST;
+export default BstInsertDemo;
