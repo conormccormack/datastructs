@@ -3,6 +3,7 @@ import anime from 'animejs';
 import '../css/bst.css';
 import '../css/input-range.css';
 import '../resources/fonts/fontawesome/css/all.css';
+import '../css/bstdemo.css';
 import ClosedCodeCaptions from './closedcodecaptions';
 
 const HORIZONTAL_SPACING = 45;

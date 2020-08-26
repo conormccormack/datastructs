@@ -2,6 +2,7 @@ import React from 'react';
 import '../css/explanations.css';
 import BstDemo from './home/bstdemo.js';
 import BstInsertDemo from './bstinsertdemo';
+import BstDegenerateDemo from './bstdegeneratedemo';
 
 function BstExplained() {
     
@@ -41,11 +42,11 @@ function BstExplained() {
                         <div className='explanation-subtitle'>Summary</div>
                         Binary Search Trees typical offer the following operations:
                         <ul>
-                            <li>insert(node): O(n) ? </li>
-                            <li>search(key): O(n)  ? </li>
-                            <li>delete(key): O(n) ? </li>
+                            <li>insert(node): O(n) <span className='question'>?</span><span className='hidden'>Confused by this?</span> </li>
+                            <li>search(key): O(n)  <span className='question'>?</span> </li>
+                            <li>delete(key): O(n) <span className='question'>?</span> </li>
                         </ul>
-                        <BstDemo maxNodes={4}/>
+                        <BstDemo maxHeight={4} maxNodes={4}/>
                     </div>
                 </div>
                 <div className='algorithm-grid'>
@@ -86,11 +87,14 @@ function BstExplained() {
                 <div className='explanation-subtitle'>Limitations:</div>
                     As great as binary search trees can be, their most basic form is far from perfect. Vanilla BST’s can quickly become degenerate if they have no self-balancing mechanism.
 
-                    Degenerate binary search trees offer little to no advantage over linked lists since any operation might have to traverse every node in the tree in order complete, which gives us O(n) linear complexity. 
+                    Degenerate binary search trees offer little to no advantage over linked lists since any operation may have to traverse every node in the tree in order complete, which gives us O(n) linear complexity. 
 
-                    However, if tress remain balanced and non-degenerate, we can guarantee logarithmic complexity for every operation as the tree height of a complete binary tree of size n is only O(log n). Intuitively, this makes sense, as every time we choose to go search left or right when traversing a binary search tree, we are eliminating half of the possible places in our search space, just as we do in the binary search algorithm.
+                    However, if trees remain balanced and non-degenerate, we can guarantee logarithmic complexity for every operation as the tree height of a complete binary tree of size <strong>n</strong> is only O(log <strong>n</strong>). Intuitively, this makes sense, as every time we choose to go search left or right when traversing a binary search tree, we are eliminating half of the possible spots in our search space, just as we do in the binary search algorithm.
 
-                    Advanced implementations of binary search trees, as mentioned earlier, include self-balancing in order to guarantee logarithmic runtimes. Examples of this include AVL Trees and Red-Black Tress, which are coming to DataStructs soon.
+                    Advanced implementations of binary search trees, as mentioned earlier, include self-balancing in order to guarantee logarithmic runtimes. Examples of this include AVL Trees and Red-Black Tress, which are coming to DataStructs soon. 
+                    <br/><br/>
+                    Below is an example of a binary search tree quickly becoming degenerate, where the height is always equal to the number of nodes in the tree. 
+                    <BstDegenerateDemo/>
                 </div>
 
             </div>

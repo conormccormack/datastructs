@@ -502,7 +502,7 @@ class RefactoredBST extends Component {
     render(){ 
         return(
             <div style={{ marginTop: '2rem' }}>
-                <div className="demo-nodecontainer" id="demo-nodecontainer" style={{ height: `${(this.state.treeHeight - 1)*70 + 100}px`}} >
+                <div className="demo-nodecontainer" id="demo-nodecontainer" style={{ height: `${(this.props.maxHeight || this.state.treeHeight - 1)*70 + 100}px`}} >
                     <svg className="linecontainer" id="demo-svg-line" />                    
                 </div>
             </div>
