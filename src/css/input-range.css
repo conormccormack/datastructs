@@ -1,12 +1,7 @@
-.slider {
-    margin-left: 10px;
-}
-
 input[type=range] {
-    width: 100%;
-    margin: 5.8px 2px;
+    width: 110px;
+    margin: 0px 0px 0px 0px;
     padding-left: 1rem;
-    margin-top: 1px;
     background-color: transparent;
     -webkit-appearance: none;
   }
@@ -17,7 +12,7 @@ input[type=range] {
     background: #ccc;
     border: 0.1px solid #aaa;
     border-radius: 25px;
-    width: 100%;
+    width: 110px;
     height: 8.4px;
     cursor: pointer;
   }
@@ -37,7 +32,7 @@ input[type=range] {
     background: #ccc;
     border: 0.1px solid #dddddd;
     border-radius: 25px;
-    width: 100%;
+    width: 110px;
     height: 8.4px;
     cursor: pointer;
   }
@@ -53,7 +48,7 @@ input[type=range] {
     border-color: transparent;
     border-width: 6.8px 0;
     color: transparent;
-    width: 100%;
+    width: 110px;
     height: 8.4px;
     cursor: pointer;
   }

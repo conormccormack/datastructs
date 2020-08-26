@@ -5,6 +5,8 @@ import '../css/input-range.css';
 import '../resources/fonts/fontawesome/css/all.css';
 import '../css/bstdemo.css';
 import ClosedCodeCaptions from './closedcodecaptions';
+import {ReactComponent as Undo} from '../resources/icons/undo.svg';
+import {ReactComponent as Redo} from '../resources/icons/redo.svg'; 
 
 const HORIZONTAL_SPACING = 45;
 const NODE_RADIUS = 30;
@@ -605,6 +607,7 @@ class RefactoredBST extends Component {
     }
 
     calculateShiftX(nodeContainer) {
+        if (this.state.bst.root === null) return 0;
         const rightOverflow = Math.min(0, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.right) * HORIZONTAL_SPACING - NODE_RADIUS);
         return Math.max(NODE_RADIUS, getWidthMidpoint(nodeContainer) - BinarySearchTree.sizeOfSubtree(this.state.bst.root.left) * HORIZONTAL_SPACING + rightOverflow);
     }
@@ -617,7 +620,7 @@ class RefactoredBST extends Component {
         const newState = action === 'Undo' ? this.state.undoController.undo(): this.state.undoController.redo();
         if (newState !== -1) {
             this.setState({ errorMessage: `${action}ing ${action === 'Undo' ? currState.action : newState.action} 
-                ${action === 'Undo' ? currState.value : newState.value}...` 
+                ${action === 'Undo' ? currState.value : newState.value}.` 
             });
             await this.tearDownTree();
             newState.state.forEach( (value, index) => {
@@ -688,57 +691,69 @@ class RefactoredBST extends Component {
                     <svg className="linecontainer" id="svg-line" />                    
                 </div>
                 <div style={{ display: `${this.props.hideUI && 'none'}`}} className='ui-container'>
-                    <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
-                    <div className='tree-info'>Tree Height: {this.state.treeHeight}</div>
-                    <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
-                        <label>
-                            <input disabled={this.state.disable} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
-                            <button disabled={this.state.disable} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Insert</button>
-                        </label>
-                    </form>
-                    <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
-                        <label>
-                            <input disabled={this.state.disable} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
-                            <button disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
-                        </label>
-                    </form>
-                    {/* <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={this.animator.timeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
-                    <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
+                    <div>
+                        <div className='tree-info'>Number of Nodes: {this.state.numActiveNodes}</div> 
+                        <div className='tree-info'>
+                            Tree Height: {this.state.treeHeight} 
+                            <button className='undo-redo-button' onClick={() => this.handleUndoRedo('Undo')} disabled={this.state.disable}>
+                                <Undo/>
+                            </button>
+                            <button className='undo-redo-button' onClick={() => this.handleUndoRedo('Redo')} disabled={this.state.disable}>
+                                <Redo/>
+                            </button>
+                        </div>
+                        <form id='input-form' onSubmit={this.handleInputSubmit} className='controlForm'>
+                            <label>
+                                <input disabled={this.state.disable} className='field' type="number" value={this.state.inputValue} id="input-field" onChange={this.handleInputChange}/> 
+                                <button style={{ height: '24px'}} disabled={this.state.disable} id='input-button' onClick={this.handleInputSubmit} className='field-button'>Insert</button>
+                            </label>
+                        </form>
+                        <form id='remove-form' onSubmit={this.handleRemoveSubmit} className='controlForm'>
+                            <label>
+                                <input disabled={this.state.disable} className='field' type="number" value={this.state.removeValue} id="remove-field" onChange={this.handleRemoveChange}/> 
+                                <button style={{ height: '24px'}} disabled={this.state.disable} id='remove-button' onClick={this.handleRemoveSubmit} className='field-button'>Remove</button>
+                            </label>
+                        </form>
+                        {/* <input type='range' step={TRAVERSE_DURATION} min={TRAVERSE_DURATION/2} max={this.animator.timeline.duration - 1800} value={this.state.seekValue} onChange={(e) => this.setState({ seekValue: e.target.value})}/>
+                        <button onClick={() => this.playPause()}>{this.state.disable ? 'Pause' : 'Play'}</button>
                     <button onClick={() => this.animator.timeline.seek(this.state.seekValue)}></button> */}
-                    <div className='tree-info'> 
-                        <label>
-                            Animate traversal
-                            <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
-                        </label>
+                        <div className='tree-info' style={{ marginTop: '13px'}}> 
+                            <label>
+                                Animate traversal
+                                <input type='checkbox' defaultChecked='on' id='traverse-checkbox' onChange={this.toggleTraverseOn}/>
+                            </label>
+                        </div>
+                        <div className='tree-info slider-wrapper' style={{ marginTop: '13px'}}>
+                            <label>
+                                Traversal Speed 
+                                    <input className='slider' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
+                            </label>
+                        </div>
+                        <div style={{ marginTop: '10px'}}>
+                            <button className='clear-button' onClick={ async () => { 
+                                if (this.state.bst.root === null) {
+                                    this.setState({ errorMessage: 'Tree is already empty.' })
+                                }
+                                this.setState({ errorMessage: 'Clearing tree.'})
+                                await this.tearDownTree(); 
+                                this.setState({ numActiveNodes: 0, treeHeight: 0, errorMessage: 'Tree cleared.' });
+                                this.state.undoController.newState([], 'CLEAR', 'tree');
+                            }} disabled={this.state.disable}>
+                                    Clear Tree
+                            </button>
+                            <button disabled={this.state.disable} onClick={() => this.resyncFormat()} className='refresh-button'>
+                                Something wrong? <i style={{ color: 'white' }} className="fas fa-sync-alt"/>
+                            </button>
+                        </div>
                     </div>
-                    <div className='tree-info slider-wrapper'>
-                        <label>
-                            Traversal Speed 
-                            <input style={{width: '120px'}} className='slider' type='range' defaultValue='1000' min='0' max='1400' id='traverse-interval-slider' onChange={this.handleIntervalChange}/>
-                        </label>
-                    </div>
-                    <button disabled={this.state.disable} onClick={() => this.resyncFormat()} className='refresh-button'>
-                        Something wrong? <i className="fas fa-sync-alt"/>
-                    </button>
-                    <button className='clear-button' onClick={() => { 
-                        this.tearDownTree(); 
-                        this.setState({ numActiveNodes: 0, treeHeight: 0 });
-                        }} disabled={this.state.disable}>
-                            Clear Tree
-                    </button>
-                    <button className='clear-button' onClick={() => this.handleUndoRedo('Undo')} disabled={this.state.disable}>
-                        Undo
-                    </button>
-                    <button className='clear-button' onClick={() => this.handleUndoRedo('Redo')} disabled={this.state.disable}>
-                        Redo
-                    </button>
-                    {this.animator.timeline.duration}
-                    <div className='tree-info' id='error-message'>{this.state.errorMessage}</div>
-                    <ClosedCodeCaptions current={this.state.currentLine} lines={ 
+                    <div style={{ marginLeft: '8px' }}>
+                        <div style={{ marginLeft: '0px', height: `${this.state.errorMessage !== '' ? '20px' : '0px'}`, transition: 'height var(--speed) ease' }} className='tree-info' id='error-message'>{this.state.errorMessage}</div>
+                        <ClosedCodeCaptions current={this.state.currentLine} lines={ 
                             this.state.currentOperation === 'input' ? this.inputLines : 
                             this.state.currentOperation === 'remove' ? this.removeLines :
                             []
                         }/>
+                    </div>
                 </div>
             </div>
         );
