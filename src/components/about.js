@@ -42,9 +42,7 @@ function About (props){
                     </AboutHeadline>
                     <AboutBody>
                         DataStructs is a platform for interactive vizualizations of data structures and algorithms
-                        to supplement existing visualization sites that offer little in the way of explaining how data structures and algorithms work or why we use them.<br/>
-                        <br/>
-                        Undergrad CS students at USC get a kick out of warning first-years about <a href="https://bytes.usc.edu/cs104/">CSCI 104: Data Structures and Object Oriented Design</a>, a course that's often recalled as one of the most painful experiences of your freshman year. As someone who had switched to CS two semesters into college and passed the prerequisite placement exam with a "marginal pass", this reputation was never lost on me. Throughout that semester, I fought back every urge to give in and drop out of CS. With the fantastic course staff and support I had at my disposal, though, I pushed through my confusion and self-doubt to build an intution behind data structures & OOP along with a genuine appreciation for the major I'd chosen.
+                        to supplement existing visualization sites that offer little in the way of explaining how data structures and algorithms work or why we use them.
                         <br/><br/>
                         I'm building DataStructs in attempt to assure anyone studying data structures that clarity in this field is within their reach and that it can be extremely rewarding once they have it.
                         <br/><br/>
