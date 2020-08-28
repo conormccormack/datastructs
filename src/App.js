@@ -5,7 +5,7 @@ import About from './components/about'
 import { Switch, Route, useLocation } from 'react-router-dom';
 import {AnimatePresence} from "framer-motion";
 import BST from './components/bst';
-import AVL from './components/avl';
+import AVL from './components/avl/avl_page';
 import FourOhFour from './components/404';
 
 const PageVariants = {

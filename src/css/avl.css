@@ -15,8 +15,7 @@
     text-align: center;
     vertical-align: middle;
     font-size: 20px;
-    font-family: Helvetica;
-    color: #FFF;
+    font-family: Lato;
 }
 
 .front-node {
@@ -26,12 +25,37 @@
     background: none;
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     text-align: center;
     vertical-align: middle;
     font-size: 20px;
-    font-family: Helvetica;
+    font-weight: 500;
     color: #FFF;
+}
+
+.front-content{
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #FFF;
+}
+
+.balance-node {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    font-weight: 600;
+    color: black;
+    margin-top: -5px;
+    margin-bottom: 5px;
 }
 
 .bstnode:hover {
@@ -117,6 +141,7 @@
     margin-right: -10px;
     background-color: var(--global-bg);
 }
+
 .undo-redo-button:hover {
     cursor: pointer; 
 }
